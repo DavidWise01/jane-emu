@@ -1,0 +1,96 @@
+name: Jane EMU — Build, Artifact & Play
+run-name: Jane EMU / publish playable Mission Control
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'releases/**'
+      - '.github/workflows/jane-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: jane-emu-pages
+  cancel-in-progress: false
+
+jobs:
+  package:
+    name: Validate and package playable Jane
+    runs-on: ubuntu-latest
+    outputs:
+      entry: ${{ steps.verify.outputs.entry }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Verify playable HTML and embedded JPG
+        id: verify
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import pathlib, re, os
+          page = pathlib.Path('index.html')
+          assert page.is_file(), 'Missing index.html'
+          index = page.read_text(encoding='utf-8')
+          match = re.search(r'url=\./(releases/[^"<>\s]+\.html)', index)
+          assert match, 'index.html must link to latest release'
+          release = pathlib.Path(match.group(1))
+          assert release.is_file(), f'Missing playable release: {release}'
+          content = release.read_text(encoding='utf-8')
+          assert '<canvas' in content and 'nesCanvas' in content, 'Missing NES canvas'
+          assert 'data:image/jpeg;base64,' in content, 'Missing embedded JPEG story'
+          assert 'jp59ThemePicker' in content, 'Missing skin hangar'
+          print(f'Playable release validated: {release} ({release.stat().st_size:,} bytes)')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              print(f'entry={release}', file=f)
+          PY
+
+      - name: Assemble offline-playable web artifact
+        shell: bash
+        run: |
+          mkdir -p _site
+          cp index.html _site/index.html
+          cp -R releases _site/releases
+          if [ -d assets ]; then cp -R assets _site/assets; fi
+          printf 'Jane EMU release: %s\nCommit: %s\n' '${{ steps.verify.outputs.entry }}' "$GITHUB_SHA" > _site/BUILD.txt
+          find _site -maxdepth 2 -type f -printf '%p (%s bytes)\n'
+
+      - name: Upload downloadable play artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jane-emu-playable
+          path: _site/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site/
+
+  deploy:
+    name: Deploy live Jane
+    needs: package
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Show live game URL
+        shell: bash
+        run: |
+          echo "Play Jane at: ${{ steps.deployment.outputs.page_url }}"
+          echo "Playable release: ${{ needs.package.outputs.entry }}"
