@@ -477,6 +477,7 @@ async function av078Watch(){
   av078QuestionSeen='';renderAV078();
  }
 }
+$('av076Arm').addEventListener('click',()=>{if(av076Armed?.question_id){av078QuestionSeen=av076Armed.question_id;av078Training();}});
 $('av078Inspect').onclick=renderAV078;
 $('av078Feedback').onclick=()=>setTab('feedback');
 $('av078Export').onclick=()=>{
