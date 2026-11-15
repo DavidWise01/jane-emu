@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JANE EMU | The Wizard Three-Player Arena</title>
+<style>
+:root{color-scheme:dark;--bg:#071522;--edge:#3c6c81;--text:#e2f5ff;--teal:#72e2f2;--gold:#f7bd7c}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#235174,#071522 55%);color:var(--text);font:13px/1.45 system-ui,sans-serif}
+a{color:var(--teal)}button,input,select{font:inherit}button{padding:9px 13px;border:1px solid var(--edge);border-radius:8px;background:#143a53;color:var(--text);font-weight:700;cursor:pointer}button:hover{background:#235371}
+h1{font:900 clamp(22px,3vw,36px) ui-monospace,monospace;color:var(--teal);margin:0}h2{font:800 16px ui-monospace,monospace;margin:0 0 9px}
+header,main{max-width:1900px;margin:auto;padding:14px}header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--edge)}
+.pill{border:1px solid var(--edge);border-radius:24px;padding:5px 9px;font:11px ui-monospace,monospace}
+.controls{padding:15px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;background:#0d293d;border:1px solid var(--edge);border-radius:13px;margin-bottom:14px}
+.controls input[type=range]{width:180px;accent-color:#79dce8}.controls input[type=file]{max-width:280px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.arena{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.cabinet{border:1px solid var(--edge);border-top:4px solid var(--hero);background:#0b2436;border-radius:12px;padding:12px;min-width:0;box-shadow:0 8px 24px #0005}
+.banner{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.name{font:900 clamp(19px,2vw,28px) ui-monospace,monospace;color:var(--hero)}
+.role{color:#9ac1d4;font:11px ui-monospace,monospace}
+.view{margin:10px 0;height:clamp(310px,42vh,550px);border:2px solid var(--edge);border-radius:8px;overflow:hidden;background:#000;position:relative}
+.view iframe{border:0;width:100%;height:100%;display:block;background:#020d17}
+.telemetry{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.kpi{background:#051925;border:1px solid #30576c;padding:8px;border-radius:8px;min-width:0}.kpi b{display:block;color:var(--hero);font:900 18px ui-monospace,monospace;overflow-wrap:anywhere}.kpi small{font:9px ui-monospace,monospace;color:#a9c8d6}
+.score{margin:11px 0 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.score input{width:95px;border:1px solid var(--edge);border-radius:6px;background:#061421;color:var(--text);padding:7px}
+.note{color:#aac8d6;background:#0c2b40;border-left:3px solid var(--gold);padding:11px;margin:14px 0;border-radius:5px}
+.board{padding:15px;border:1px solid var(--edge);border-radius:12px;background:#0a2537;margin-top:14px}
+table{width:100%;border-collapse:collapse}td,th{text-align:left;border-bottom:1px solid #2e5063;padding:9px}th{font-size:11px;color:#a9c8d6}caption{text-align:left;padding-bottom:10px;color:#a9c8d6}
+#status{min-height:18px}#winner{color:#f4c685;font:900 16px ui-monospace,monospace}
+@media(max-width:1050px){.arena{grid-template-columns:1fr}.view{height:430px}}
+</style></head>
+<body>
+<header><div><div class="pill">JANE EMU · HEAD-TO-HEAD · THREE INDEPENDENT NES MACHINES</div><h1>THE WIZARD ARENA</h1><div class="role">PLAYER 1 JANE | PLAYER 2 TOPH | PLAYER 3 PATRICIA</div></div><a href="./">Back to Play ↔ Learn Dashboard</a></header>
+<main>
+<div class="controls">
+<label>ONE CARTRIDGE FOR ALL THREE <input id="romAll" type="file" accept=".nes,application/octet-stream"></label>
+<label>MASTER VOLUME <input id="masterVolume" type="range" min="0" max="100" value="35" aria-label="Master NES volume"><output id="volumeValue">35%</output></label>
+<button id="mute" aria-pressed="false">Mute</button>
+<button id="resetAll" disabled>Reset heat</button>
+<button id="lockHeat" disabled>Finish heat · judge scores</button>
+<span id="status" role="status">Initialize three separate NES instances. No ROM is uploaded.</span>
+</div>
+<section class="arena" aria-label="Three autonomous NES competitors">
+<article class="cabinet" style="--hero:#77ebee"><div class="banner"><div><div class="name">01 / JANE</div><div class="role">FAST · react every frame</div></div><span class="pill" id="janeMode">INITIALIZING</span></div><div class="view"><iframe id="janeFrame" title="Jane independent NES machine"></iframe></div><div class="telemetry"><div class="kpi"><b id="janeFrames">0</b><small>FRAMES</small></div><div class="kpi"><b id="janeTrials">0</b><small>ACTIONS OBSERVED</small></div><div class="kpi"><b id="janeScenes">0</b><small>SCENES SEEN</small></div></div><label class="score">Human-verified game score <input id="janeScore" type="number" step="1" min="0" placeholder="Not rated"></label></article>
+<article class="cabinet" style="--hero:#f1b075"><div class="banner"><div><div class="name">02 / TOPH</div><div class="role">CAREFUL · react every 4 frames</div></div><span class="pill" id="tophMode">INITIALIZING</span></div><div class="view"><iframe id="tophFrame" title="Toph independent NES machine"></iframe></div><div class="telemetry"><div class="kpi"><b id="tophFrames">0</b><small>FRAMES</small></div><div class="kpi"><b id="tophTrials">0</b><small>ACTIONS OBSERVED</small></div><div class="kpi"><b id="tophScenes">0</b><small>SCENES SEEN</small></div></div><label class="score">Human-verified game score <input id="tophScore" type="number" step="1" min="0" placeholder="Not rated"></label></article>
+<article class="cabinet" style="--hero:#c5a5ff"><div class="banner"><div><div class="name">03 / PATRICIA</div><div class="role">BALANCED · react every 2 frames</div></div><span class="pill" id="patriciaMode">INITIALIZING</span></div><div class="view"><iframe id="patriciaFrame" title="Patricia independent NES machine"></iframe></div><div class="telemetry"><div class="kpi"><b id="patriciaFrames">0</b><small>FRAMES</small></div><div class="kpi"><b id="patriciaTrials">0</b><small>ACTIONS OBSERVED</small></div><div class="kpi"><b id="patriciaScenes">0</b><small>SCENES SEEN</small></div></div><label class="score">Human-verified game score <input id="patriciaScore" type="number" step="1" min="0" placeholder="Not rated"></label></article>
+</section>
+<section class="board"><h2>TOURNAMENT SCOREBOARD <span id="winner"></span></h2>
+<table><caption>Everyone runs the same local cartridge. Machine observations are not game points; enter visible scores and finish the heat to declare a winner.</caption>
+<thead><tr><th>Player</th><th>Reaction mode</th><th>Frames</th><th>Observed trials</th><th>Unique scenes</th><th>Human-verified game score</th></tr></thead><tbody id="ranking"></tbody></table>
+<div class="note">Each competitor is a separate NES emulator with its own learning-memory namespace and one autonomous Player 1 policy running inside that emulator. This is a parallel tournament, not three native NES controller ports. Jane, Toph and Patricia use FAST, CAREFUL and BALANCED profiles; those are speed profiles of the same underlying experimental agent, not three independently trained AI models. Trial counts and scene counts describe exploration, not winning. ROM bytes stay in the browser; no copyrighted game is bundled.</div>
+</section>
+</main>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const profiles=[{id:'jane',name:'Jane',mode:'fast'},{id:'toph',name:'Toph',mode:'careful'},{id:'patricia',name:'Patricia',mode:'balanced'}];
+let releaseHTML='',ready=0,romFile=null,muted=false,done=false,volume=35;
+function message(s){$('status').textContent=s}
+function compartment(doc,id){
+ // Distinct namespaces prevent competitors sharing the main learning model.
+ const isolation="const STORAGE_PREFIX='jane.arena."+id+".perception.v1.';";
+ const replaced=doc.replace("const STORAGE_PREFIX='jane.perception.v1.';",isolation);
+ if(replaced===doc)throw Error('Emulator memory isolation anchor missing');
+ return replaced.replace('<head>','<head><base href="'+new URL('../releases/',location.href).href+'">');
+}
+function iframe(id){return $(id+'Frame').contentWindow}
+function status(p){const w=iframe(p.id);return w?.JANE_PERCEPTION?.status?.()||null}
+function setVolume(v){
+ volume=Math.max(0,Math.min(100,Math.round(Number(v)||0)));
+ $('masterVolume').value=volume;$('volumeValue').textContent=volume+'%';
+ const per=muted?0:volume;
+ profiles.forEach((p,i)=>{
+  const w=iframe(p.id);if(!w)return;
+  const slider=w.document?.getElementById('volSlider');if(!slider)return;
+  // Only the focused competitor is audible, avoiding three overlapping APU signals.
+  slider.value=i===0?per:0;
+  slider.dispatchEvent(new w.Event('input',{bubbles:true}));
+ });
+ $('mute').textContent=muted?'Unmute':'Mute';$('mute').setAttribute('aria-pressed',String(muted));
+}
+function setupProfile(p){
+ const w=iframe(p.id);
+ if(!w?.document?.getElementById('romInput'))return false;
+ const select=w.document.getElementById('reactionSelect');
+ if(select){select.value=p.mode;select.dispatchEvent(new w.Event('change',{bubbles:true}));}
+ // Hide lab instruments, retain the emulator, ROM loading and pause/reset controls.
+ const css=w.document.createElement('style');css.textContent=
+  'body{background:#020e19!important}.app{padding:4px!important}.main{display:block!important;max-width:none!important;margin:0!important}'+
+  '.main>section:not(:first-child),.header,.footer,#jp59ThemePicker,.jp63-bridge{display:none!important}'+
+  '.main>section:first-child{display:block!important;width:100%!important;max-width:none!important}'+
+  '.main>section:first-child .inner{padding:5px!important}'+
+  '.main>section:first-child .gamebox{max-width:100%!important}'+
+  '.main>section:first-child .gamebox canvas{width:100%!important;height:auto!important}';
+ w.document.head.appendChild(css);
+ $(p.id+'Mode').textContent='READY · '+p.mode.toUpperCase();
+ setVolume(volume);
+ return true;
+}
+async function init(){
+ try{
+  message('Loading three independent NES emulators…');
+  const res=await fetch('../releases/Janes_Perception_v71_Mission_Control_Embedded_JPG_Story_NES.html',{cache:'force-cache'});
+  if(!res.ok)throw Error('NES release unavailable ('+res.status+')');
+  releaseHTML=await res.text();
+  for(const p of profiles){
+   const f=$(p.id+'Frame');
+   f.addEventListener('load',()=>{try{if(setupProfile(p)){ready++;if(ready===3){$('resetAll').disabled=false;message('All three cabinets are ready. Choose one .nes cartridge to start a tournament.')}}catch(err){message('Cabinet error: '+err.message)}},{once:true});
+   f.srcdoc=compartment(releaseHTML,p.id);
+  }
+ }catch(err){message('Arena initialization failed: '+err.message)}
+}
+async function loadAll(file){
+ if(!file)return;
+ if(!/\.nes$/i.test(file.name)){message('Choose a .nes ROM file that you have the right to use.');return}
+ if(file.size>5*1024*1024){message('ROM file exceeds 5 MB browser limit.');return}
+ romFile=file;done=false;for(const p of profiles)$(p.id+'Score').value='';
+ if(ready!==3){message('Cabinets are still initializing; try loading again.');return}
+ for(const p of profiles){
+   const w=iframe(p.id),input=w.document.getElementById('romInput');
+   const transfer=new w.DataTransfer();
+   transfer.items.add(new w.File([await file.arrayBuffer()],file.name,{type:'application/octet-stream'}));
+   input.files=transfer.files;
+   input.dispatchEvent(new w.Event('change',{bubbles:true}));
+ }
+ $('lockHeat').disabled=false;
+ message('Heat started: '+file.name+' / three isolated machines / independent local agent memories');
+ setVolume(volume);
+}
+function render(){
+ const rows=[];
+ for(const p of profiles){
+  let s=null,m=null;
+  try{s=status(p);m=iframe(p.id)?.JANE_PERCEPTION?.export?.()}catch(err){}
+  $(p.id+'Frames').textContent=s?.frame??'0';
+  $(p.id+'Trials').textContent=s?.trials??'0';
+  $(p.id+'Scenes').textContent=s?.scenes??'0';
+  const raw=$(p.id+'Score').value.trim(),score=raw===''?null:Number(raw);
+  rows.push({p,frame:s?.frame??0,trials:s?.trials??0,scenes:s?.scenes??0,score});
+ }
+ const scores=rows.filter(x=>x.score!==null&&Number.isFinite(x.score));
+ const full=scores.length===3;
+ const ranking=done&&full?[...rows].sort((a,b)=>b.score-a.score):rows;
+ $('ranking').replaceChildren(...ranking.map(r=>{
+  const tr=document.createElement('tr');
+  [r.p.name,r.p.mode,r.frame,r.trials,r.scenes,r.score===null?'Not rated':r.score].forEach(v=>{
+   const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});
+  return tr
+ }));
+ if(done&&full){
+  const top=ranking[0].score,leaders=ranking.filter(r=>r.score===top);
+  $('winner').textContent=leaders.length===1?' · WINNER '+leaders[0].p.name.toUpperCase():' · TIE '+leaders.map(r=>r.p.name.toUpperCase()).join(' / ');
+ }else $('winner').textContent=done?' · ENTER ALL THREE GAME SCORES':'';
+}
+$('romAll').addEventListener('change',async e=>loadAll(e.target.files?.[0]));
+$('masterVolume').addEventListener('input',e=>setVolume(e.target.value));
+$('mute').onclick=()=>{muted=!muted;setVolume(volume)};
+$('resetAll').onclick=()=>{if(romFile)loadAll(romFile)};
+$('lockHeat').onclick=()=>{done=true;render();message('Heat closed; human game scores determine the winner, not pixel motion.')};
+setInterval(render,1200);render();init();
+})();
+</script></body></html>
