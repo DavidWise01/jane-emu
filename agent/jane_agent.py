@@ -42,7 +42,7 @@ def validate(raw: object) -> dict:
         raise ValueError("Event must be an object")
     if len(canonical(raw)) > 16000:
         raise ValueError("Event exceeds 16 KB")
-    allowed = {"kind", "rom", "source_root", "source", "word", "button", "outcome", "frame", "note", "recorded_at", "context", "question_id", "pixel_change_bp", "status"}
+    allowed = {"kind", "rom", "source_root", "source", "word", "button", "outcome", "frame", "note", "recorded_at", "context", "question_id", "pixel_change_bp", "status", "refinement_state", "predicted_pixel_bp", "prediction_low_bp", "prediction_high_bp", "prediction_error_bp", "prior_root_count"}
     if set(raw) - allowed:
         raise ValueError("Unexpected event fields")
     kind = raw.get("kind")
@@ -67,6 +67,36 @@ def validate(raw: object) -> dict:
         if isinstance(delta, bool) or not isinstance(delta, int) or not (0 <= delta <= 10000):
             raise ValueError("pixel_change_bp must be integer from 0 to 10000")
         doc["pixel_change_bp"] = delta
+        refinement = raw.get("refinement_state")
+        if refinement is not None:
+            if refinement not in {"NEEDS_ROOTS", "WITHIN_BAND", "BOUNDARY_MISS"}:
+                raise ValueError("Unsupported refinement state")
+            doc["refinement_state"] = refinement
+            fields = ("predicted_pixel_bp", "prediction_low_bp", "prediction_high_bp",
+                      "prediction_error_bp", "prior_root_count")
+            if refinement == "NEEDS_ROOTS":
+                if any(raw.get(field) is not None for field in fields):
+                    raise ValueError("Untrained forecast cannot claim prediction metrics")
+            else:
+                if any(isinstance(raw.get(field), bool) or
+                       not isinstance(raw.get(field), int) for field in fields):
+                    raise ValueError("Prediction requires all exact integer metrics")
+                if any(not 0 <= raw[field] <= 10000 for field in fields[:-1]):
+                    raise ValueError("Prediction basis points outside range")
+                if not 3 <= raw["prior_root_count"] <= 100000:
+                    raise ValueError("Prediction requires three prior roots")
+                if raw["prediction_low_bp"] > raw["prediction_high_bp"]:
+                    raise ValueError("Invalid interval")
+                if abs(raw["predicted_pixel_bp"] - delta) != raw["prediction_error_bp"]:
+                    raise ValueError("Forecast error does not match observation")
+                inside = raw["prediction_low_bp"] <= delta <= raw["prediction_high_bp"]
+                if inside != (refinement == "WITHIN_BAND"):
+                    raise ValueError("Refinement classification contradicts measured response")
+                for field in fields:
+                    doc[field] = raw[field]
+        elif any(raw.get(field) is not None for field in ("predicted_pixel_bp", "prediction_low_bp",
+                             "prediction_high_bp", "prediction_error_bp", "prior_root_count")):
+            raise ValueError("Forecast metrics require a refinement state")
         if raw.get("outcome") is not None:
             raise ValueError("Experimental feedback cannot assert an outcome label")
         if raw.get("word") is not None:
@@ -154,7 +184,9 @@ def rebuild_index() -> dict:
             "rom": rom, "question_id": question_id, "context": context, "button": button,
             "independent_observation_roots": len(roots),
             "observations": sum(len(events) for events in roots.values()),
-            "outcome": "UNLABELED", "semantic_gain": "UNPROVEN"
+            "outcome": "UNLABELED", "semantic_gain": "UNPROVEN",
+            "predictions_scored": sum(1 for items in roots.values() for r in items if r.get("refinement_state") in ("WITHIN_BAND", "BOUNDARY_MISS")),
+            "boundary_misses": sum(1 for items in roots.values() for r in items if r.get("refinement_state") == "BOUNDARY_MISS")
         })
     associations = []
     for (rom, word, button, context), roots in sorted(evidence.items()):
