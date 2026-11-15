@@ -42,7 +42,7 @@ def validate(raw: object) -> dict:
         raise ValueError("Event must be an object")
     if len(canonical(raw)) > 16000:
         raise ValueError("Event exceeds 16 KB")
-    allowed = {"kind", "rom", "source_root", "source", "word", "button", "outcome", "frame", "note", "recorded_at"}
+    allowed = {"kind", "rom", "source_root", "source", "word", "button", "outcome", "frame", "note", "recorded_at", "context"}
     if set(raw) - allowed:
         raise ValueError("Unexpected event fields")
     kind = raw.get("kind")
@@ -51,6 +51,8 @@ def validate(raw: object) -> dict:
     doc = {"schema": SCHEMA, "kind": kind, "rom": token(raw.get("rom"), "rom", True),
            "source_root": token(raw.get("source_root"), "source_root", True),
            "source": token(raw.get("source"), "source", True)}
+    if raw.get("context") is not None:
+        doc["context"] = token(raw["context"], "context", True)
     if kind == "outcome_label":
         doc["word"] = token(raw.get("word"), "word", True)
         doc["button"] = token(raw.get("button"), "button", True)
@@ -122,9 +124,9 @@ def rebuild_index() -> dict:
     evidence = defaultdict(lambda: defaultdict(list))
     for rec in records:
         if rec.get("kind") == "outcome_label":
-            evidence[(rec["rom"], rec["word"], rec["button"])][rec["source_root"]].append(rec)
+            evidence[(rec["rom"], rec["word"], rec["button"], rec.get("context", "UNSPECIFIED"))][rec["source_root"]].append(rec)
     associations = []
-    for (rom, word, button), roots in sorted(evidence.items()):
+    for (rom, word, button, context), roots in sorted(evidence.items()):
         # One ancestry, one vote. Contradiction inside a root is not corroboration.
         good, bad, unresolved = 0, 0, 0
         for events in roots.values():
@@ -137,6 +139,7 @@ def rebuild_index() -> dict:
                 unresolved += 1
         state = "CONTESTED" if bad else ("SUPPORTED_PROVISIONAL" if good >= 3 else "INSUFFICIENT")
         associations.append({"rom": rom, "word": word, "button": button,
+                             "context": context, "context_bound": context != "UNSPECIFIED",
                              "beneficial_roots": good, "harmful_or_conflicting_roots": bad,
                              "other_roots": unresolved, "status": state})
     index = {"schema": SCHEMA, "event_count": len(records),
