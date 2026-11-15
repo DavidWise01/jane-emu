@@ -2,7 +2,7 @@
 <html lang="en" data-skin="mission">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JANE EMU / AV-077 / PLAY ↔ LEARN / PERSISTENT MEMORY</title>
+<title>JANE EMU / AV-078 / PLAY ↔ LEARN / PERSISTENT MEMORY</title>
 <style>
 :root{--bg:#061421;--panel:#0d2639;--edge:#2f6076;--text:#e8f8ff;--muted:#91b4c6;--accent:#72e8f8;--warm:#ffbc75;--button:#163f57;--radius:13px;color-scheme:dark}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -20%,#25556f,var(--bg) 54%);color:var(--text);font:13px/1.55 system-ui,sans-serif}
@@ -56,7 +56,7 @@ html[data-skin="mono"]{--bg:#090909;--panel:#252525;--edge:#757575;--text:#fafaf
 @media(max-width:520px){.skinlist{grid-template-columns:repeat(2,minmax(0,1fr))}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}header{padding:10px}main{padding:7px}}
 </style></head>
 <body>
-<header><div><span class="tag">ROOT 0 · EVIDENCE-CARRYING LEARNING BRIDGE</span><h1>JANE EMU / PLAY ↔ LEARN</h1><div class="small">AV-077 / LIVE NES · HUMAN EVIDENCE · GITHUB IMMUTABLE MEMORY</div></div><div class="row"><span class="pill" id="gameSignal">GAME CONNECTING</span><span class="pill" id="gitSignal">GIT CONNECTING</span><a href="https://github.com/DavidWise01/jane-emu" target="_blank" rel="noopener">GitHub Repository</a></div></header>
+<header><div><span class="tag">ROOT 0 · EVIDENCE-CARRYING LEARNING BRIDGE</span><h1>JANE EMU / PLAY ↔ LEARN</h1><div class="small">AV-078 / LIVE NES · HUMAN EVIDENCE · GITHUB IMMUTABLE MEMORY</div></div><div class="row"><span class="pill" id="gameSignal">GAME CONNECTING</span><span class="pill" id="gitSignal">GIT CONNECTING</span><a href="https://github.com/DavidWise01/jane-emu" target="_blank" rel="noopener">GitHub Repository</a></div></header>
 <main>
 <div class="top">
 <section class="panel" aria-label="Jane playable NES left 50 percent">
@@ -77,7 +77,7 @@ html[data-skin="mono"]{--bg:#090909;--panel:#252525;--edge:#757575;--text:#fafaf
 <button role="tab" data-tab="reuse" aria-selected="false">MEMORY REUSE</button>
 <button role="tab" data-tab="experiments" aria-selected="false">EXPERIMENTS</button>
 <button role="tab" data-tab="feedback" aria-selected="false">FEEDBACK</button>
-<button role="tab" data-tab="refinement" aria-selected="false">REFINEMENT</button>
+<button role="tab" data-tab="refinement" aria-selected="false">REFINEMENT</button><button role="tab" data-tab="impact" aria-selected="false">IMPACT</button><button role="tab" data-tab="curator" aria-selected="false">MEMORY CURATOR</button>
 </div>
 <div class="tabpage" data-page="live">
 <div class="kpis"><div class="kpi"><b id="poolCount">—</b><small>IMMUTABLE EVENTS ON GIT</small></div><div class="kpi"><b id="assocCount">—</b><small>WORD/ACTION ASSOCIATIONS</small></div><div class="kpi"><b id="staged">0</b><small>LOCAL EVIDENCE QUEUE</small></div><div class="kpi"><b id="rootCount">—</b><small>DISTINCT ROOTS IN RECENT TRIALS</small></div></div>
@@ -167,6 +167,21 @@ html[data-skin="mono"]{--bg:#090909;--panel:#252525;--edge:#757575;--text:#fafaf
 <div class="toolbar"><button id="av077Inspect">Inspect eligible prior observations</button><button id="av077Feedback">Open Feedback</button><button id="av077Export">Export refinement record</button></div>
 <div class="note">At least three independent prior roots are required for a numeric forecast. Future outcomes are scored against the frozen forecast; replays from one state are not three witnesses. A forecast within its observed range means only that pixel change was expected, not that the action helped.</div>
 </div>
+<div class="tabpage" data-page="impact" hidden>
+<h3>AV-078 / INDEPENDENT HOLDOUT IMPACT</h3>
+<div class="note">Before arming an AV-076 experiment, set a revised pixel forecast. The prior AV-077 baseline and this revision are frozen before the next action. Only a new independent source root can score whether the revision predicted pixels more accurately. This is not a game-reward measurement.</div>
+<div class="field"><label for="av078Revised">REVISED FORECAST: PIXEL CHANGE (%)</label><input id="av078Revised" type="number" min="0" max="100" step="0.01" placeholder="e.g. 12.50"></div>
+<div class="kpis"><div class="kpi"><b id="av078State">UNTRAINED</b><small>HOLDOUT STATE</small></div><div class="kpi"><b id="av078BaseError">—</b><small>BASELINE ERROR</small></div><div class="kpi"><b id="av078NewError">—</b><small>REVISED ERROR</small></div><div class="kpi"><b id="av078Diff">—</b><small>ERROR REDUCTION</small></div></div>
+<pre id="av078Result">Awaiting a frozen question with baseline and revised forecasts.</pre>
+<div class="toolbar"><button id="av078Inspect">Check impact</button><button id="av078Feedback">Open Feedback</button><button id="av078Export">Export comparison</button></div>
+<div class="note">Reused roots are rejected; improvement must be measured on a distinct held-out NES starting state. A lower forecasting error is not a beneficial outcome.</div></div>
+<div class="tabpage" data-page="curator" hidden>
+<h3>JANE MEMORY CURATOR / GITHUB AGENT</h3>
+<div class="note">The agent verifies immutable event hashes, collates distinct witness ancestries, and maintains a public digest. Optional server-side AI synthesis requires a GitHub Actions secret; the page never stores an AI key.</div>
+<div class="kpis"><div class="kpi"><b id="curatorStatus">FETCHING</b><small>CURATOR STATUS</small></div><div class="kpi"><b id="curatorEvents">—</b><small>VERIFIED EVENTS</small></div><div class="kpi"><b id="curatorQuestions">—</b><small>OPEN QUESTIONS</small></div><div class="kpi"><b id="curatorAI">OFF</b><small>AI ANALYST</small></div></div>
+<pre id="curatorLedger">Fetching Jane's Git evidence curator digest…</pre>
+<div class="toolbar"><button id="curatorRefresh">Refresh memory</button><a href="https://github.com/DavidWise01/jane-emu/actions/workflows/jane-curator.yml" target="_blank" rel="noopener">Run the Curator Agent</a><a href="https://github.com/DavidWise01/jane-emu/blob/main/memory/curation/current.json" target="_blank" rel="noopener">See source digest</a></div>
+<div class="note">The GitHub Pages dashboard is a read-only viewer of the agent output. AI notes are unverified suggestions and never modify memory roots, label gameplay rewards, or press NES controls.</div></div>
 <div id="statusLine" class="small" role="status" aria-live="polite">Connecting…</div>
 </section>
 </div>
@@ -175,12 +190,12 @@ html[data-skin="mono"]{--bg:#090909;--panel:#252525;--edge:#757575;--text:#fafaf
 </main>
 <script src="./av075_policy.js"></script>
 <script src="./av076_feedback.js"></script>
-<script src="./av077_refinement.js"></script>
+<script src="./av077_refinement.js"></script><script src="./av078_impact.js"></script>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
 const REPO='DavidWise01/jane-emu', API='https://api.github.com/repos/'+REPO;
-let game=null, selection=null, trials=[], queued=[], savedIds=new Set(),token='',remote=null,autoSeen=new Set(),bootShown='',lastReport='',statusChanged=0, skippedDuplicates=0, checkpointAt='', latestScreen={}, latestRead={}, av075Decision=null, av076Armed=null, av076Last=null, av076Busy=false, av077Frozen=null, av077Last=null;
+let game=null, selection=null, trials=[], queued=[], savedIds=new Set(),token='',remote=null,autoSeen=new Set(),bootShown='',lastReport='',statusChanged=0, skippedDuplicates=0, checkpointAt='', latestScreen={}, latestRead={}, av075Decision=null, av076Armed=null, av076Last=null, av076Busy=false, av077Frozen=null, av077Last=null, av078Frozen=null, av078Last=null, av078QuestionSeen='', curatorMemory=null;
 const skins=[['mission','Mission Control','#122c43','#55c9e8'],['arcade','Pixel Arcade','#3e155c','#fa69db'],['field','Field Laboratory','#f3ecd8','#bb8557'],['phosphor','Phosphor Terminal','#082719','#a5f982'],['copper','Copper Foundry','#3f2517','#ffc079'],['blueprint','Blueprint Station','#0c345e','#90e2ff'],['glacier','Polar Glass','#edfafd','#79ccd9'],['solar','Solar Observatory','#4b2d19','#ffc153'],['violet','Violet Reactor','#24143d','#c49eff'],['mono','Monochrome','#202020','#e0e0e0']];
 function say(text,error=false){$('statusLine').textContent=(error?'ERROR · ':'')+text;$('statusLine').style.color=error?'#ff9999':'var(--muted)'}
 function setTab(t){document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',String(x.dataset.tab===t)));document.querySelectorAll('[data-page]').forEach(x=>x.hidden=x.dataset.page!==t)}
@@ -411,6 +426,89 @@ $('av075Export').onclick=()=>{
 
 
 
+
+function av078Training(){
+ const armed=av076Armed, prev=av077Frozen, candidate=$('av078Revised').value.trim();
+ const bp=Number(candidate)*100;
+ const evidence=queued.map(x=>x.record).filter(x=>armed&&x.kind==='experiment_feedback'&&x.rom===armed.rom&&x.context===armed.context&&x.button===armed.button&&x.source_root);
+ const roots=[...new Set(evidence.map(x=>x.source_root))];
+ av078Frozen=window.JaneAV078?.freeze({
+  question_id:armed?.question_id,rom:armed?.rom,context:armed?.context,button:armed?.button,
+  training_roots:roots,baseline:prev?.status==='FORECAST'?prev:null,
+  revised:candidate!==''&&Number.isFinite(bp)?{predicted_pixel_bp:Math.round(bp)}:null
+ })||{status:'ABSTAIN',reason:'Impact policy unavailable'};
+ av078Last=null;
+ renderAV078();
+}
+function renderAV078(){
+ const p=av078Frozen,v=av078Last;
+ $('av078State').textContent=v?.status||p?.status||'UNTRAINED';
+ $('av078BaseError').textContent=v?.baseline_error_bp===undefined?'—':(v.baseline_error_bp/100).toFixed(2)+'%';
+ $('av078NewError').textContent=v?.revised_error_bp===undefined?'—':(v.revised_error_bp/100).toFixed(2)+'%';
+ $('av078Diff').textContent=v?.error_reduction_bp===undefined?'—':(v.error_reduction_bp/100).toFixed(2)+'%';
+ $('av078Result').textContent=[
+ 'QUESTION '+(p?.question_id||'NONE'),
+ 'TRAINING ROOTS '+(p?.training_roots?.length??0),
+ 'BASELINE PRE-FROZEN '+(p?.baseline_bp===undefined?'NONE':(p.baseline_bp/100).toFixed(2)+'%'),
+ 'REVISED PRE-FROZEN '+(p?.revised_bp===undefined?'NONE':(p.revised_bp/100).toFixed(2)+'%'),
+ 'NEW HOLDOUT ROOT '+(v?.source_root||'NONE'),
+ 'COMPARISON '+(v?.status||p?.status||'UNTRAINED'),
+ 'ERROR REDUCTION '+(v?.error_reduction_bp??'NOT MEASURED')+' basis points',
+ 'REASON '+(v?.reason||p?.reason||'Awaiting an experiment'),
+ 'SEMANTIC GAIN UNPROVEN; NO CONTROLLER INPUT GENERATED'
+ ].join('\n');
+}
+async function av078Watch(){
+ if(av076Armed?.question_id&&av078QuestionSeen!==av076Armed.question_id){
+   av078QuestionSeen=av076Armed.question_id;av078Training();
+ }
+ if(!av076Armed&&av078QuestionSeen&&av076Last?.state==='OBSERVED'&&!av078Last){
+  const t=trials.find(x=>Number(x.endFrame)===Number(av076Last.frame)
+   &&x.rom===av076Last.rom&&x.preHash);
+  if(t){
+   const id=await root(t);
+   av078Last=window.JaneAV078?.score(av078Frozen,{
+     rom:av076Last.rom,context:av076Last.context,
+     button:av076Last.button,source_root:id,pixel_change_bp:av076Last.pixel_change_bp
+   })||{status:'ABSTAIN',reason:'No holdout policy'};
+  }else{
+   av078Last={status:'ABSTAIN',reason:'No independently rooted matching trial available for scoring'};
+  }
+  av078QuestionSeen='';renderAV078();
+ }
+}
+$('av078Inspect').onclick=renderAV078;
+$('av078Feedback').onclick=()=>setTab('feedback');
+$('av078Export').onclick=()=>{
+ if(!av078Last){say('No held-out impact comparison available.',true);return}
+ download(JSON.stringify({schema:'jane.impact.av078',plan:av078Frozen,result:av078Last,beneficial_claim:false},null,2),'jane-av078-impact.json');
+};
+async function refreshCurator(){
+ try{
+  const resp=await fetch('https://raw.githubusercontent.com/'+REPO+'/main/memory/curation/current.json?u='+Date.now(),{cache:'no-store'});
+  if(!resp.ok)throw Error('Digest not published yet. Run Jane Memory Curator in GitHub Actions.');
+  const doc=await resp.json();
+  if(doc.schema!=='jane.memory-curation.v1')throw Error('Unexpected memory digest schema');
+  curatorMemory=doc;
+  $('curatorStatus').textContent=doc.status==='EVIDENCE_AVAILABLE'?'EVIDENCE':'AWAIT DATA';
+  $('curatorEvents').textContent=doc.pool_event_count;
+  $('curatorQuestions').textContent=doc.question_gaps?.length||0;
+  $('curatorAI').textContent=doc.ai?.state==='MODEL_SYNTHESIS_UNVERIFIED'?'OPTIONAL':'OFF';
+  $('curatorLedger').textContent=[
+    'SOURCE '+doc.source,'ANCESTRY '+doc.source_ancestry,'EVENTS '+doc.pool_event_count,
+    'DISTINCT ROOTS '+doc.distinct_source_root_ids,'KINDS '+JSON.stringify(doc.kind_counts),
+    'NEXT QUESTION '+(doc.next_question||'WAIT FOR MORE EVIDENCE'),
+    'AI STATUS '+(doc.ai?.state||'OFF'),
+    'AI COMMENTARY (NOT VERIFIED): '+(doc.ai?.commentary||'none'),
+    '','MEMORY ASSOCIATIONS',
+    ...(doc.associations||[]).slice(0,15).map(x=>x.word+' -> '+x.button+' / '+x.status+' / '+x.independent_beneficial_roots+' beneficial roots'),
+    '','OPEN QUESTIONS',
+    ...(doc.question_gaps||[]).slice(0,15).map(x=>x.question_id+' / '+x.independent_roots+' roots / '+x.next_step)
+   ].join('\n');
+ }catch(e){$('curatorStatus').textContent='NOT READY';$('curatorLedger').textContent=e.message}
+}
+$('curatorRefresh').onclick=refreshCurator;
+
 function renderAV077(){
  const model=av077Frozen,last=av077Last;
  const verdict=last?.comparison?.status||model?.status||'UNTRAINED';
@@ -528,6 +626,6 @@ $('sendQueue').onclick=async()=>{if(!token){say('Connect using a repository-scop
 const pending=[...queued];let pushed=0;for(const q of pending){try{const data=q.record;const bytes=JSON.stringify(data,null,2)+'\n';const hash=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(bytes));const name=Array.from(new Uint8Array(hash),x=>x.toString(16).padStart(2,'0')).join('').slice(0,24);const path='memory/inbox/bridge-'+name+'.json';await gitFetch(API+'/contents/'+path,{method:'PUT',content:true,body:JSON.stringify({message:'memory: submit reviewed Jane NES observation',content:b64Unicode(bytes),branch:'main'})});queued=queued.filter(x=>x!==q);pushed++;$('staged').textContent=queued.length;renderQueue();}catch(e){say('Published '+pushed+' packet(s); next item failed: '+e.message,true);return}}
 say('Published '+pushed+' reviewed event(s) into Git inbox. Wait for Memory Agent Action to ingest; refresh index after it finishes.');};
 $('game').addEventListener('load',()=>{game=null;setTimeout(live,800)});
-setInterval(live,1600);setInterval(refreshGit,30000);refreshGit();restoreSession();$('staged').textContent=queued.length;renderQueue();say('AV-077 restored '+queued.length+' reviewed record(s) locally. Load a ROM to continue observing.');
+setInterval(live,1600);setInterval(av078Watch,1600);setInterval(refreshGit,30000);setInterval(refreshCurator,60000);refreshCurator();refreshGit();restoreSession();$('staged').textContent=queued.length;renderQueue();say('AV-078 restored '+queued.length+' reviewed record(s) locally. Load a ROM to continue observing.');
 })();
 </script></body></html>
