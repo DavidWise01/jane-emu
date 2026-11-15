@@ -149,6 +149,47 @@ class TestJaneMemory(unittest.TestCase):
             with self.assertRaises(ValueError):
                 agent.validate({**baseline,**patch})
 
+    def test_forecast_records_preserve_outcome_separation(self):
+        with tempfile.TemporaryDirectory() as d:
+            old_pool,old_events=agent.POOL,agent.EVENTS
+            agent.POOL=pathlib.Path(d)
+            agent.EVENTS=agent.POOL/"events"
+            agent.EVENTS.mkdir()
+            try:
+                prior = {
+                    "kind":"experiment_feedback","question_id":"q-forecast-1",
+                    "rom":"demo","context":"screen-1","button":"START",
+                    "source_root":"root-1","source":"nes-action-observation",
+                    "status":"OBSERVED_UNLABELED","pixel_change_bp":1200,
+                    "refinement_state":"WITHIN_BAND","predicted_pixel_bp":1100,
+                    "prediction_low_bp":650,"prediction_high_bp":1550,
+                    "prediction_error_bp":100,"prior_root_count":3,"frame":110
+                }
+                agent.write_event(agent.validate(prior))
+                result=agent.rebuild_index()
+                self.assertEqual(result["associations"],[])
+                self.assertEqual(result["feedback_summary"][0]["predictions_scored"],1)
+                self.assertEqual(result["feedback_summary"][0]["boundary_misses"],0)
+            finally:
+                agent.POOL,agent.EVENTS=old_pool,old_events
+
+    def test_refinement_rejects_posthoc_score_forgery(self):
+        baseline={
+            "kind":"experiment_feedback","question_id":"q-forecast-2",
+            "rom":"demo","context":"screen-1","button":"A",
+            "source_root":"root-1","source":"nes-action-observation",
+            "status":"OBSERVED_UNLABELED","pixel_change_bp":1200,
+            "refinement_state":"WITHIN_BAND","predicted_pixel_bp":1100,
+            "prediction_low_bp":650,"prediction_high_bp":1550,
+            "prediction_error_bp":100,"prior_root_count":3
+        }
+        for patch in ({"prediction_error_bp":99},{"prior_root_count":2},
+                      {"refinement_state":"BOUNDARY_MISS"},
+                      {"refinement_state":"NEEDS_ROOTS"},
+                      {"predicted_pixel_bp":True}):
+            with self.assertRaises(ValueError):
+                agent.validate({**baseline,**patch})
+
     def test_reject_private_or_unrecognized_fields(self):
         with self.assertRaises(ValueError):
             agent.validate({"kind":"observation", "rom":"game", "source":"test", "source_root":"root", "rom_base64":"AA=="})
