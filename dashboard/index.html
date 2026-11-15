@@ -2,7 +2,7 @@
 <html lang="en" data-skin="mission">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JANE EMU / AV-075 / PLAY ↔ LEARN / PERSISTENT MEMORY</title>
+<title>JANE EMU / AV-076 / PLAY ↔ LEARN / PERSISTENT MEMORY</title>
 <style>
 :root{--bg:#061421;--panel:#0d2639;--edge:#2f6076;--text:#e8f8ff;--muted:#91b4c6;--accent:#72e8f8;--warm:#ffbc75;--button:#163f57;--radius:13px;color-scheme:dark}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -20%,#25556f,var(--bg) 54%);color:var(--text);font:13px/1.55 system-ui,sans-serif}
@@ -56,7 +56,7 @@ html[data-skin="mono"]{--bg:#090909;--panel:#252525;--edge:#757575;--text:#fafaf
 @media(max-width:520px){.skinlist{grid-template-columns:repeat(2,minmax(0,1fr))}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}header{padding:10px}main{padding:7px}}
 </style></head>
 <body>
-<header><div><span class="tag">ROOT 0 · EVIDENCE-CARRYING LEARNING BRIDGE</span><h1>JANE EMU / PLAY ↔ LEARN</h1><div class="small">AV-075 / LIVE NES · HUMAN EVIDENCE · GITHUB IMMUTABLE MEMORY</div></div><div class="row"><span class="pill" id="gameSignal">GAME CONNECTING</span><span class="pill" id="gitSignal">GIT CONNECTING</span><a href="https://github.com/DavidWise01/jane-emu" target="_blank" rel="noopener">GitHub Repository</a></div></header>
+<header><div><span class="tag">ROOT 0 · EVIDENCE-CARRYING LEARNING BRIDGE</span><h1>JANE EMU / PLAY ↔ LEARN</h1><div class="small">AV-076 / LIVE NES · HUMAN EVIDENCE · GITHUB IMMUTABLE MEMORY</div></div><div class="row"><span class="pill" id="gameSignal">GAME CONNECTING</span><span class="pill" id="gitSignal">GIT CONNECTING</span><a href="https://github.com/DavidWise01/jane-emu" target="_blank" rel="noopener">GitHub Repository</a></div></header>
 <main>
 <div class="top">
 <section class="panel" aria-label="Jane playable NES left 50 percent">
@@ -76,6 +76,7 @@ html[data-skin="mono"]{--bg:#090909;--panel:#252525;--edge:#757575;--text:#fafaf
 <button role="tab" data-tab="continuity" aria-selected="false">CONTINUITY</button>
 <button role="tab" data-tab="reuse" aria-selected="false">MEMORY REUSE</button>
 <button role="tab" data-tab="experiments" aria-selected="false">EXPERIMENTS</button>
+<button role="tab" data-tab="feedback" aria-selected="false">FEEDBACK</button>
 </div>
 <div class="tabpage" data-page="live">
 <div class="kpis"><div class="kpi"><b id="poolCount">—</b><small>IMMUTABLE EVENTS ON GIT</small></div><div class="kpi"><b id="assocCount">—</b><small>WORD/ACTION ASSOCIATIONS</small></div><div class="kpi"><b id="staged">0</b><small>LOCAL EVIDENCE QUEUE</small></div><div class="kpi"><b id="rootCount">—</b><small>DISTINCT ROOTS IN RECENT TRIALS</small></div></div>
@@ -137,6 +138,20 @@ html[data-skin="mono"]{--bg:#090909;--panel:#252525;--edge:#757575;--text:#fafaf
 <h3>Independent-witness ledger</h3><div id="av075Rows" class="small">No candidate experiments yet.</div>
 <div class="note">A proposed button remains a question only. Run it in Jane's existing quiet-verified experiment instrument, observe the outcome, and supply an explicit human label; repeated forks of the same starting state count as one root. No ROM data or Git credentials are included in exported plans.</div>
 </div>
+<div class="tabpage" data-page="feedback" hidden>
+<h3>AV-076 / EXPERIMENT FEEDBACK CLOSURE</h3>
+<div class="note">Freeze the next AV-075 question <b>before</b> an input occurs. Jane's existing Player 1 controller remains the only controller. The first completed trial after arming is compared against the frozen input; mismatches are withheld. Pixel change is never an automatic reward.</div>
+<div class="kpis">
+<div class="kpi"><b id="av076State">IDLE</b><small>QUESTION STATE</small></div>
+<div class="kpi"><b id="av076Question">—</b><small>QUESTION ID</small></div>
+<div class="kpi"><b id="av076Change">—</b><small>PIXEL RESPONSE</small></div>
+<div class="kpi"><b id="av076Git">0</b><small>GIT OBSERVED ROOTS</small></div>
+</div>
+<h3>Question → input → evidence</h3><pre id="av076Readout">No question armed. Choose Experiments → recalculate, then arm the proposed next question.</pre>
+<div class="toolbar"><button id="av076Arm">Arm next verified question</button><button id="av076Cancel">Cancel observation</button><button id="av076Evidence">Review Git evidence</button></div>
+<h3>Immutable evidence boundary</h3>
+<div class="note">Matching trials create a locally staged, unlabeled experiment-feedback packet. Publishing through Sync is optional and explicit. Three branches from the same saved state still count as one witness. Git's feedback pool never changes a lesson to “beneficial” from motion alone.</div>
+</div>
 <div id="statusLine" class="small" role="status" aria-live="polite">Connecting…</div>
 </section>
 </div>
@@ -144,11 +159,12 @@ html[data-skin="mono"]{--bg:#090909;--panel:#252525;--edge:#757575;--text:#fafaf
 <section class="panel story"><div class="row between"><h2>STORY / AV-072 · PLAY ↔ LEARN ↔ GIT</h2><span class="tag">CONCEPT ILLUSTRATION</span></div><div class="small">A visual chapter of Jane's NES gameplay feeding reviewed evidence into persistent, independently rooted GitHub memory.</div><div id="storyImage"><p class="small">Story artwork is embedded in the downloadable offline edition; the playable release already contains an embedded JPG illustration.</p></div></section>
 </main>
 <script src="./av075_policy.js"></script>
+<script src="./av076_feedback.js"></script>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
 const REPO='DavidWise01/jane-emu', API='https://api.github.com/repos/'+REPO;
-let game=null, selection=null, trials=[], queued=[], savedIds=new Set(),token='',remote=null,autoSeen=new Set(),bootShown='',lastReport='',statusChanged=0, skippedDuplicates=0, checkpointAt='', latestScreen={}, latestRead={}, av075Decision=null;
+let game=null, selection=null, trials=[], queued=[], savedIds=new Set(),token='',remote=null,autoSeen=new Set(),bootShown='',lastReport='',statusChanged=0, skippedDuplicates=0, checkpointAt='', latestScreen={}, latestRead={}, av075Decision=null, av076Armed=null, av076Last=null, av076Busy=false;
 const skins=[['mission','Mission Control','#122c43','#55c9e8'],['arcade','Pixel Arcade','#3e155c','#fa69db'],['field','Field Laboratory','#f3ecd8','#bb8557'],['phosphor','Phosphor Terminal','#082719','#a5f982'],['copper','Copper Foundry','#3f2517','#ffc079'],['blueprint','Blueprint Station','#0c345e','#90e2ff'],['glacier','Polar Glass','#edfafd','#79ccd9'],['solar','Solar Observatory','#4b2d19','#ffc153'],['violet','Violet Reactor','#24143d','#c49eff'],['mono','Monochrome','#202020','#e0e0e0']];
 function say(text,error=false){$('statusLine').textContent=(error?'ERROR · ':'')+text;$('statusLine').style.color=error?'#ff9999':'var(--muted)'}
 function setTab(t){document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',String(x.dataset.tab===t)));document.querySelectorAll('[data-page]').forEach(x=>x.hidden=x.dataset.page!==t)}
@@ -190,7 +206,7 @@ $('gameSignal').textContent=stat.running?'GAME RUNNING':'GAME CONNECTED';
 const roots=new Set(trials.filter(t=>t.preHash).map(t=>rootInput(t)));
 $('rootCount').textContent=roots.size;
 $('liveLog').textContent='FRAME '+(stat.frame||0)+' / PLAYER 1 '+(stat.flux?.lastAction||'IDLE')+'\nTRIALS '+trials.length+' / ROOTS '+roots.size+'\nREADING '+(read.reading||'UNKNOWN')+'\nBOOT '+(boot.verified?'TRANSITION OBSERVED':'NOT VERIFIED')+'\n\n'+trials.slice(-6).reverse().map(t=>'#'+t.id+' '+t.button+' · Δ '+(100*(Number(t.delta)||0)).toFixed(2)+'% · '+(t.label||'unknown')).join('\n');
-const signature=trials.map(identity).join('|');if(signature!==lastReport){lastReport=signature;renderTrials()}
+const signature=trials.map(identity).join('|');if(signature!==lastReport){lastReport=signature;renderTrials();captureAV076()}
 evaluateReuse();planNextExperiment();if($('autoCapture').checked){for(const t of trials){const id=identity(t);if(!autoSeen.has(id)){autoSeen.add(id);if(t.preHash&&t.rom)queueFromTrial(t,'observation','unknown','',true)}}}
 }
 function renderTrials(){const box=$('trialList');box.textContent='';if(!trials.length){box.textContent='No completed actions yet.';return}
@@ -211,12 +227,14 @@ $('queueTrial').onclick=async()=>{if(!selection){say('Select a completed trial f
 
 const LOCAL_KEY='jane.emu.reviewed-evidence.v73';
 function acceptableEvent(r){
- if(!r||typeof r!=='object'||!['observation','outcome_label','checkpoint'].includes(r.kind))return false;
+ if(!r||typeof r!=='object'||!['observation','outcome_label','checkpoint','experiment_feedback'].includes(r.kind))return false;
  const test=v=>typeof v==='string'&&/^[a-zA-Z0-9_.:/-]{1,128}$/.test(v);
  if(!test(r.rom)||!test(r.source_root)||!test(r.source))return false;
  if(r.context!==undefined&&!test(r.context))return false;
+ if(r.kind==='experiment_feedback'&&(!test(r.question_id)||!test(r.context)||!['OBSERVED_UNLABELED'].includes(r.status)||!Number.isInteger(r.pixel_change_bp)||r.pixel_change_bp<0||r.pixel_change_bp>10000))return false;
  if(r.kind==='outcome_label'&&(!test(r.word)||!['beneficial','harmful','neutral','unknown'].includes(r.outcome)))return false;
  if(r.button!==undefined&&!['START','SELECT','UP','DOWN','LEFT','RIGHT','A','B','NONE'].includes(r.button))return false;
+ if(r.kind==='experiment_feedback'&&r.outcome!==undefined)return false;
  return JSON.stringify(r).length<=10000;
 }
 function persistSession(){
@@ -375,10 +393,74 @@ $('av075Export').onclick=()=>{
  say('Downloaded an evidence-gap experiment plan; no input was sent and nothing was uploaded.');
 };
 
+
+function renderAV076(){
+ const a=av076Armed,p=av076Last;
+ $('av076State').textContent=a?'ARMED':p?.state||'IDLE';
+ $('av076Question').textContent=(a?.question_id||p?.question_id||'—').slice(-13);
+ $('av076Change').textContent=p?.state==='OBSERVED'?(p.pixel_change_bp/100).toFixed(2)+'%':'—';
+ const summary=Array.isArray(remote?.feedback_summary)?remote.feedback_summary:[];
+ $('av076Git').textContent=p?.question_id?(summary.find(x=>x.question_id===p.question_id)?.independent_observation_roots||0):0;
+ $('av076Readout').textContent=a?[
+ 'FROZEN QUESTION '+a.question_id,'ROM '+a.rom,'PRE-ACTION SCREEN '+a.context,
+ 'WORD '+a.word,'PROPOSED BUTTON '+a.button,
+ 'ARMED AT FRAME '+a.frame,'MISSING INDEPENDENT BENEFICIAL ROOTS '+a.missing_roots,
+ '','Waiting for the next completed action; any mismatched button or cartridge is rejected.',
+ 'No input is generated by this dashboard.'
+ ].join('\n'):p?[
+ 'CLOSED QUESTION '+(p.question_id||'NONE'),'STATE '+p.state,
+ 'BUTTON '+(p.button||'NONE'),'PIXEL CHANGE '+(p.pixel_change_bp===undefined?'UNMEASURED':(p.pixel_change_bp/100).toFixed(2)+'%'),
+ 'BENEFIT '+(p.benefit||'UNKNOWN'),
+ 'SEMANTIC UNCERTAINTY '+(p.semantic_gain||'NOT MEASURED'),
+ '',''+p.reason
+ ].join('\n'):'No question armed. A question can be armed only from a confirmed word and a Git-indexed candidate.';
+}
+async function captureAV076(){
+ if(!av076Armed||av076Busy||!Array.isArray(trials))return;
+ const a=av076Armed;
+ const t=trials.filter(x=>Number.isSafeInteger(Number(x.startFrame))&&Number(x.startFrame)>a.frame).sort((x,y)=>Number(x.startFrame)-Number(y.startFrame))[0];
+ if(!t)return;
+ av076Busy=true;
+ // A frozen question is consumed once, even on mismatch: no cherry-picking later observations.
+ av076Armed=null;
+ const feedback=window.JaneAV076?.close(a,{...t,startFrame:Number(t.startFrame),endFrame:Number(t.endFrame)});
+ av076Last=feedback||{state:'ABSTAIN',reason:'Feedback module unavailable.'};
+ try{
+  if(feedback?.state==='OBSERVED'){
+   const rootId=await root(t);
+   const rec=window.JaneAV076.event(feedback,rootId);
+   if(rec){
+    const id=rec.question_id+'|'+rec.source_root+'|'+rec.frame;
+    if(!savedIds.has(id)){
+     savedIds.add(id);queued.push({id,record:rec});$('staged').textContent=queued.length;renderQueue();
+    }else skippedDuplicates++;
+   }
+   say('Captured rooted pixel feedback. Semantic gain UNPROVEN; review the queued packet before publishing.');
+  }else say('Feedback withheld: '+(feedback?.reason||'unknown trial'),true);
+ }catch(e){say('Feedback could not be staged: '+e.message,true)}
+ finally{av076Busy=false;renderAV076()}
+}
+$('av076Arm').onclick=()=>{
+ const choice=av075Decision?.candidates?.find(c=>c.button===av075Decision.selected);
+ const word=String(latestRead?.reading||'').toUpperCase().replace(/\s+/g,'_');
+ const confirmed=latestRead?.status==='CONFIRMED'||latestRead?.state==='CONFIRMED'||latestRead?.confirmed===true;
+ const id='q-'+crypto.randomUUID();
+ const frozen=window.JaneAV076?.freeze({
+   state:av075Decision?.state,rom:latestScreen.rom,context:latestScreen.context,
+   word:confirmed?word:'UNKNOWN',button:av075Decision?.selected,frame:latestScreen.frame,
+   missing_roots:choice?.missing,question_id:id
+ });
+ if(frozen?.state!=='ARMED'){av076Last=frozen||{state:'ABSTAIN',reason:'No feedback policy loaded'};av076Armed=null;say(av076Last.reason,true);}
+ else{av076Armed=frozen;av076Last=null;say('Armed '+frozen.button+' question at NES frame '+frozen.frame+'; existing controller remains in charge.');}
+ renderAV076();
+};
+$('av076Cancel').onclick=()=>{av076Armed=null;av076Last={state:'CANCELLED',reason:'Manual cancellation; no observation or learning was recorded.'};renderAV076();say('Experiment observation cancelled.')};
+$('av076Evidence').onclick=()=>{setTab('memory');};
+
 async function refreshGit(){try{const response=await fetch('https://raw.githubusercontent.com/'+REPO+'/main/memory/pool/index.json?v='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error('GitHub memory index HTTP '+response.status);const data=await response.json();remote=data;$('poolCount').textContent=data.event_count??'0';$('assocCount').textContent=(data.associations||[]).length;$('gitSignal').textContent='GIT MEMORY ONLINE';
 $('gitIndex').textContent=JSON.stringify({schema:data.schema,events:data.event_count,latest_release:data.latest_release,policy:data.policy,associations:data.associations},null,2);
 $('associationRows').textContent=(data.associations||[]).map(a=>a.word+' → '+a.button+' ('+a.status+', '+a.beneficial_roots+' independent beneficial roots)').join('\n')||'None yet; observations alone do not establish beneficial word meaning.';
-showContinuity();evaluateReuse();planNextExperiment();say('Git memory refreshed: '+data.event_count+' immutable events.');}catch(e){$('gitSignal').textContent='GIT READ ERROR';say('Git read failed: '+e.message,true)}}
+showContinuity();evaluateReuse();planNextExperiment();renderAV076();say('Git memory refreshed: '+data.event_count+' immutable events.');}catch(e){$('gitSignal').textContent='GIT READ ERROR';say('Git read failed: '+e.message,true)}}
 $('reloadGit').onclick=refreshGit;
 $('connect').onclick=async()=>{const value=$('token').value.trim();if(!value){say('Paste a repository-scoped fine-grained token, or remain read-only.',true);return}
 try{token=value;const user=await gitFetch('https://api.github.com/user');$('token').value='';$('syncBadge').textContent='CONNECTED · '+user.login;say('Authenticated to GitHub as '+user.login+'. Token is in memory only.')}catch(e){token='';$('syncBadge').textContent='READ ONLY';$('token').value='';say('GitHub authentication failed: '+e.message,true)}};
@@ -387,6 +469,6 @@ $('sendQueue').onclick=async()=>{if(!token){say('Connect using a repository-scop
 const pending=[...queued];let pushed=0;for(const q of pending){try{const data=q.record;const bytes=JSON.stringify(data,null,2)+'\n';const hash=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(bytes));const name=Array.from(new Uint8Array(hash),x=>x.toString(16).padStart(2,'0')).join('').slice(0,24);const path='memory/inbox/bridge-'+name+'.json';await gitFetch(API+'/contents/'+path,{method:'PUT',content:true,body:JSON.stringify({message:'memory: submit reviewed Jane NES observation',content:b64Unicode(bytes),branch:'main'})});queued=queued.filter(x=>x!==q);pushed++;$('staged').textContent=queued.length;renderQueue();}catch(e){say('Published '+pushed+' packet(s); next item failed: '+e.message,true);return}}
 say('Published '+pushed+' reviewed event(s) into Git inbox. Wait for Memory Agent Action to ingest; refresh index after it finishes.');};
 $('game').addEventListener('load',()=>{game=null;setTimeout(live,800)});
-setInterval(live,1600);setInterval(refreshGit,30000);refreshGit();restoreSession();$('staged').textContent=queued.length;renderQueue();say('AV-075 restored '+queued.length+' reviewed record(s) locally. Load a ROM to continue observing.');
+setInterval(live,1600);setInterval(refreshGit,30000);refreshGit();restoreSession();$('staged').textContent=queued.length;renderQueue();say('AV-076 restored '+queued.length+' reviewed record(s) locally. Load a ROM to continue observing.');
 })();
 </script></body></html>
