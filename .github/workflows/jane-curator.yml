@@ -1,0 +1,51 @@
+name: Jane Memory Curator — AI Analyst
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '37 */6 * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'agent/jane_curator.py'
+      - 'tests/test_jane_curator.py'
+      - 'memory/pool/**'
+      - '.github/workflows/jane-curator.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: jane-curator-main
+  cancel-in-progress: false
+
+jobs:
+  curate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Test witness-aware curator
+        run: python3 -m unittest discover -s tests -p 'test_jane_curator.py' -v
+
+      - name: Collate immutable memory and optionally synthesize with AI
+        env:
+          JANE_AI_KEY: ${{ secrets.JANE_AI_KEY }}
+          JANE_AI_MODEL: ${{ vars.JANE_AI_MODEL || 'gpt-6' }}
+        run: python3 agent/jane_curator.py
+
+      - name: Commit derived public digest (never edit evidence)
+        shell: bash
+        run: |
+          git config user.name 'jane-memory-curator[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add memory/curation/current.json
+          if git diff --cached --quiet; then
+            echo 'Memory digest unchanged; no commit needed.'
+            exit 0
+          fi
+          git commit -m 'curation: update Jane evidence digest [skip ci]'
+          git push origin HEAD:main
