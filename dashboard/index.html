@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en" data-skin="mission">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JANE EMU / PLAY ↔ LEARN / GIT MEMORY BRIDGE</title>
+<style>
+:root{--bg:#061421;--panel:#0d2639;--edge:#2f6076;--text:#e8f8ff;--muted:#91b4c6;--accent:#72e8f8;--warm:#ffbc75;--button:#163f57;--radius:13px;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -20%,#25556f,var(--bg) 54%);color:var(--text);font:13px/1.55 system-ui,sans-serif}
+button,input,select{font:inherit}button{cursor:pointer;background:var(--button);border:1px solid var(--edge);border-radius:7px;color:var(--text);padding:9px 12px;font-weight:750}button:hover{filter:brightness(1.2)}button:disabled{opacity:.45;cursor:not-allowed}
+input,select{background:var(--bg);color:var(--text);border:1px solid var(--edge);padding:9px;border-radius:6px;min-width:0}
+a{color:var(--accent)}header{max-width:1850px;margin:0 auto;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--edge)}
+h1{font:900 clamp(20px,2.4vw,34px) ui-monospace,monospace;letter-spacing:-.04em;margin:0;color:var(--accent)}
+h2{font:900 14px ui-monospace,monospace;letter-spacing:.09em;margin:0 0 12px}
+h3{font:800 12px ui-monospace,monospace;letter-spacing:.07em;margin:14px 0 8px;color:var(--warm)}
+.small{color:var(--muted);font:11px/1.5 ui-monospace,monospace}.tag{color:var(--warm);font:800 10px ui-monospace,monospace;letter-spacing:.1em}
+main{max-width:1850px;margin:0 auto;padding:12px}
+.top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:stretch}
+.panel{min-width:0;background:linear-gradient(145deg,var(--panel),var(--bg));border:1px solid var(--edge);border-radius:var(--radius);padding:13px;box-shadow:0 9px 29px #0005}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+.kpi{padding:9px;border-radius:7px;border:1px solid var(--edge);background:#0003;min-width:0}
+.kpi b{font:900 20px ui-monospace,monospace;color:var(--warm);display:block;overflow-wrap:anywhere}
+.kpi small{font:9px ui-monospace,monospace;color:var(--muted)}
+.screen{height:min(62vh,590px);min-height:380px;position:relative;overflow:hidden;border:3px solid var(--edge);border-radius:9px;background:#02070d}
+iframe{width:100%;height:100%;border:0;display:block;background:#06101b}
+.screen .corner{position:absolute;pointer-events:none;right:8px;top:7px;background:#041523c9;color:var(--accent);border:1px solid var(--edge);border-radius:5px;padding:3px 8px;font:10px ui-monospace,monospace}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.row>*{min-width:0}.between{justify-content:space-between}
+.pill{border:1px solid var(--edge);padding:4px 9px;border-radius:50px;color:var(--accent);font:800 10px ui-monospace,monospace}
+.tabbar{display:flex;gap:5px;overflow:auto;margin-bottom:11px;padding-bottom:7px;border-bottom:1px solid var(--edge)}
+.tabbar button{white-space:nowrap;font-size:11px;padding:8px 11px}
+.tabbar button[aria-selected=true]{color:#081820;background:var(--accent);border-color:var(--accent)}
+.tabpage[hidden]{display:none!important}.tabpage{height:min(60vh,570px);min-height:430px;overflow:auto;scrollbar-width:thin}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;color:#bce4f1;font:11px/1.6 ui-monospace,monospace;background:#041420;border:1px solid var(--edge);border-radius:7px;padding:11px}
+.note{border-left:3px solid var(--warm);padding:8px 10px;background:#ffc77712;font:11px/1.55 ui-monospace,monospace;color:var(--muted);margin:10px 0}
+.field{display:grid;gap:5px;margin:10px 0}.field label{color:var(--muted);font:10px ui-monospace,monospace}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.toolbar button{font-size:11px}
+#statusLine{min-height:24px;color:var(--muted)}
+.trial{width:100%;text-align:left;display:flex;justify-content:space-between;gap:7px;margin:4px 0;padding:8px}
+.trial[aria-pressed=true]{outline:2px solid var(--accent)}
+.trial span{color:var(--muted);font:10px ui-monospace,monospace}
+#queueItems{display:grid;gap:5px}.queued{border:1px solid var(--edge);border-radius:7px;padding:8px;background:#041624;font:11px/1.5 ui-monospace,monospace}
+.hangar{margin-top:12px}.skinlist{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:7px;margin-top:10px}.skin{padding:8px 4px!important;text-align:center;min-height:78px;display:grid;align-content:center;gap:5px;font-size:9px}.swatch{height:27px;border-radius:4px;background:linear-gradient(120deg,var(--sw1),var(--sw2));border:1px solid #fff6}
+.story{margin-top:12px}.story img{display:block;max-width:100%;max-height:350px;object-fit:contain;margin:auto;border-radius:8px;border:1px solid var(--edge)}
+.story p{margin-bottom:0}.collapsed .skinlist{display:none}
+html[data-skin="arcade"]{--bg:#1b0c31;--panel:#341851;--edge:#9e5ec5;--text:#fff1ff;--muted:#e7b6ed;--accent:#ff7bdb;--warm:#75ecfd;--button:#69377d}
+html[data-skin="field"]{--bg:#e9e5d7;--panel:#fbf3e0;--edge:#ad926d;--text:#293b42;--muted:#746751;--accent:#176f83;--warm:#a26329;--button:#d9c4a2;color-scheme:light}
+html[data-skin="phosphor"]{--bg:#04150f;--panel:#092519;--edge:#3c8d55;--text:#c4ffbc;--muted:#83bd83;--accent:#a3ff6e;--warm:#f0fca7;--button:#19472a}
+html[data-skin="copper"]{--bg:#1a100e;--panel:#3a281c;--edge:#a17a50;--text:#fff0d3;--muted:#cdb195;--accent:#ffc178;--warm:#7fe6d5;--button:#62402b}
+html[data-skin="blueprint"]{--bg:#071a3a;--panel:#10355d;--edge:#3789b6;--text:#ddf6ff;--muted:#8bc7e6;--accent:#80dfff;--warm:#fff1a2;--button:#144d81}
+html[data-skin="glacier"]{--bg:#deedf4;--panel:#f3fcff;--edge:#80b8c9;--text:#15364a;--muted:#617e90;--accent:#077a9d;--warm:#bb6e32;--button:#c2e5f1;color-scheme:light}
+html[data-skin="solar"]{--bg:#281819;--panel:#513124;--edge:#bf7436;--text:#fff2d6;--muted:#e1baa0;--accent:#ffd36b;--warm:#fca163;--button:#784330}
+html[data-skin="violet"]{--bg:#130d2c;--panel:#2b1b4e;--edge:#7f62b7;--text:#f4eafd;--muted:#bea4e6;--accent:#cfb0ff;--warm:#85f9ff;--button:#493272}
+html[data-skin="mono"]{--bg:#090909;--panel:#252525;--edge:#757575;--text:#fafafa;--muted:#bbb;--accent:#ededed;--warm:#fff;--button:#3c3c3c}
+@media(max-width:1150px){.skinlist{grid-template-columns:repeat(5,minmax(0,1fr))}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:880px){.top{grid-template-columns:1fr}.screen{height:56vh;min-height:370px}.tabpage{height:auto;min-height:390px;max-height:65vh}}
+@media(max-width:520px){.skinlist{grid-template-columns:repeat(2,minmax(0,1fr))}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}header{padding:10px}main{padding:7px}}
+</style></head>
+<body>
+<header><div><span class="tag">ROOT 0 · EVIDENCE-CARRYING LEARNING BRIDGE</span><h1>JANE EMU / PLAY ↔ LEARN</h1><div class="small">AV-072 / LIVE NES · HUMAN EVIDENCE · GITHUB IMMUTABLE MEMORY</div></div><div class="row"><span class="pill" id="gameSignal">GAME CONNECTING</span><span class="pill" id="gitSignal">GIT CONNECTING</span><a href="https://github.com/DavidWise01/jane-emu" target="_blank" rel="noopener">GitHub Repository</a></div></header>
+<main>
+<div class="top">
+<section class="panel" aria-label="Jane playable NES left 50 percent">
+<div class="row between"><h2>01 / JANE PLAYING · NES PLAYER 1</h2><a href="../releases/Janes_Perception_v71_Mission_Control_Embedded_JPG_Story_NES.html" target="_blank" rel="noopener">Open full arcade</a></div>
+<div class="screen"><iframe id="game" title="Live Jane NES player" src="../releases/Janes_Perception_v71_Mission_Control_Embedded_JPG_Story_NES.html"></iframe><span class="corner">256 × 240 · LIVE GAME</span></div>
+<div class="kpis"><div class="kpi"><b id="frame">—</b><small>NES FRAME</small></div><div class="kpi"><b id="action">—</b><small>PLAYER 1 ACTION</small></div><div class="kpi"><b id="trials">—</b><small>OBSERVED TRIALS</small></div><div class="kpi"><b id="reading">UNKNOWN</b><small>FAST GLYPH READING</small></div></div>
+<div class="row between"><span class="small" id="rom">Load a .nes file inside the left player</span><span class="small" id="boot">BOOT: UNKNOWN</span></div>
+<div class="note">The NES emulator runs inside the left screen. Its data is read directly only when both panes are served from the same GitHub Pages origin; ROM data stays in your browser and is never sent to GitHub.</div>
+</section>
+<section class="panel" aria-label="GitHub learning and memory on right 50 percent">
+<div class="row between"><h2>02 / GITHUB LEARNING · INDEPENDENT WITNESSES</h2><span class="pill" id="syncBadge">READ ONLY</span></div>
+<div class="tabbar" role="tablist">
+<button role="tab" data-tab="live" aria-selected="true">LIVE</button>
+<button role="tab" data-tab="evidence" aria-selected="false">EVIDENCE</button>
+<button role="tab" data-tab="memory" aria-selected="false">GIT MEMORY</button>
+<button role="tab" data-tab="sync" aria-selected="false">SYNC / PUBLISH</button>
+</div>
+<div class="tabpage" data-page="live">
+<div class="kpis"><div class="kpi"><b id="poolCount">—</b><small>IMMUTABLE EVENTS ON GIT</small></div><div class="kpi"><b id="assocCount">—</b><small>WORD/ACTION ASSOCIATIONS</small></div><div class="kpi"><b id="staged">0</b><small>LOCAL EVIDENCE QUEUE</small></div><div class="kpi"><b id="rootCount">—</b><small>DISTINCT ROOTS IN RECENT TRIALS</small></div></div>
+<h3>PLAY → OBSERVE → LABEL → GIT → INDEX</h3>
+<pre id="liveLog">Awaiting NES frame data. Load a compatible .nes cartridge in the left player.</pre>
+<div class="row"><button id="openEvidence">Review a trial</button><button id="reloadGit">Refresh Git memory</button></div>
+<h3>Interpretation boundary</h3><div class="note">Screen motion is an observation, not a reward. Sending START is not proof of reading START. Three observations from one saved-state ancestry are still one witness root.</div>
+</div>
+<div class="tabpage" data-page="evidence" hidden>
+<div class="small">Completed trials from the live emulator. Select one, enter a human-observed outcome, and add it to the review queue. No trial is automatically labeled beneficial.</div>
+<div id="trialList" style="margin:10px 0;max-height:170px;overflow:auto"></div>
+<div class="field"><label for="word">WORD / HUMAN TRANSCRIPTION (optional)</label><input id="word" maxlength="60" autocomplete="off" placeholder="e.g. PRESS_START · blank if unread"></div>
+<div class="row"><div class="field" style="flex:1"><label for="label">HUMAN OUTCOME LABEL</label><select id="label"><option value="unknown">Unknown</option><option value="beneficial">Beneficial</option><option value="harmful">Harmful</option><option value="neutral">Neutral</option></select></div><div class="field" style="flex:1"><label for="interpret">EVIDENCE TYPE</label><select id="interpret"><option value="observation">Raw observation only</option><option value="outcome_label">Human word/action outcome label</option></select></div></div>
+<div class="toolbar"><button id="queueTrial">Add reviewed evidence to queue</button><button id="downloadQueue">Download queue JSON</button></div>
+<div class="note">For a word/action label, a human must explicitly provide the visible word. It is marked as human transcription, not Jane-confirmed reading. The Git agent will count independent roots conservatively.</div>
+</div>
+<div class="tabpage" data-page="memory" hidden>
+<div class="row between"><span class="small">GitHub public memory/pool/index.json</span><a href="https://github.com/DavidWise01/jane-emu/tree/main/memory" target="_blank" rel="noopener">Browse memory</a></div>
+<pre id="gitIndex">Fetching the latest index from GitHub…</pre>
+<h3>Supported associations</h3><div id="associationRows" class="small">None verified.</div>
+</div>
+<div class="tabpage" data-page="sync" hidden>
+<p class="small">GitHub memory is public. Reading the index needs no credentials. Publishing requires an explicitly supplied fine-grained GitHub token with <b>Contents: Read and write</b> scoped only to <b>DavidWise01/jane-emu</b>; it is held in memory for this browser tab only, never saved to storage or included in evidence.</p>
+<div class="field"><label for="token">FINE-GRAINED GITHUB TOKEN (SESSION ONLY)</label><input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="Paste token to publish evidence; leave blank for read-only"></div>
+<div class="toolbar"><button id="connect">Connect this session</button><button id="disconnect">Disconnect</button><button id="sendQueue">Publish reviewed queue to inbox</button></div>
+<label class="row" style="margin:10px 0"><input id="autoCapture" type="checkbox"> Auto-capture completed trials as <b>unlabeled observations</b> (local queue only)</label>
+<div class="note">Each queued record is published as a new JSON file in memory/inbox. GitHub Actions ingests it into content-addressed memory/pool/events and rebuilds the index. New evidence is public; do not submit proprietary ROMs or private information. GitHub may take time to process the push.</div>
+<h3>Review queue</h3><div id="queueItems"></div><div class="toolbar"><button id="clearQueue">Clear local queue</button><a href="https://github.com/DavidWise01/jane-emu/actions/workflows/jane-memory.yml" target="_blank" rel="noopener">Memory Agent Actions</a></div>
+</div>
+<div id="statusLine" class="small" role="status" aria-live="polite">Connecting…</div>
+</section>
+</div>
+<section class="panel hangar" id="hangar"><div class="row between"><h2>03 / SKIN HANGAR · 10 CABINET DESIGNS</h2><button id="fold">Hide skins</button></div><div class="skinlist" id="skinlist"></div></section>
+<section class="panel story"><div class="row between"><h2>STORY / AV-072 · PLAY ↔ LEARN ↔ GIT</h2><span class="tag">CONCEPT ILLUSTRATION</span></div><div class="small">A visual chapter of Jane's NES gameplay feeding reviewed evidence into persistent, independently rooted GitHub memory.</div><div id="storyImage"><p class="small">Story artwork is embedded in the downloadable offline edition; the playable release already contains an embedded JPG illustration.</p></div></section>
+</main>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);
+const REPO='DavidWise01/jane-emu', API='https://api.github.com/repos/'+REPO;
+let game=null, selection=null, trials=[], queued=[], savedIds=new Set(),token='',remote=null,autoSeen=new Set(),bootShown='',lastReport='',statusChanged=0;
+const skins=[['mission','Mission Control','#122c43','#55c9e8'],['arcade','Pixel Arcade','#3e155c','#fa69db'],['field','Field Laboratory','#f3ecd8','#bb8557'],['phosphor','Phosphor Terminal','#082719','#a5f982'],['copper','Copper Foundry','#3f2517','#ffc079'],['blueprint','Blueprint Station','#0c345e','#90e2ff'],['glacier','Polar Glass','#edfafd','#79ccd9'],['solar','Solar Observatory','#4b2d19','#ffc153'],['violet','Violet Reactor','#24143d','#c49eff'],['mono','Monochrome','#202020','#e0e0e0']];
+function say(text,error=false){$('statusLine').textContent=(error?'ERROR · ':'')+text;$('statusLine').style.color=error?'#ff9999':'var(--muted)'}
+function setTab(t){document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',String(x.dataset.tab===t)));document.querySelectorAll('[data-page]').forEach(x=>x.hidden=x.dataset.page!==t)}
+document.querySelectorAll('[data-tab]').forEach(x=>x.onclick=()=>setTab(x.dataset.tab));
+$('openEvidence').onclick=()=>setTab('evidence');
+const list=$('skinlist');skins.forEach(([id,name,a,b])=>{const btn=document.createElement('button');btn.className='skin';btn.style.setProperty('--sw1',a);btn.style.setProperty('--sw2',b);btn.innerHTML='<span class="swatch"></span><span>'+name+'</span>';btn.onclick=()=>{document.documentElement.dataset.skin=id;try{localStorage.setItem('jane.bridge.skin',id)}catch(e){};};list.appendChild(btn)});
+try{const saved=localStorage.getItem('jane.bridge.skin');if(skins.some(x=>x[0]===saved))document.documentElement.dataset.skin=saved;}catch(e){}
+$('fold').onclick=()=>{const hidden=$('hangar').classList.toggle('collapsed');$('fold').textContent=hidden?'Show skins':'Hide skins'};
+function safe(getter,fall=null){try{return getter()??fall}catch(e){return fall}}
+function sameOrigin(){try{return game&&game.location.origin===location.origin}catch(e){return false}}
+function gameWindow(){const f=$('game');const w=f.contentWindow;return w&&safe(()=>w.JANE_PERCEPTION)?w:null}
+function cropGame(){const f=$('game');const w=f.contentWindow;if(!w)return;try{const d=w.document;if(d.getElementById('jane-bridge-crop'))return;const css=d.createElement('style');css.id='jane-bridge-crop';css.textContent='body{background:#040e16!important}.app{padding:4px!important}.header,.footer,#jp59ThemePicker,.main>section.analysiscol,.main>section:not(:first-child),#jane-v71-story-plate,.jp63-bridge{display:none!important}.main{display:block!important;margin:0!important;max-width:none!important}.main>section:first-child{width:100%!important;display:block!important;max-width:none!important}.main>section:first-child .inner{height:auto!important;padding:7px!important}.main>section:first-child .gamebox{max-width:100%!important;margin:4px auto!important}.main>section:first-child .gamebox canvas{max-height:none!important;width:100%!important;height:auto!important}.main>section:first-child .metrics{grid-template-columns:repeat(4,1fr)}';d.head.appendChild(css);}catch(e){}}
+function identity(trial){return String(trial.rom||'')+'/'+String(trial.id||'')+'/'+String(trial.startFrame||0)}
+function rootInput(t){return String(t.rom||'')+'|'+String(t.preHash||'unknown');}
+async function root(t){const bytes=new TextEncoder().encode(rootInput(t));const hash=await crypto.subtle.digest('SHA-256',bytes);return 'state-'+Array.from(new Uint8Array(hash),x=>x.toString(16).padStart(2,'0')).join('').slice(0,48)}
+function live(){const g=gameWindow();if(!g){$('gameSignal').textContent='GAME ISOLATED';$('liveLog').textContent='Live frame telemetry requires the same-origin playable release on GitHub Pages. The NES frame remains playable even if telemetry is unavailable.';return}
+game=g;cropGame();
+const stat=safe(()=>g.JANE_PERCEPTION.status(),{}), data=safe(()=>g.JANE_PERCEPTION.export(),{}),boot=safe(()=>g.JANE_BOOT_V57?.status(),{}),read=safe(()=>g.JANE_FAST_READ_V58?.status(),{});
+trials=Array.isArray(data.trials)?data.trials.slice(-40):[];
+$('frame').textContent=String(stat.frame??'—');$('action').textContent=stat.flux?.lastAction||'—';$('trials').textContent=String(stat.trials??trials.length);$('reading').textContent=String(read.reading||'UNKNOWN').slice(0,14);
+$('rom').textContent='CARTRIDGE: '+String(stat.rom||'NO ROM').slice(0,55);$('boot').textContent='BOOT: '+(boot.verified?'TRANSITION VERIFIED':String(boot.phase||'UNVERIFIED'));
+$('gameSignal').textContent=stat.running?'GAME RUNNING':'GAME CONNECTED';
+const roots=new Set(trials.filter(t=>t.preHash).map(t=>rootInput(t)));
+$('rootCount').textContent=roots.size;
+$('liveLog').textContent='FRAME '+(stat.frame||0)+' / PLAYER 1 '+(stat.flux?.lastAction||'IDLE')+'\nTRIALS '+trials.length+' / ROOTS '+roots.size+'\nREADING '+(read.reading||'UNKNOWN')+'\nBOOT '+(boot.verified?'TRANSITION OBSERVED':'NOT VERIFIED')+'\n\n'+trials.slice(-6).reverse().map(t=>'#'+t.id+' '+t.button+' · Δ '+(100*(Number(t.delta)||0)).toFixed(2)+'% · '+(t.label||'unknown')).join('\n');
+const signature=trials.map(identity).join('|');if(signature!==lastReport){lastReport=signature;renderTrials()}
+if($('autoCapture').checked){for(const t of trials){const id=identity(t);if(!autoSeen.has(id)){autoSeen.add(id);if(t.preHash&&t.rom)queueFromTrial(t,'observation','unknown','',true)}}}
+}
+function renderTrials(){const box=$('trialList');box.textContent='';if(!trials.length){box.textContent='No completed actions yet.';return}
+trials.slice(-16).reverse().forEach(t=>{const b=document.createElement('button');b.className='trial';b.setAttribute('aria-pressed',String(selection&&identity(selection)===identity(t)));const name=document.createElement('b');name.textContent='#'+t.id+' '+t.button;const meta=document.createElement('span');meta.textContent=(100*(Number(t.delta)||0)).toFixed(1)+'% change · '+(t.label||'unknown');b.append(name,meta);b.onclick=()=>{selection=t;renderTrials();say('Selected trial #'+t.id+'; review before submitting.')};box.appendChild(b)})}
+function tidyWord(text){return String(text||'').trim().toUpperCase().replace(/\s+/g,'_').replace(/[^A-Z0-9_.:/-]/g,'').slice(0,60)}
+function sanitizeNote(str){return String(str||'').slice(0,500).replace(/[^\x20-\x7E]/g,'')}
+async function queueFromTrial(t,kind,outcome,word,auto=false){
+try{if(!t||!t.rom||!t.preHash||!t.button)throw Error('Missing originating ROM, pre-action fingerprint, or button.');
+const rootName=await root(t);
+const record={kind,rom:String(t.rom).replace(/[^a-zA-Z0-9_.:/-]/g,'').slice(0,128),source_root:rootName,source:kind==='outcome_label'?'human-labeled-nes-trial':'nes-action-observation',frame:Number(t.endFrame)||0,button:String(t.button).split('+')[0].toUpperCase(),note:sanitizeNote('trial '+t.id+'; pixel delta '+String(t.delta)+'; input '+t.button+'; observation only unless human labeled')};
+if(!['START','SELECT','UP','DOWN','LEFT','RIGHT','A','B','NONE'].includes(record.button)){record.button='NONE';record.note=sanitizeNote(record.note+'; combined input recorded separately');}
+if(kind==='outcome_label'){if(!word)throw Error('A human-transcribed word is required for a word/action label.');record.word=tidyWord(word);record.outcome=outcome;record.note=sanitizeNote('human transcription; '+'trial '+t.id+'; delta '+t.delta+'; button '+t.button+'. Reading not independently verified.');}
+const id=identity(t)+'|'+kind+'|'+(record.word||'')+'|'+(record.outcome||'');if(savedIds.has(id))return;
+savedIds.add(id);queued.push({id,record});$('staged').textContent=queued.length;renderQueue();if(!auto)say('Reviewed evidence added locally; publish to GitHub only when ready.');
+}catch(e){if(!auto)say(e.message,true)}}
+$('queueTrial').onclick=async()=>{if(!selection){say('Select a completed trial first.',true);return}await queueFromTrial(selection,$('interpret').value,$('label').value,$('word').value)};
+function renderQueue(){const holder=$('queueItems');holder.textContent='';queued.forEach((q,i)=>{const div=document.createElement('div');div.className='queued';div.textContent=(i+1)+'. '+q.record.kind+' · '+q.record.button+' · '+(q.record.word||'unread')+' · '+q.record.source_root.slice(0,18);holder.appendChild(div)});if(!queued.length)holder.textContent='No queued evidence.'}
+function download(text,filename){const a=document.createElement('a'),u=URL.createObjectURL(new Blob([text],{type:'application/json'}));a.href=u;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(u),3000)}
+$('downloadQueue').onclick=()=>{download(JSON.stringify(queued.map(x=>x.record),null,2),'jane-reviewed-evidence.json');say('Downloaded local evidence; nothing was uploaded.')};
+$('clearQueue').onclick=()=>{queued=[];savedIds.clear();$('staged').textContent='0';renderQueue();say('Local queue cleared.')};
+function b64Unicode(str){const u=new TextEncoder().encode(str);let binary='';for(let i=0;i<u.length;i+=8192)binary+=String.fromCharCode(...u.slice(i,i+8192));return btoa(binary)}
+async function gitFetch(endpoint,options={}){const headers={'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};if(token)headers.Authorization='Bearer '+token;if(options.content)headers['Content-Type']='application/json';const r=await fetch(endpoint,{...options,headers:{...headers,...options.headers},cache:'no-store'});const body=await r.json().catch(()=>({}));if(!r.ok)throw Error((body.message||r.statusText)+' ['+r.status+']');return body}
+async function refreshGit(){try{const response=await fetch('https://raw.githubusercontent.com/'+REPO+'/main/memory/pool/index.json?v='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error('GitHub memory index HTTP '+response.status);const data=await response.json();remote=data;$('poolCount').textContent=data.event_count??'0';$('assocCount').textContent=(data.associations||[]).length;$('gitSignal').textContent='GIT MEMORY ONLINE';
+$('gitIndex').textContent=JSON.stringify({schema:data.schema,events:data.event_count,latest_release:data.latest_release,policy:data.policy,associations:data.associations},null,2);
+$('associationRows').textContent=(data.associations||[]).map(a=>a.word+' → '+a.button+' ('+a.status+', '+a.beneficial_roots+' independent beneficial roots)').join('\n')||'None yet; observations alone do not establish beneficial word meaning.';
+say('Git memory refreshed: '+data.event_count+' immutable events.');}catch(e){$('gitSignal').textContent='GIT READ ERROR';say('Git read failed: '+e.message,true)}}
+$('reloadGit').onclick=refreshGit;
+$('connect').onclick=async()=>{const value=$('token').value.trim();if(!value){say('Paste a repository-scoped fine-grained token, or remain read-only.',true);return}
+try{token=value;const user=await gitFetch('https://api.github.com/user');$('token').value='';$('syncBadge').textContent='CONNECTED · '+user.login;say('Authenticated to GitHub as '+user.login+'. Token is in memory only.')}catch(e){token='';$('syncBadge').textContent='READ ONLY';$('token').value='';say('GitHub authentication failed: '+e.message,true)}};
+$('disconnect').onclick=()=>{token='';$('token').value='';$('syncBadge').textContent='READ ONLY';say('Disconnected; no credentials retained.')};
+$('sendQueue').onclick=async()=>{if(!token){say('Connect using a repository-scoped token first.',true);setTab('sync');return}if(!queued.length){say('Review and queue evidence before publishing.',true);return}
+const pending=[...queued];let pushed=0;for(const q of pending){try{const data=q.record;const bytes=JSON.stringify(data,null,2)+'\n';const hash=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(bytes));const name=Array.from(new Uint8Array(hash),x=>x.toString(16).padStart(2,'0')).join('').slice(0,24);const path='memory/inbox/bridge-'+name+'.json';await gitFetch(API+'/contents/'+path,{method:'PUT',content:true,body:JSON.stringify({message:'memory: submit reviewed Jane NES observation',content:b64Unicode(bytes),branch:'main'})});queued=queued.filter(x=>x!==q);pushed++;$('staged').textContent=queued.length;renderQueue();}catch(e){say('Published '+pushed+' packet(s); next item failed: '+e.message,true);return}}
+say('Published '+pushed+' reviewed event(s) into Git inbox. Wait for Memory Agent Action to ingest; refresh index after it finishes.');};
+$('game').addEventListener('load',()=>{game=null;setTimeout(live,800)});
+setInterval(live,1600);setInterval(refreshGit,30000);refreshGit();renderQueue();say('Dashboard ready. Load a ROM on the left, review evidence on the right.');
+})();
+</script></body></html>
