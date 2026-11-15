@@ -1514,6 +1514,12 @@ var I13_IS_BETA_END   = 256;  // 1.0 in Q8
 var I13_IS_BETA_STEPS = 50000; // full anneal over 50k replay steps
 var i13ISBeta = I13_IS_BETA_START;  // current β (Q8)
 var i13ISSteps = 0;            // replay steps taken (for β anneal)
+// ── BUILD 13: PRIORITY DECAY ──
+// Every I13_PD_EVERY replay steps, all stored priorities decay by factor
+// I13_PD_FACTOR/256. Prevents stale surprises hogging replay bandwidth.
+// td_new = max(1, (td * factor) >> 8). Floor of 1 keeps entry alive.
+var I13_PD_EVERY = 64;    // decay sweep every 64 replay steps
+var I13_PD_FACTOR = 240;  // 240/256 ≈ 0.9375 — ~6.25% decay per sweep
 
 // ── ACTION MAPPING ─────────────────────────────────────────
 // i13 action index → NES pad bitmask
@@ -1805,7 +1811,9 @@ var api = {
   get isSteps() { return i13ISSteps; },
   IS_BETA_START: I13_IS_BETA_START,
   IS_BETA_END: I13_IS_BETA_END,
-  IS_BETA_STEPS: I13_IS_BETA_STEPS
+  IS_BETA_STEPS: I13_IS_BETA_STEPS,
+  PD_EVERY: I13_PD_EVERY,
+  PD_FACTOR: I13_PD_FACTOR
 };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.I13BRAIN = api;
@@ -2791,6 +2799,17 @@ var frames=0;function one(){var pad=human;if(agentOn)pad=blind?agent.step(zeros,
             i13ISSteps++;
             if(i13ISBeta<I13_IS_BETA_END){
               i13ISBeta=I13_IS_BETA_START+(((I13_IS_BETA_END-I13_IS_BETA_START)*Math.min(i13ISSteps,I13_IS_BETA_STEPS)/I13_IS_BETA_STEPS)|0);
+            }
+            /* ── BUILD 13: PRIORITY DECAY — stale surprises drain ── */
+            if(i13ISSteps%I13_PD_EVERY===0&&i13PER.length>0){
+              var pdNewTotal=0;
+              for(var pd=0;pd<i13PER.length;pd++){
+                var pdOld=i13PER[pd].td;
+                var pdNew=Math.max(1,(pdOld*I13_PD_FACTOR+128)>>8); /* round, floor 1 */
+                i13PER[pd].td=pdNew;
+                pdNewTotal+=pdNew;
+              }
+              i13PERTotal=pdNewTotal;
             }
           }
           /* also feed old cnet replay buffers (backward compat with opponent bank) */
