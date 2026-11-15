@@ -40,3 +40,11 @@ You can also run **Actions → Jane Memory Agent — Evidence Pool → Run workf
 ## Causality and ancestry
 
 A saved-state fork and each of its replay branches share one ancestry. A GitHub file and its public-site mirror share one ancestry. Source independence is checked by `source_root`, not by number of files or URL appearances. Harmful or contradictory labels contest confidence; absence of evidence means abstain.
+
+## AV-074: Verified Memory Reuse
+
+Each newly submitted `outcome_label` may include `context`, the **exact pre-action screen fingerprint** associated with the human-labeled trial (a safe token of 1–128 characters). The agent groups word/action evidence by `rom`, `context`, `word` and `button` and counts distinct `source_root` values, not repeated forks. It adds `context_bound` to the derived index. Legacy records without `context` remain visible, but they are not eligible for live recall.
+
+The dashboard's **MEMORY REUSE** tab is observation-only: it requires an exact current cartridge and context match, a confirmed recognized word, at least three distinct beneficial roots and zero contradictory/harmful roots. Even when every gate passes, the dashboard displays an evidence-backed candidate; **it never presses a controller button from Git memory**. If a field cannot be measured, the result is **ABSTAIN**. Current screen hashes and confirmed word status are queried only from an accessible same-origin NES player.
+
+This protects the distinction between historical evidence and new independent trials. Pixel change alone is not a beneficial outcome, and GitHub memory isn't a source of independently verified gameplay understanding.
