@@ -15,7 +15,7 @@ POOL = ROOT / "memory" / "pool"
 EVENTS = POOL / "events"
 INBOX = ROOT / "memory" / "inbox"
 SCHEMA = "jane.evidence.v1"
-KINDS = {"observation", "outcome_label", "checkpoint"}
+KINDS = {"observation", "outcome_label", "checkpoint", "experiment_feedback"}
 BUTTONS = {"START", "SELECT", "UP", "DOWN", "LEFT", "RIGHT", "A", "B", "NONE"}
 OUTCOMES = {"beneficial", "harmful", "neutral", "unknown"}
 SAFE = re.compile(r"^[a-zA-Z0-9_.:/-]{1,128}$")
@@ -42,7 +42,7 @@ def validate(raw: object) -> dict:
         raise ValueError("Event must be an object")
     if len(canonical(raw)) > 16000:
         raise ValueError("Event exceeds 16 KB")
-    allowed = {"kind", "rom", "source_root", "source", "word", "button", "outcome", "frame", "note", "recorded_at", "context"}
+    allowed = {"kind", "rom", "source_root", "source", "word", "button", "outcome", "frame", "note", "recorded_at", "context", "question_id", "pixel_change_bp", "status"}
     if set(raw) - allowed:
         raise ValueError("Unexpected event fields")
     kind = raw.get("kind")
@@ -53,6 +53,24 @@ def validate(raw: object) -> dict:
            "source": token(raw.get("source"), "source", True)}
     if raw.get("context") is not None:
         doc["context"] = token(raw["context"], "context", True)
+    if kind == "experiment_feedback":
+        doc["question_id"] = token(raw.get("question_id"), "question_id", True)
+        doc["button"] = token(raw.get("button"), "button", True)
+        if doc["button"] not in BUTTONS or doc["button"] == "NONE":
+            raise ValueError("Invalid experimental button")
+        if "context" not in doc:
+            raise ValueError("Experimental feedback requires frozen screen context")
+        if raw.get("status") != "OBSERVED_UNLABELED":
+            raise ValueError("Feedback must remain unlabeled")
+        doc["status"] = "OBSERVED_UNLABELED"
+        delta = raw.get("pixel_change_bp")
+        if isinstance(delta, bool) or not isinstance(delta, int) or not (0 <= delta <= 10000):
+            raise ValueError("pixel_change_bp must be integer from 0 to 10000")
+        doc["pixel_change_bp"] = delta
+        if raw.get("outcome") is not None:
+            raise ValueError("Experimental feedback cannot assert an outcome label")
+        if raw.get("word") is not None:
+            doc["word"] = token(raw.get("word"), "word")
     if kind == "outcome_label":
         doc["word"] = token(raw.get("word"), "word", True)
         doc["button"] = token(raw.get("button"), "button", True)
@@ -125,6 +143,19 @@ def rebuild_index() -> dict:
     for rec in records:
         if rec.get("kind") == "outcome_label":
             evidence[(rec["rom"], rec["word"], rec["button"], rec.get("context", "UNSPECIFIED"))][rec["source_root"]].append(rec)
+    # A pixel-response record is never a beneficial-outcome witness.
+    feedback = defaultdict(lambda: defaultdict(list))
+    for rec in records:
+        if rec.get("kind") == "experiment_feedback":
+            feedback[(rec["rom"], rec["question_id"], rec["context"], rec["button"])][rec["source_root"]].append(rec)
+    feedback_summary = []
+    for (rom, question_id, context, button), roots in sorted(feedback.items()):
+        feedback_summary.append({
+            "rom": rom, "question_id": question_id, "context": context, "button": button,
+            "independent_observation_roots": len(roots),
+            "observations": sum(len(events) for events in roots.values()),
+            "outcome": "UNLABELED", "semantic_gain": "UNPROVEN"
+        })
     associations = []
     for (rom, word, button, context), roots in sorted(evidence.items()):
         # One ancestry, one vote. Contradiction inside a root is not corroboration.
@@ -144,6 +175,7 @@ def rebuild_index() -> dict:
                              "other_roots": unresolved, "status": state})
     index = {"schema": SCHEMA, "event_count": len(records),
              "event_ids": [e["id"] for e in records],
+             "feedback_summary": feedback_summary,
              "latest_release": next((r for r in reversed(records) if r["kind"] == "release"), None),
              "associations": associations,
              "policy": "No unverified word reading, gameplay benefit, or independent witnesses may be inferred."}
