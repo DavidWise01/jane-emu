@@ -31,3 +31,11 @@ The standalone AV-073 edition includes a new JPEG visual story embedded in its H
 One starting NES state is one witness root even when multiple forks are produced. Pixel changes are observations, not rewards. A START press is not proof of reading an instruction. Unknown words remain unknown. Do not redistribute cartridge ROMs without rights.
 
 Each JPEG story is a conceptual illustration rather than experimental proof.
+
+## The Wizard · Three-Player NES Arena
+
+Play at [Wizard Arena](./dashboard/arena.html) or [Play ↔ Learn dashboard](./dashboard/index.html). The arena provides **three separate NES emulator instances** using one locally selected ROM file, with independent per-profile memory namespace. The players are **Jane (FAST, every frame)**, **Toph (CAREFUL, every four frames)** and **Patricia (BALANCED, every two frames)**. These are reaction profiles of the same experimental controller, **not independently trained personalities** and not a fictional native NES controller port 3. Cartridge bytes remain in the browser.
+
+A master **0–100% speaker-volume slider**, plus mute/unmute, controls Jane's audible APU, with Toph and Patricia muted to prevent three soundtracks mixing. The three machines still emulate audio for their own sensors. Each cabinet displays frames, observed actions and scene counts. Those are not game victory scores; enter the actual visible game scores and click **Finish / Judge** to declare the winner. This avoids inventing game objectives from pixel motion.
+
+The main [Play ↔ Learn Git dashboard](./dashboard/index.html) also exposes a volume slider and a link to the arena. GitHub Pages uses the Pages Actions workflow and tests `tests/test_wizard_arena.cjs` alongside learning policy tests.
