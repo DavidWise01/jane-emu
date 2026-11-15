@@ -1,0 +1,29 @@
+{
+  "ai": {
+    "commentary": null,
+    "model": null,
+    "source_ids": [],
+    "state": "NOT_CONFIGURED"
+  },
+  "associations": [],
+  "distinct_source_root_ids": 1,
+  "kind_counts": {
+    "release": 1
+  },
+  "limits": [
+    "A repository mirror is not an independent witness",
+    "Pixel motion is not an outcome label",
+    "No model summary may modify immutable evidence or authorize controller input",
+    "All memory here is public; never upload ROMs or secrets"
+  ],
+  "next_question": null,
+  "pool_event_count": 1,
+  "pool_event_ids": [
+    "fe110c62f1af58cc6fee747d378ed2a3d848b3dcdb603f913ae350cf9fc50923"
+  ],
+  "question_gaps": [],
+  "schema": "jane.memory-curation.v1",
+  "source": "DavidWise01/jane-emu",
+  "source_ancestry": "github_and_pages_are_one_owned_root",
+  "status": "INSUFFICIENT_LEARNING_EVIDENCE"
+}
