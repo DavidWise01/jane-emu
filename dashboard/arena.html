@@ -105,7 +105,7 @@ async function init(){
   releaseHTML=await res.text();
   for(const p of profiles){
    const f=$(p.id+'Frame');
-   f.addEventListener('load',()=>{try{if(setupProfile(p)){ready++;if(ready===3){$('resetAll').disabled=false;message('All three cabinets are ready. Choose one .nes cartridge to start a tournament.')}}catch(err){message('Cabinet error: '+err.message)}},{once:true});
+   f.addEventListener('load',()=>{try{if(setupProfile(p)){ready++;if(ready===3){$('resetAll').disabled=false;message('All three cabinets are ready. Choose one .nes cartridge to start a tournament.')}}}catch(err){message('Cabinet error: '+err.message)}},{once:true});
    f.srcdoc=compartment(releaseHTML,p.id);
   }
  }catch(err){message('Arena initialization failed: '+err.message)}
