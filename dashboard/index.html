@@ -164,11 +164,26 @@ function cropGame(){const f=$('game');const w=f.contentWindow;if(!w)return;try{c
 function identity(trial){return String(trial.rom||'')+'/'+String(trial.id||'')+'/'+String(trial.startFrame||0)}
 function rootInput(t){return String(t.rom||'')+'|'+String(t.preHash||'unknown');}
 async function root(t){const bytes=new TextEncoder().encode(rootInput(t));const hash=await crypto.subtle.digest('SHA-256',bytes);return 'state-'+Array.from(new Uint8Array(hash),x=>x.toString(16).padStart(2,'0')).join('').slice(0,48)}
+function liveScreenHash(w){
+ try{
+  const canvas=w.document.getElementById('nesCanvas');if(!canvas||!canvas.width)return '';
+  const c=document.createElement('canvas');c.width=32;c.height=30;
+  const ctx=c.getContext('2d',{willReadFrequently:true});ctx.imageSmoothingEnabled=false;ctx.drawImage(canvas,0,0,32,30);
+  const rgba=ctx.getImageData(0,0,32,30).data,values=new Uint8Array(960);
+  for(let i=0;i<960;i++){const p=i*4;values[i]=Math.round(rgba[p]*.299+rgba[p+1]*.587+rgba[p+2]*.114)}
+  let hash='';
+  for(let by=0;by<6;by++)for(let bx=0;bx<8;bx++){
+   let s=0;for(let y=by*5;y<by*5+5;y++)for(let x=bx*4;x<bx*4+4;x++)s+=values[y*32+x];
+   hash+=Math.round((Math.round(s/20/16)*16)/32).toString(16);
+  }
+  return /^[0-9a-f]{48}$/.test(hash)?hash:'';
+ }catch(e){return ''}
+}
 function live(){const g=gameWindow();if(!g){$('gameSignal').textContent='GAME ISOLATED';$('liveLog').textContent='Live frame telemetry requires the same-origin playable release on GitHub Pages. The NES frame remains playable even if telemetry is unavailable.';return}
 game=g;cropGame();
 const stat=safe(()=>g.JANE_PERCEPTION.status(),{}), data=safe(()=>g.JANE_PERCEPTION.export(),{}),boot=safe(()=>g.JANE_BOOT_V57?.status(),{}),read=safe(()=>g.JANE_FAST_READ_V58?.status(),{});
 trials=Array.isArray(data.trials)?data.trials.slice(-40):[];
-latestScreen={rom:String(stat.rom||''),context:String(stat.hash||stat.perception?.hash||data.current?.hash||''),frame:Number(stat.frame)||0};latestRead=read;
+latestScreen={rom:String(data.trials?.at(-1)?.rom||data.game?.rom||stat.rom||''),context:liveScreenHash(g),frame:Number(stat.frame)||0};latestRead=read;
 $('frame').textContent=String(stat.frame??'—');$('action').textContent=stat.flux?.lastAction||'—';$('trials').textContent=String(stat.trials??trials.length);$('reading').textContent=String(read.reading||'UNKNOWN').slice(0,14);
 $('rom').textContent='CARTRIDGE: '+String(stat.rom||'NO ROM').slice(0,55);$('boot').textContent='BOOT: '+(boot.verified?'TRANSITION VERIFIED':String(boot.phase||'UNVERIFIED'));
 $('gameSignal').textContent=stat.running?'GAME RUNNING':'GAME CONNECTED';
