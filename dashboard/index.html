@@ -56,8 +56,15 @@ html[data-skin="mono"]{--bg:#090909;--panel:#252525;--edge:#757575;--text:#fafaf
 @media(max-width:520px){.skinlist{grid-template-columns:repeat(2,minmax(0,1fr))}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}header{padding:10px}main{padding:7px}}
 </style></head>
 <body>
-<header><div><span class="tag">ROOT 0 · EVIDENCE-CARRYING LEARNING BRIDGE</span><h1>JANE EMU / PLAY ↔ LEARN</h1><div class="small">AV-078 / LIVE NES · HUMAN EVIDENCE · GITHUB IMMUTABLE MEMORY</div></div><div class="row"><span class="pill" id="gameSignal">GAME CONNECTING</span><span class="pill" id="gitSignal">GIT CONNECTING</span><a href="https://github.com/DavidWise01/jane-emu" target="_blank" rel="noopener">GitHub Repository</a></div></header>
-<main>
+<header><div><span class="tag">ROOT 0 · EVIDENCE-CARRYING LEARNING BRIDGE</span><h1>JANE EMU / PLAY ↔ LEARN</h1><div class="small">AV-078 / LIVE NES · HUMAN EVIDENCE · GITHUB IMMUTABLE MEMORY</div></div><div class="row"><span class="pill" id="gameSignal">GAME CONNECTING</span><span class="pill" id="gitSignal">GIT CONNECTING</span><a href="./arena.html" style="font-weight:900;color:#ffc57b" title="Play Jane against Toph and Patricia in three independent NES machines">3-PLAYER ARENA</a><a href="https://github.com/DavidWise01/jane-emu" target="_blank" rel="noopener">GitHub Repository</a></div></header>
+<main><div class="panel" style="margin-bottom:12px;padding:9px 13px">
+<div class="row between">
+<div class="row"><label for="masterSound" class="tag">NES SPEAKER VOLUME</label>
+<input type="range" id="masterSound" min="0" max="100" value="45" step="1" aria-label="NES volume level" style="width:clamp(120px,22vw,250px);accent-color:#6fe3ed">
+<output id="masterSoundValue" for="masterSound" style="min-width:42px;color:var(--accent)">45%</output>
+<button id="masterMute" aria-pressed="false">Mute</button></div>
+<div class="row"><span class="small">Master speaker control / Jane NES</span><a href="./arena.html">Jane vs Toph vs Patricia</a></div>
+</div></div>
 <div class="top">
 <section class="panel" aria-label="Jane playable NES left 50 percent">
 <div class="row between"><h2>01 / JANE PLAYING · NES PLAYER 1</h2><a href="../releases/Janes_Perception_v71_Mission_Control_Embedded_JPG_Story_NES.html" target="_blank" rel="noopener">Open full arcade</a></div>
@@ -195,7 +202,7 @@ html[data-skin="mono"]{--bg:#090909;--panel:#252525;--edge:#757575;--text:#fafaf
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
 const REPO='DavidWise01/jane-emu', API='https://api.github.com/repos/'+REPO;
-let game=null, selection=null, trials=[], queued=[], savedIds=new Set(),token='',remote=null,autoSeen=new Set(),bootShown='',lastReport='',statusChanged=0, skippedDuplicates=0, checkpointAt='', latestScreen={}, latestRead={}, av075Decision=null, av076Armed=null, av076Last=null, av076Busy=false, av077Frozen=null, av077Last=null, av078Frozen=null, av078Last=null, av078QuestionSeen='', curatorMemory=null;
+let game=null, selection=null, trials=[], queued=[], savedIds=new Set(),token='',remote=null,autoSeen=new Set(),bootShown='',lastReport='',statusChanged=0, skippedDuplicates=0, checkpointAt='', latestScreen={}, latestRead={}, av075Decision=null, av076Armed=null, av076Last=null, av076Busy=false, av077Frozen=null, av077Last=null, av078Frozen=null, av078Last=null, av078QuestionSeen='', curatorMemory=null, audioLevel=45, audioMuted=false, audioEnableRequested=false;
 const skins=[['mission','Mission Control','#122c43','#55c9e8'],['arcade','Pixel Arcade','#3e155c','#fa69db'],['field','Field Laboratory','#f3ecd8','#bb8557'],['phosphor','Phosphor Terminal','#082719','#a5f982'],['copper','Copper Foundry','#3f2517','#ffc079'],['blueprint','Blueprint Station','#0c345e','#90e2ff'],['glacier','Polar Glass','#edfafd','#79ccd9'],['solar','Solar Observatory','#4b2d19','#ffc153'],['violet','Violet Reactor','#24143d','#c49eff'],['mono','Monochrome','#202020','#e0e0e0']];
 function say(text,error=false){$('statusLine').textContent=(error?'ERROR · ':'')+text;$('statusLine').style.color=error?'#ff9999':'var(--muted)'}
 function setTab(t){document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',String(x.dataset.tab===t)));document.querySelectorAll('[data-page]').forEach(x=>x.hidden=x.dataset.page!==t)}
@@ -226,8 +233,33 @@ function liveScreenHash(w){
   return /^[0-9a-f]{48}$/.test(hash)?hash:'';
  }catch(e){return ''}
 }
+
+function applySound(){
+ const w=gameWindow();if(!w)return;
+ const slider=w.document.getElementById('volSlider');
+ if(!slider)return;
+ const desired=audioMuted?0:audioLevel;
+ if(Number(slider.value)!==desired){
+  slider.value=desired;
+  slider.dispatchEvent(new w.Event('input',{bubbles:true}));
+ }
+ if(audioEnableRequested&&desired>0){
+  const button=w.document.getElementById('soundBtn');
+  if(button&&/SOUND OFF/i.test(button.textContent||''))button.click();
+  audioEnableRequested=false;
+ }
+}
+$('masterSound').oninput=e=>{
+ audioLevel=Math.max(0,Math.min(100,Number(e.target.value)||0));
+ audioEnableRequested=true;$('masterSoundValue').textContent=audioLevel+'%';applySound();
+};
+$('masterMute').onclick=()=>{
+ audioMuted=!audioMuted;audioEnableRequested=!audioMuted;
+ $('masterMute').textContent=audioMuted?'Unmute':'Mute';
+ $('masterMute').setAttribute('aria-pressed',String(audioMuted));applySound();
+};
 function live(){const g=gameWindow();if(!g){$('gameSignal').textContent='GAME ISOLATED';$('liveLog').textContent='Live frame telemetry requires the same-origin playable release on GitHub Pages. The NES frame remains playable even if telemetry is unavailable.';return}
-game=g;cropGame();
+game=g;cropGame();applySound();
 const stat=safe(()=>g.JANE_PERCEPTION.status(),{}), data=safe(()=>g.JANE_PERCEPTION.export(),{}),boot=safe(()=>g.JANE_BOOT_V57?.status(),{}),read=safe(()=>g.JANE_FAST_READ_V58?.status(),{});
 trials=Array.isArray(data.trials)?data.trials.slice(-40):[];
 latestScreen={rom:String(data.trials?.at(-1)?.rom||data.game?.rom||stat.rom||''),context:liveScreenHash(g),frame:Number(stat.frame)||0};latestRead=read;
