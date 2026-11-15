@@ -1,0 +1,56 @@
+import json
+import pathlib
+import tempfile
+import unittest
+from importlib.util import module_from_spec, spec_from_file_location
+
+SCRIPT = pathlib.Path(__file__).resolve().parents[1] / "agent" / "jane_agent.py"
+spec = spec_from_file_location("jane_agent", SCRIPT)
+agent = module_from_spec(spec)
+spec.loader.exec_module(agent)
+
+class TestJaneMemory(unittest.TestCase):
+    def test_independent_root_required(self):
+        with tempfile.TemporaryDirectory() as d:
+            original_pool, original_events = agent.POOL, agent.EVENTS
+            agent.POOL = pathlib.Path(d)
+            agent.EVENTS = agent.POOL / "events"
+            agent.EVENTS.mkdir()
+            try:
+                for n in range(3):
+                    rec = agent.validate({"kind":"outcome_label", "rom":"game-1", "source_root":f"root-{n}",
+                                          "source":"nes-intervention", "word":"START", "button":"START", "outcome":"beneficial"})
+                    self.assertTrue(agent.write_event(rec))
+                result = agent.rebuild_index()
+                self.assertEqual(result["associations"][0]["status"], "SUPPORTED_PROVISIONAL")
+                bad = agent.validate({"kind":"outcome_label", "rom":"game-1", "source_root":"root-bad",
+                                      "source":"nes-intervention", "word":"START", "button":"START", "outcome":"harmful"})
+                agent.write_event(bad)
+                self.assertEqual(agent.rebuild_index()["associations"][0]["status"], "CONTESTED")
+            finally:
+                agent.POOL, agent.EVENTS = original_pool, original_events
+
+    def test_no_duplicate_votes(self):
+        with tempfile.TemporaryDirectory() as d:
+            original_pool, original_events = agent.POOL, agent.EVENTS
+            agent.POOL = pathlib.Path(d)
+            agent.EVENTS = agent.POOL / "events"
+            agent.EVENTS.mkdir()
+            try:
+                for frame in range(3):
+                    rec = agent.validate({"kind":"outcome_label", "rom":"game-1", "source_root":"same-root",
+                                          "source":"nes-intervention", "word":"START", "button":"START",
+                                          "outcome":"beneficial", "frame":frame})
+                    agent.write_event(rec)
+                value = agent.rebuild_index()["associations"][0]
+                self.assertEqual(value["beneficial_roots"], 1)
+                self.assertEqual(value["status"], "INSUFFICIENT")
+            finally:
+                agent.POOL, agent.EVENTS = original_pool, original_events
+
+    def test_reject_private_or_unrecognized_fields(self):
+        with self.assertRaises(ValueError):
+            agent.validate({"kind":"observation", "rom":"game", "source":"test", "source_root":"root", "rom_base64":"AA=="})
+
+if __name__ == "__main__":
+    unittest.main()
