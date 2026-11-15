@@ -52,7 +52,22 @@ jobs:
               print(f'entry={release}', file=f)
           PY
 
-      - name: Check AV-075 experiment policy\n        run: node tests/test_av075_policy.cjs\n\n      - name: Check AV-076 feedback closure\n        run: node tests/test_av076_feedback.cjs\n\n      - name: Check AV-077 prospective refinement\n        run: node tests/test_av077_refinement.cjs\n\n      - name: Verify AV-078 independent holdout gate\n        run: node tests/test_av078_impact.cjs\n\n      - name: Verify Jane Curator event ancestry\n        run: python3 -m unittest discover -s tests -p 'test_jane_curator.py' -v\n\n      - name: Assemble offline-playable web artifact
+      - name: Check AV-075 experiment policy
+        run: node tests/test_av075_policy.cjs
+
+      - name: Check AV-076 feedback closure
+        run: node tests/test_av076_feedback.cjs
+
+      - name: Check AV-077 prospective refinement
+        run: node tests/test_av077_refinement.cjs
+
+      - name: Verify AV-078 independent holdout gate
+        run: node tests/test_av078_impact.cjs
+
+      - name: Verify Jane Curator event ancestry
+        run: python3 -m unittest discover -s tests -p 'test_jane_curator.py' -v
+
+      - name: Assemble offline-playable web artifact
         shell: bash
         run: |
           mkdir -p _site
