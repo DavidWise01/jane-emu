@@ -92,6 +92,63 @@ class TestJaneMemory(unittest.TestCase):
             finally:
                 agent.POOL,agent.EVENTS=old_pool,old_events
 
+    def test_rooted_experiment_feedback_is_unlabeled(self):
+        with tempfile.TemporaryDirectory() as d:
+            old_pool, old_events = agent.POOL, agent.EVENTS
+            agent.POOL = pathlib.Path(d)
+            agent.EVENTS = agent.POOL / "events"
+            agent.EVENTS.mkdir()
+            try:
+                for n in range(3):
+                    event = agent.validate({
+                        "kind":"experiment_feedback",
+                        "question_id":"q-test-001","rom":"demo-rom",
+                        "context":"screen-01","button":"START",
+                        "source_root": "root-" + str(n),
+                        "source":"nes-action-observation",
+                        "pixel_change_bp":1200,"status":"OBSERVED_UNLABELED","frame":90+n
+                    })
+                    agent.write_event(event)
+                result = agent.rebuild_index()
+                self.assertEqual(result["associations"], [])
+                self.assertEqual(result["feedback_summary"][0]["independent_observation_roots"], 3)
+                self.assertEqual(result["feedback_summary"][0]["outcome"], "UNLABELED")
+                self.assertEqual(result["feedback_summary"][0]["semantic_gain"], "UNPROVEN")
+            finally:
+                agent.POOL, agent.EVENTS = old_pool, old_events
+
+    def test_replay_branches_share_one_feedback_witness(self):
+        with tempfile.TemporaryDirectory() as d:
+            old_pool, old_events = agent.POOL, agent.EVENTS
+            agent.POOL = pathlib.Path(d)
+            agent.EVENTS = agent.POOL / "events"
+            agent.EVENTS.mkdir()
+            try:
+                for n in range(4):
+                    record=agent.validate({
+                        "kind":"experiment_feedback","question_id":"q-test-002",
+                        "rom":"demo-rom","context":"screen-01","button":"RIGHT",
+                        "source_root":"one-start-state",
+                        "source":"nes-action-observation","status":"OBSERVED_UNLABELED",
+                        "pixel_change_bp":100*n,"frame":100+n
+                    })
+                    agent.write_event(record)
+                item=agent.rebuild_index()["feedback_summary"][0]
+                self.assertEqual(item["independent_observation_roots"],1)
+                self.assertEqual(item["observations"],4)
+            finally:
+                agent.POOL, agent.EVENTS = old_pool, old_events
+
+    def test_feedback_rejects_forged_outcome_or_invalid_measurement(self):
+        baseline={"kind":"experiment_feedback","question_id":"q-test-003",
+                  "rom":"demo-rom","context":"title","button":"START",
+                  "source_root":"root-1","source":"nes-action-observation",
+                  "pixel_change_bp":1000,"status":"OBSERVED_UNLABELED"}
+        for patch in ({"outcome":"beneficial"},{"pixel_change_bp":10001},
+                      {"status":"SUPPORTED"},{"context":""}):
+            with self.assertRaises(ValueError):
+                agent.validate({**baseline,**patch})
+
     def test_reject_private_or_unrecognized_fields(self):
         with self.assertRaises(ValueError):
             agent.validate({"kind":"observation", "rom":"game", "source":"test", "source_root":"root", "rom_base64":"AA=="})
