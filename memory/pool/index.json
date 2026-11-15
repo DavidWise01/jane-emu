@@ -1,0 +1,20 @@
+{
+  "associations": [],
+  "event_count": 1,
+  "event_ids": [
+    "fe110c62f1af58cc6fee747d378ed2a3d848b3dcdb603f913ae350cf9fc50923"
+  ],
+  "latest_release": {
+    "id": "fe110c62f1af58cc6fee747d378ed2a3d848b3dcdb603f913ae350cf9fc50923",
+    "jpg_embedded": true,
+    "kind": "release",
+    "path": "releases/Janes_Perception_v71_Mission_Control_Embedded_JPG_Story_NES.html",
+    "schema": "jane.evidence.v1",
+    "sha256": "adef656196113a7b47c90b8a21538f9ccd8b9783bae98f10c8afd466f1e71369",
+    "size": 1590143,
+    "source": "github/main",
+    "source_root": "owned/jane-emu"
+  },
+  "policy": "No unverified word reading, gameplay benefit, or independent witnesses may be inferred.",
+  "schema": "jane.evidence.v1"
+}
