@@ -2,7 +2,7 @@
 <html lang="en" data-skin="mission">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JANE EMU / AV-073 / PLAY ↔ LEARN / PERSISTENT MEMORY</title>
+<title>JANE EMU / AV-074 / PLAY ↔ LEARN / PERSISTENT MEMORY</title>
 <style>
 :root{--bg:#061421;--panel:#0d2639;--edge:#2f6076;--text:#e8f8ff;--muted:#91b4c6;--accent:#72e8f8;--warm:#ffbc75;--button:#163f57;--radius:13px;color-scheme:dark}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -20%,#25556f,var(--bg) 54%);color:var(--text);font:13px/1.55 system-ui,sans-serif}
@@ -56,7 +56,7 @@ html[data-skin="mono"]{--bg:#090909;--panel:#252525;--edge:#757575;--text:#fafaf
 @media(max-width:520px){.skinlist{grid-template-columns:repeat(2,minmax(0,1fr))}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}header{padding:10px}main{padding:7px}}
 </style></head>
 <body>
-<header><div><span class="tag">ROOT 0 · EVIDENCE-CARRYING LEARNING BRIDGE</span><h1>JANE EMU / PLAY ↔ LEARN</h1><div class="small">AV-073 / LIVE NES · HUMAN EVIDENCE · GITHUB IMMUTABLE MEMORY</div></div><div class="row"><span class="pill" id="gameSignal">GAME CONNECTING</span><span class="pill" id="gitSignal">GIT CONNECTING</span><a href="https://github.com/DavidWise01/jane-emu" target="_blank" rel="noopener">GitHub Repository</a></div></header>
+<header><div><span class="tag">ROOT 0 · EVIDENCE-CARRYING LEARNING BRIDGE</span><h1>JANE EMU / PLAY ↔ LEARN</h1><div class="small">AV-074 / LIVE NES · HUMAN EVIDENCE · GITHUB IMMUTABLE MEMORY</div></div><div class="row"><span class="pill" id="gameSignal">GAME CONNECTING</span><span class="pill" id="gitSignal">GIT CONNECTING</span><a href="https://github.com/DavidWise01/jane-emu" target="_blank" rel="noopener">GitHub Repository</a></div></header>
 <main>
 <div class="top">
 <section class="panel" aria-label="Jane playable NES left 50 percent">
@@ -74,6 +74,7 @@ html[data-skin="mono"]{--bg:#090909;--panel:#252525;--edge:#757575;--text:#fafaf
 <button role="tab" data-tab="memory" aria-selected="false">GIT MEMORY</button>
 <button role="tab" data-tab="sync" aria-selected="false">SYNC / PUBLISH</button>
 <button role="tab" data-tab="continuity" aria-selected="false">CONTINUITY</button>
+<button role="tab" data-tab="reuse" aria-selected="false">MEMORY REUSE</button>
 </div>
 <div class="tabpage" data-page="live">
 <div class="kpis"><div class="kpi"><b id="poolCount">—</b><small>IMMUTABLE EVENTS ON GIT</small></div><div class="kpi"><b id="assocCount">—</b><small>WORD/ACTION ASSOCIATIONS</small></div><div class="kpi"><b id="staged">0</b><small>LOCAL EVIDENCE QUEUE</small></div><div class="kpi"><b id="rootCount">—</b><small>DISTINCT ROOTS IN RECENT TRIALS</small></div></div>
@@ -113,6 +114,14 @@ html[data-skin="mono"]{--bg:#090909;--panel:#252525;--edge:#757575;--text:#fafaf
 <pre id="continuityLog">Browser-local checkpoint pending. Git memory remains a separate, independently verifiable record.</pre>
 <div class="note">Public Git memory is only updated after you explicitly publish a reviewed queue using a scoped token in Sync / Publish. Checkpoint events never become evidence of gameplay benefit.</div>
 </div>
+<div class="tabpage" data-page="reuse" hidden>
+<h3>AV-074 / VERIFIED MEMORY REUSE · OBSERVATION ONLY</h3>
+<div class="note">Jane evaluates read-only Git knowledge as a candidate, never as an instruction to press buttons. Reuse requires the same cartridge, exact screen fingerprint, confirmed text recognition, three independent beneficial witness roots, and no harmful witness.</div>
+<div class="kpis"><div class="kpi"><b id="reuseStatus">ABSTAIN</b><small>REUSE GATE</small></div><div class="kpi"><b id="reuseMatches">0</b><small>ELIGIBLE ASSOCIATIONS</small></div><div class="kpi"><b id="reuseRoots">0</b><small>BENEFICIAL ROOTS</small></div><div class="kpi"><b id="reuseContradictions">0</b><small>CONTRADICTIONS</small></div></div>
+<h3>Live context and witness comparison</h3><pre id="reuseProof">Awaiting a live NES cartridge and the Git evidence index.</pre>
+<div class="toolbar"><button id="reuseRecheck">Re-evaluate memory</button><button id="reuseGit">Refresh Git evidence</button></div>
+<div class="note">Older memory entries without a recorded screen context are intentionally ineligible. No automatic NES controls are triggered by recalled information; evidence reuse is read-only until its safety and transfer behavior are independently tested.</div>
+</div>
 <div id="statusLine" class="small" role="status" aria-live="polite">Connecting…</div>
 </section>
 </div>
@@ -123,7 +132,7 @@ html[data-skin="mono"]{--bg:#090909;--panel:#252525;--edge:#757575;--text:#fafaf
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
 const REPO='DavidWise01/jane-emu', API='https://api.github.com/repos/'+REPO;
-let game=null, selection=null, trials=[], queued=[], savedIds=new Set(),token='',remote=null,autoSeen=new Set(),bootShown='',lastReport='',statusChanged=0, skippedDuplicates=0, checkpointAt='';
+let game=null, selection=null, trials=[], queued=[], savedIds=new Set(),token='',remote=null,autoSeen=new Set(),bootShown='',lastReport='',statusChanged=0, skippedDuplicates=0, checkpointAt='', latestScreen={}, latestRead={};
 const skins=[['mission','Mission Control','#122c43','#55c9e8'],['arcade','Pixel Arcade','#3e155c','#fa69db'],['field','Field Laboratory','#f3ecd8','#bb8557'],['phosphor','Phosphor Terminal','#082719','#a5f982'],['copper','Copper Foundry','#3f2517','#ffc079'],['blueprint','Blueprint Station','#0c345e','#90e2ff'],['glacier','Polar Glass','#edfafd','#79ccd9'],['solar','Solar Observatory','#4b2d19','#ffc153'],['violet','Violet Reactor','#24143d','#c49eff'],['mono','Monochrome','#202020','#e0e0e0']];
 function say(text,error=false){$('statusLine').textContent=(error?'ERROR · ':'')+text;$('statusLine').style.color=error?'#ff9999':'var(--muted)'}
 function setTab(t){document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',String(x.dataset.tab===t)));document.querySelectorAll('[data-page]').forEach(x=>x.hidden=x.dataset.page!==t)}
@@ -143,6 +152,7 @@ function live(){const g=gameWindow();if(!g){$('gameSignal').textContent='GAME IS
 game=g;cropGame();
 const stat=safe(()=>g.JANE_PERCEPTION.status(),{}), data=safe(()=>g.JANE_PERCEPTION.export(),{}),boot=safe(()=>g.JANE_BOOT_V57?.status(),{}),read=safe(()=>g.JANE_FAST_READ_V58?.status(),{});
 trials=Array.isArray(data.trials)?data.trials.slice(-40):[];
+latestScreen={rom:String(stat.rom||''),context:String(stat.hash||stat.perception?.hash||data.current?.hash||''),frame:Number(stat.frame)||0};latestRead=read;
 $('frame').textContent=String(stat.frame??'—');$('action').textContent=stat.flux?.lastAction||'—';$('trials').textContent=String(stat.trials??trials.length);$('reading').textContent=String(read.reading||'UNKNOWN').slice(0,14);
 $('rom').textContent='CARTRIDGE: '+String(stat.rom||'NO ROM').slice(0,55);$('boot').textContent='BOOT: '+(boot.verified?'TRANSITION VERIFIED':String(boot.phase||'UNVERIFIED'));
 $('gameSignal').textContent=stat.running?'GAME RUNNING':'GAME CONNECTED';
@@ -150,7 +160,7 @@ const roots=new Set(trials.filter(t=>t.preHash).map(t=>rootInput(t)));
 $('rootCount').textContent=roots.size;
 $('liveLog').textContent='FRAME '+(stat.frame||0)+' / PLAYER 1 '+(stat.flux?.lastAction||'IDLE')+'\nTRIALS '+trials.length+' / ROOTS '+roots.size+'\nREADING '+(read.reading||'UNKNOWN')+'\nBOOT '+(boot.verified?'TRANSITION OBSERVED':'NOT VERIFIED')+'\n\n'+trials.slice(-6).reverse().map(t=>'#'+t.id+' '+t.button+' · Δ '+(100*(Number(t.delta)||0)).toFixed(2)+'% · '+(t.label||'unknown')).join('\n');
 const signature=trials.map(identity).join('|');if(signature!==lastReport){lastReport=signature;renderTrials()}
-if($('autoCapture').checked){for(const t of trials){const id=identity(t);if(!autoSeen.has(id)){autoSeen.add(id);if(t.preHash&&t.rom)queueFromTrial(t,'observation','unknown','',true)}}}
+evaluateReuse();if($('autoCapture').checked){for(const t of trials){const id=identity(t);if(!autoSeen.has(id)){autoSeen.add(id);if(t.preHash&&t.rom)queueFromTrial(t,'observation','unknown','',true)}}}
 }
 function renderTrials(){const box=$('trialList');box.textContent='';if(!trials.length){box.textContent='No completed actions yet.';return}
 trials.slice(-16).reverse().forEach(t=>{const b=document.createElement('button');b.className='trial';b.setAttribute('aria-pressed',String(selection&&identity(selection)===identity(t)));const name=document.createElement('b');name.textContent='#'+t.id+' '+t.button;const meta=document.createElement('span');meta.textContent=(100*(Number(t.delta)||0)).toFixed(1)+'% change · '+(t.label||'unknown');b.append(name,meta);b.onclick=()=>{selection=t;renderTrials();say('Selected trial #'+t.id+'; review before submitting.')};box.appendChild(b)})}
@@ -160,6 +170,7 @@ async function queueFromTrial(t,kind,outcome,word,auto=false){
 try{if(!t||!t.rom||!t.preHash||!t.button)throw Error('Missing originating ROM, pre-action fingerprint, or button.');
 const rootName=await root(t);
 const record={kind,rom:String(t.rom).replace(/[^a-zA-Z0-9_.:/-]/g,'').slice(0,128),source_root:rootName,source:kind==='outcome_label'?'human-labeled-nes-trial':'nes-action-observation',frame:Number(t.endFrame)||0,button:String(t.button).split('+')[0].toUpperCase(),note:sanitizeNote('trial '+t.id+'; pixel delta '+String(t.delta)+'; input '+t.button+'; observation only unless human labeled')};
+if(typeof t.preHash==='string'&&/^[a-zA-Z0-9_.:/-]{1,128}$/.test(t.preHash))record.context=t.preHash;
 if(!['START','SELECT','UP','DOWN','LEFT','RIGHT','A','B','NONE'].includes(record.button)){record.button='NONE';record.note=sanitizeNote(record.note+'; combined input recorded separately');}
 if(kind==='outcome_label'){if(!word)throw Error('A human-transcribed word is required for a word/action label.');record.word=tidyWord(word);record.outcome=outcome;record.note=sanitizeNote('human transcription; '+'trial '+t.id+'; delta '+t.delta+'; button '+t.button+'. Reading not independently verified.');}
 const id=identity(t)+'|'+kind+'|'+(record.word||'')+'|'+(record.outcome||'');if(savedIds.has(id))return;
@@ -172,6 +183,7 @@ function acceptableEvent(r){
  if(!r||typeof r!=='object'||!['observation','outcome_label','checkpoint'].includes(r.kind))return false;
  const test=v=>typeof v==='string'&&/^[a-zA-Z0-9_.:/-]{1,128}$/.test(v);
  if(!test(r.rom)||!test(r.source_root)||!test(r.source))return false;
+ if(r.context!==undefined&&!test(r.context))return false;
  if(r.kind==='outcome_label'&&(!test(r.word)||!['beneficial','harmful','neutral','unknown'].includes(r.outcome)))return false;
  if(r.button!==undefined&&!['START','SELECT','UP','DOWN','LEFT','RIGHT','A','B','NONE'].includes(r.button))return false;
  return JSON.stringify(r).length<=10000;
@@ -248,10 +260,44 @@ $('downloadQueue').onclick=()=>{download(JSON.stringify(queued.map(x=>x.record),
 $('clearQueue').onclick=()=>{queued=[];savedIds.clear();$('staged').textContent='0';renderQueue();say('Local queue cleared.')};
 function b64Unicode(str){const u=new TextEncoder().encode(str);let binary='';for(let i=0;i<u.length;i+=8192)binary+=String.fromCharCode(...u.slice(i,i+8192));return btoa(binary)}
 async function gitFetch(endpoint,options={}){const headers={'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};if(token)headers.Authorization='Bearer '+token;if(options.content)headers['Content-Type']='application/json';const r=await fetch(endpoint,{...options,headers:{...headers,...options.headers},cache:'no-store'});const body=await r.json().catch(()=>({}));if(!r.ok)throw Error((body.message||r.statusText)+' ['+r.status+']');return body}
+
+function evaluateReuse(){
+ const context=latestScreen.context,rom=latestScreen.rom;
+ const reading=String(latestRead?.reading||'').toUpperCase().replace(/\s+/g,'_');
+ const confirmed=latestRead?.status==='CONFIRMED'||latestRead?.state==='CONFIRMED'||latestRead?.confirmed===true;
+ const candidates=Array.isArray(remote?.associations)?remote.associations:[];
+ const scoped=candidates.filter(a=>a.rom===rom&&a.context_bound===true&&a.context===context&&a.word===reading);
+ const eligible=scoped.filter(a=>a.status==='SUPPORTED_PROVISIONAL'&&Number(a.beneficial_roots)>=3&&Number(a.harmful_or_conflicting_roots)===0);
+ const ok=Boolean(rom&&context&&reading&&reading!=='UNKNOWN'&&confirmed&&eligible.length);
+ const reasons=[];
+ if(!remote)reasons.push('Git memory unavailable');
+ if(!rom)reasons.push('no loaded cartridge fingerprint');
+ if(!context)reasons.push('no current live screen fingerprint');
+ if(!reading||reading==='UNKNOWN')reasons.push('screen word unread');
+ else if(!confirmed)reasons.push('reading is not independently confirmed');
+ if(remote&&rom&&context&&confirmed&&!scoped.length)reasons.push('no matching Git lessons for this cartridge / context / word');
+ if(scoped.length&&!eligible.length)reasons.push('insufficient independent beneficial roots or conflicting evidence');
+ $('reuseStatus').textContent=ok?'CANDIDATE':'ABSTAIN';
+ $('reuseMatches').textContent=ok?eligible.length:0;
+ $('reuseRoots').textContent=scoped.reduce((s,a)=>Math.max(s,Number(a.beneficial_roots)||0),0);
+ $('reuseContradictions').textContent=scoped.reduce((s,a)=>s+(Number(a.harmful_or_conflicting_roots)||0),0);
+ $('reuseProof').textContent=[
+   'DECISION: '+(ok?'EVIDENCE-BACKED CANDIDATE (NO AUTO ACTION)':'ABSTAIN'),
+   'ROM: '+(rom||'unknown'), 'CONTEXT: '+(context||'unavailable'), 'WORD: '+(reading||'unknown'),
+   'READING VERIFIED: '+confirmed, 'GIT ASSOCIATIONS: '+candidates.length,
+   'SAME-CONTEXT ENTRIES: '+scoped.length,
+   'REASONS: '+(ok?'all observation gates met; manual testing only':reasons.join('; ')),
+   '',
+   ...scoped.map(a=>a.word+' → '+a.button+' · '+a.status+' · '+a.beneficial_roots+' good roots · '+a.harmful_or_conflicting_roots+' contested roots')
+ ].join('\n');
+}
+$('reuseRecheck').onclick=evaluateReuse;
+$('reuseGit').onclick=refreshGit;
+
 async function refreshGit(){try{const response=await fetch('https://raw.githubusercontent.com/'+REPO+'/main/memory/pool/index.json?v='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error('GitHub memory index HTTP '+response.status);const data=await response.json();remote=data;$('poolCount').textContent=data.event_count??'0';$('assocCount').textContent=(data.associations||[]).length;$('gitSignal').textContent='GIT MEMORY ONLINE';
 $('gitIndex').textContent=JSON.stringify({schema:data.schema,events:data.event_count,latest_release:data.latest_release,policy:data.policy,associations:data.associations},null,2);
 $('associationRows').textContent=(data.associations||[]).map(a=>a.word+' → '+a.button+' ('+a.status+', '+a.beneficial_roots+' independent beneficial roots)').join('\n')||'None yet; observations alone do not establish beneficial word meaning.';
-showContinuity();say('Git memory refreshed: '+data.event_count+' immutable events.');}catch(e){$('gitSignal').textContent='GIT READ ERROR';say('Git read failed: '+e.message,true)}}
+showContinuity();evaluateReuse();say('Git memory refreshed: '+data.event_count+' immutable events.');}catch(e){$('gitSignal').textContent='GIT READ ERROR';say('Git read failed: '+e.message,true)}}
 $('reloadGit').onclick=refreshGit;
 $('connect').onclick=async()=>{const value=$('token').value.trim();if(!value){say('Paste a repository-scoped fine-grained token, or remain read-only.',true);return}
 try{token=value;const user=await gitFetch('https://api.github.com/user');$('token').value='';$('syncBadge').textContent='CONNECTED · '+user.login;say('Authenticated to GitHub as '+user.login+'. Token is in memory only.')}catch(e){token='';$('syncBadge').textContent='READ ONLY';$('token').value='';say('GitHub authentication failed: '+e.message,true)}};
@@ -260,6 +306,6 @@ $('sendQueue').onclick=async()=>{if(!token){say('Connect using a repository-scop
 const pending=[...queued];let pushed=0;for(const q of pending){try{const data=q.record;const bytes=JSON.stringify(data,null,2)+'\n';const hash=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(bytes));const name=Array.from(new Uint8Array(hash),x=>x.toString(16).padStart(2,'0')).join('').slice(0,24);const path='memory/inbox/bridge-'+name+'.json';await gitFetch(API+'/contents/'+path,{method:'PUT',content:true,body:JSON.stringify({message:'memory: submit reviewed Jane NES observation',content:b64Unicode(bytes),branch:'main'})});queued=queued.filter(x=>x!==q);pushed++;$('staged').textContent=queued.length;renderQueue();}catch(e){say('Published '+pushed+' packet(s); next item failed: '+e.message,true);return}}
 say('Published '+pushed+' reviewed event(s) into Git inbox. Wait for Memory Agent Action to ingest; refresh index after it finishes.');};
 $('game').addEventListener('load',()=>{game=null;setTimeout(live,800)});
-setInterval(live,1600);setInterval(refreshGit,30000);refreshGit();restoreSession();$('staged').textContent=queued.length;renderQueue();say('AV-073 restored '+queued.length+' reviewed record(s) locally. Load a ROM to continue observing.');
+setInterval(live,1600);setInterval(refreshGit,30000);refreshGit();restoreSession();$('staged').textContent=queued.length;renderQueue();say('AV-074 restored '+queued.length+' reviewed record(s) locally. Load a ROM to continue observing.');
 })();
 </script></body></html>
