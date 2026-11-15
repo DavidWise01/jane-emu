@@ -67,6 +67,9 @@ jobs:
       - name: Verify Jane Curator event ancestry
         run: python3 -m unittest discover -s tests -p 'test_jane_curator.py' -v
 
+      - name: Verify Wizard three-player arena
+        run: node tests/test_wizard_arena.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
