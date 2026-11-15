@@ -55,7 +55,7 @@ table{width:100%;border-collapse:collapse}td,th{text-align:left;border-bottom:1p
 'use strict';
 const $=id=>document.getElementById(id);
 const profiles=[{id:'jane',name:'Jane',mode:'fast'},{id:'toph',name:'Toph',mode:'careful'},{id:'patricia',name:'Patricia',mode:'balanced'}];
-let releaseHTML='',ready=0,romFile=null,muted=false,done=false,volume=35;
+let releaseHTML='',ready=0,romFile=null,muted=false,done=false,volume=35,audioActivated=false;
 function message(s){$('status').textContent=s}
 function compartment(doc,id){
  // Distinct namespaces prevent competitors sharing the main learning model.
@@ -76,6 +76,10 @@ function setVolume(v){
   // Only the focused competitor is audible, avoiding three overlapping APU signals.
   slider.value=i===0?per:0;
   slider.dispatchEvent(new w.Event('input',{bubbles:true}));
+  if(i===0&&audioActivated&&per>0){
+   const sound=w.document.getElementById('soundBtn');
+   if(sound&&/SOUND OFF/i.test(sound.textContent||''))sound.click();
+  }
  });
  $('mute').textContent=muted?'Unmute':'Mute';$('mute').setAttribute('aria-pressed',String(muted));
 }
@@ -153,8 +157,8 @@ function render(){
  }else $('winner').textContent=done?' · ENTER ALL THREE GAME SCORES':'';
 }
 $('romAll').addEventListener('change',async e=>loadAll(e.target.files?.[0]));
-$('masterVolume').addEventListener('input',e=>setVolume(e.target.value));
-$('mute').onclick=()=>{muted=!muted;setVolume(volume)};
+$('masterVolume').addEventListener('input',e=>{audioActivated=true;setVolume(e.target.value)});
+$('mute').onclick=()=>{muted=!muted;audioActivated=!muted;setVolume(volume)};
 $('resetAll').onclick=()=>{if(romFile)loadAll(romFile)};
 $('lockHeat').onclick=()=>{done=true;render();message('Heat closed; human game scores determine the winner, not pixel motion.')};
 setInterval(render,1200);render();init();
