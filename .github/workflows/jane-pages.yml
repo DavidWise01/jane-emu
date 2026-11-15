@@ -52,7 +52,7 @@ jobs:
               print(f'entry={release}', file=f)
           PY
 
-      - name: Check AV-075 experiment policy\n        run: node tests/test_av075_policy.cjs\n\n      - name: Check AV-076 feedback closure\n        run: node tests/test_av076_feedback.cjs\n\n      - name: Assemble offline-playable web artifact
+      - name: Check AV-075 experiment policy\n        run: node tests/test_av075_policy.cjs\n\n      - name: Check AV-076 feedback closure\n        run: node tests/test_av076_feedback.cjs\n\n      - name: Check AV-077 prospective refinement\n        run: node tests/test_av077_refinement.cjs\n\n      - name: Assemble offline-playable web artifact
         shell: bash
         run: |
           mkdir -p _site
