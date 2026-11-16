@@ -63,11 +63,22 @@ pre{border:1px solid var(--edge);background:#031523;padding:10px;border-radius:8
 <div class="meters"><div class="meter"><strong id="teachCount">0</strong><small>QUESTIONS PROPOSED</small></div><div class="meter"><strong id="teachResults">0</strong><small>OBSERVED RETURNS</small></div></div>
 <pre id="teachLog">Toph is watching Jane. Teaching begins after repeated action evidence on the same screen context.</pre>
 <div class="note">Toph proposes *questions*, never winning actions. Jane remains the only controller; recommendations are tested occasionally in the existing action loop. Patricia audits the log. All three share the same source ancestry.</div>
+<h2 style="margin-top:14px">AV-081 · DID TOPH'S TEACHING HELP?</h2>
+<div class="note">Predeclare each attempt before play. Compare survival frames through a human-confirmed death, using separate fresh ROM attempts with the same starting screen. Measurements are exploratory—not proof of better play or an independent witness.</div>
+<div class="toolbar">
+<button id="av081Baseline">Arm baseline · Toph OFF</button>
+<button id="av081Coached">Arm coached · Toph ON</button>
+<button id="av081Cancel">Cancel armed attempt</button>
+</div>
+<div class="meters"><div class="meter"><strong id="av081BaselineCount">0</strong><small>BASELINE ATTEMPTS</small></div><div class="meter"><strong id="av081CoachedCount">0</strong><small>COACHED ATTEMPTS</small></div><div class="meter"><strong id="av081Delta">—</strong><small>MEDIAN FRAME DIFFERENCE</small></div></div>
+<pre id="av081Report">Load a game, wait for its first observed screen context, then arm a baseline or coached attempt. Confirm a life loss to finish. Repeat with a freshly loaded cartridge.</pre>
+<div class="toolbar"><button id="av081Export">Export comparison</button><button id="av081Reset">Clear local comparison</button></div>
 <h2 style="margin-top:14px">WATCH / HANDOFF LOG</h2><pre id="log">Watching for a cartridge and first frame.</pre>
 <button id="export" type="button">Export turn/observer evidence JSON</button>
 </section></div>
 </main>
 <script src="./av080_coach.js"></script>
+<script src="./av081_effect.js"></script>
 <script>
 (()=>{
 'use strict';
@@ -76,6 +87,7 @@ const people=[{name:'JANE',mode:'fast',color:'#7ae7ef',turns:0,watched:0,actions
 let active=0,ready=false,lastFrame=-1,lastTrials=0,turnStarted=0,handoffs=0,volume=40,muted=false,audioEnabled=false,speed=1,
     monitor=null,lifeLast=null,lifeStable=0,lifeCandidate=null,lifeHoldoff=0,entries=[],gameRoot='',seenScenes=new Set(),seenTrialIds=new Set();
 const limit=1500;
+const effectiveness=window.JaneAV081;const EVAL_KEY='jane.av081.teaching-effect.v1';let effectArmed=null,effectRows=[];
 const coach=window.JaneTophCoach?.create();let coachEnabled=true;window.JANE_TOPH_COACH={recommend(ctx){if(active!==0||!coachEnabled)return null;return coach?.recommend(ctx)||null}};
 function status(s){$('status').textContent=s}
 function sessionId(){return 'session-'+(typeof crypto.randomUUID==='function'?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2))}
@@ -124,6 +136,16 @@ function switchTurn(reason,verified){
  if(!ready||!safeRoot()||safeRoot()==='unloaded'){status('Load a cartridge before handing off.');return false}
  const frame=Number(observer()?.frame)||0;
  if(frame<lifeHoldoff){status('Handoff cooldown active; observe the next life first.');return false}
+ if(effectArmed&&active===0){
+   const closed=effectiveness?.close(effectArmed,frame,Boolean(verified));
+   if(closed?.state==='COMPLETE'){
+     effectRows.push(closed);if(effectRows.length>120)effectRows=effectRows.slice(-120);
+     try{localStorage.setItem(EVAL_KEY,JSON.stringify(effectRows))}catch(e){}
+     entriesPush({kind:'teaching-effect',actor:'PATRICIA',frame,game_root:gameRoot,
+      reason:closed.arm+' survival '+closed.survival_frames+' frames; no causal conclusion'});
+   }
+   effectArmed=null;renderEffect();
+ }
  const leaving=people[active];leaving.turns++;
  const old=active;active=(active+1)%3;handoffs++;
  turnStarted=frame;lifeHoldoff=frame+120;
@@ -231,14 +253,18 @@ async function load(file){
   d.files=dt.files;d.dispatchEvent(new (w().Event)('change',{bubbles:true}));
   active=0;lastFrame=-1;lastTrials=0;handoffs=0;lifeHoldoff=0;lifeLast=null;lifeCandidate=null;monitor=null;
   entries=[];seenTrialIds.clear();people.forEach(p=>{p.turns=0;p.watched=0;p.actions=0;p.observedTrials=0;p.observations=[]});
-  gameRoot=sessionId();coach?.reset('',gameRoot);coach?.setEnabled(coachEnabled);renderCoach();
+  gameRoot=sessionId();effectArmed=null;coach?.reset('',gameRoot);coach?.setEnabled(coachEnabled);renderCoach();renderEffect();
   entriesPush({kind:'load',frame:0,actor:'JANE',reason:'single cartridge started; 3 observers share this game state',game_root:gameRoot});
   $('handoffs').textContent=0;$('sensorState').textContent='MANUAL';$('lifeRead').textContent='—';
   setProfile();status('Jane plays first; Toph and Patricia watch the same game.');
  }catch(e){status('ROM load failed: '+e.message)}
 }
 $('romAll').onchange=e=>load(e.target.files?.[0]);
-$('teachOn').onchange=e=>{coachEnabled=e.target.checked;coach?.setEnabled(coachEnabled&&active===0);renderCoach();status('Toph coaching '+(coachEnabled?'enabled':'paused')+'; Jane remains Player 1.');};
+$('teachOn').onchange=e=>{
+ if(effectArmed){status('Teaching setting is locked during a preregistered attempt.');e.target.checked=coachEnabled;return}
+ coachEnabled=e.target.checked;coach?.setEnabled(coachEnabled&&active===0);renderCoach();
+ status('Toph coaching '+(coachEnabled?'enabled':'paused')+'; Jane remains Player 1.');
+};
 $('volume').oninput=e=>{volume=Number(e.target.value);audioEnabled=true;setVolume()};
 $('speed').onchange=e=>{speed=Number(e.target.value)||1;if(ready)w().JANE_ARENA_SPEED=speed;status('NES speed: '+speed+'× · one continuous game / three observers.');};
 $('mute').onclick=()=>{muted=!muted;audioEnabled=!muted;setVolume()};
@@ -261,9 +287,68 @@ $('monitor').onclick=()=>{
 $('disableMonitor').onclick=()=>{monitor=null;lifeLast=null;lifeCandidate=null;$('sensorState').textContent='MANUAL';status('Automatic lives sensor disabled; manual death confirmation active.')};
 $('export').onclick=()=>{
  const blob=new Blob([JSON.stringify({schema:'jane.turn-taking.v1',rom:safeRoot(),game_root:gameRoot,
-  observation_roots:1,players:people,teaching:coach?.status()||null,events:entries,note:'All observations share the same NES starting state lineage.'},null,2)],{type:'application/json'});
+  observation_roots:1,players:people,teaching:coach?.status()||null,teaching_effect:{attempts:effectRows,result:effectiveness.assess(effectRows)},events:entries,note:'All observations share the same NES starting state lineage.'},null,2)],{type:'application/json'});
  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='jane-toph-patricia-watch-learn-play.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
+
+function renderEffect(){
+ const r=effectiveness?.assess(effectRows)||{state:'UNAVAILABLE'};
+ $('av081BaselineCount').textContent=effectRows.filter(x=>x.arm==='baseline').length;
+ $('av081CoachedCount').textContent=effectRows.filter(x=>x.arm==='coached').length;
+ $('av081Delta').textContent=r.median_difference_frames===undefined?'—':(r.median_difference_frames>0?'+':'')+r.median_difference_frames;
+ $('av081Report').textContent=[
+  'AV-081 / '+r.state,
+  'ARMED '+(effectArmed?.arm||'NONE')+' / '+(effectArmed?.run_root||'—'),
+  'CRITERION '+(effectArmed?.criterion||'coached median survival frames > baseline median'),
+  'STARTING CONTEXT '+(effectArmed?.context||'not armed'),
+  'BASELINE ATTEMPTS '+(r.baseline??0),
+  'COACHED ATTEMPTS '+(r.coached??0),
+  'BASELINE MEDIAN '+(r.baseline_median_frames??'INSUFFICIENT'),
+  'COACHED MEDIAN '+(r.coached_median_frames??'INSUFFICIENT'),
+  'DIFFERENCE '+(r.median_difference_frames??'NOT ESTIMATED'),
+  'WHY '+(r.reason||'Await independently started attempts'),
+  '', 'NO AUTOMATIC BENEFIT LABEL; NO AUTOMATIC RETAINED TEACHING',
+  'Three repeat runs of one fixed game start do not equal three independent witness ancestries.'
+ ].join('\n');
+}
+function armEffect(arm){
+ const stat=observer();
+ if(!stat?.running||active!==0||!gameRoot){status('Jane must be playing a loaded ROM before AV-081 can arm.');return}
+ if(effectRows.some(x=>x.run_root===gameRoot)){status('This game attempt was already measured. Reload the cartridge for a distinct run.');return}
+ if(effectArmed){status('Finish or cancel the current experiment before arming another.');return}
+ const recent=w().JANE_PERCEPTION?.diagnostics?.().recentTrials||[];
+ const sample=recent.findLast?.(x=>x.rom===stat.rom&&typeof x.preHash==='string'&&x.preHash.length>0);
+ const context=sample?.preHash;
+ if(!context){status('No observed pre-action screen context yet; allow Jane to play briefly before arming.');return}
+ const planned=effectiveness?.plan({rom:String(stat.rom),context,run_root:gameRoot,start_frame:Number(stat.frame)||0,arm});
+ if(planned?.state!=='ARMED'){status(planned?.reason||'Plan could not be armed');return}
+ effectArmed=planned;coachEnabled=arm==='coached';$('teachOn').checked=coachEnabled;
+ coach?.setEnabled(coachEnabled);renderEffect();renderCoach();
+ entriesPush({kind:'experiment-armed',actor:'PATRICIA',frame:planned.start_frame,game_root:gameRoot,
+   reason:'predeclared '+arm+' / context '+context+' / frames until human-confirmed life loss'});
+ status('AV-081 '+arm+' attempt armed; only a confirmed life loss closes the measurement.');
+}
+$('av081Baseline').onclick=()=>armEffect('baseline');
+$('av081Coached').onclick=()=>armEffect('coached');
+$('av081Cancel').onclick=()=>{effectArmed=null;renderEffect();status('AV-081 attempt cancelled without recording an outcome.')};
+$('av081Reset').onclick=()=>{
+ if(!confirm('Clear the local comparison history? Export it first if you want to preserve it.'))return;
+ effectRows=[];effectArmed=null;try{localStorage.removeItem(EVAL_KEY)}catch(e){}
+ renderEffect();
+};
+$('av081Export').onclick=()=>{
+ const blob=new Blob([JSON.stringify({schema:'jane.teaching-effect.av081',
+  arm:effectArmed,attempts:effectRows,result:effectiveness.assess(effectRows),
+  witness_note:'Distinct attempts are not necessarily independent source ancestries.'},null,2)],{type:'application/json'});
+ const a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download='jane-av081-teaching-effect.json';a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+try{
+ const raw=localStorage.getItem(EVAL_KEY),parsed=raw?JSON.parse(raw):[];
+ if(Array.isArray(parsed))effectRows=parsed.filter(x=>x&&x.schema==='jane.teaching-effect.av081'&&x.state==='COMPLETE').slice(-120);
+}catch(e){}
+renderEffect();
+
 setInterval(sample,500);renderPlayers();init();
 })();
 </script></body></html>
