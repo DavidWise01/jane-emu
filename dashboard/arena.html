@@ -65,9 +65,9 @@ pre{border:1px solid var(--edge);background:#031523;padding:10px;border-radius:8
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
-const people=[{name:'JANE',mode:'fast',color:'#7ae7ef',turns:0,watched:0,actions:0},{name:'TOPH',mode:'careful',color:'#ffc185',turns:0,watched:0,actions:0},{name:'PATRICIA',mode:'balanced',color:'#c8adff',turns:0,watched:0,actions:0}];
+const people=[{name:'JANE',mode:'fast',color:'#7ae7ef',turns:0,watched:0,actions:0,observedTrials:0,observations:[]},{name:'TOPH',mode:'careful',color:'#ffc185',turns:0,watched:0,actions:0,observedTrials:0,observations:[]},{name:'PATRICIA',mode:'balanced',color:'#c8adff',turns:0,watched:0,actions:0,observedTrials:0,observations:[]}];
 let active=0,ready=false,lastFrame=-1,lastTrials=0,turnStarted=0,handoffs=0,volume=40,muted=false,audioEnabled=false,
-    monitor=null,lifeLast=null,lifeStable=0,lifeCandidate=null,lifeHoldoff=0,entries=[],gameRoot='',seenScenes=new Set();
+    monitor=null,lifeLast=null,lifeStable=0,lifeCandidate=null,lifeHoldoff=0,entries=[],gameRoot='',seenScenes=new Set(),seenTrialIds=new Set();
 const limit=1500;
 function status(s){$('status').textContent=s}
 function sessionId(){return 'session-'+(typeof crypto.randomUUID==='function'?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2))}
@@ -83,7 +83,7 @@ function renderPlayers(){
   const title=document.createElement('b');title.textContent=(i+1)+' · '+p.name;
   const sub=document.createElement('small');sub.textContent=' '+p.mode.toUpperCase()+' / '+(active===i?'PLAYING':'WATCHING');
   label.append(title,sub);
-  const stat=document.createElement('em');stat.textContent=p.turns+' TURNS · '+p.watched+' WATCHED FRAMES';
+  const stat=document.createElement('em');stat.textContent=p.turns+' TURNS · '+p.watched+' FRAMES · '+p.observedTrials+' OBSERVED ACTIONS';
   e.append(label,stat);$('players').appendChild(e);
  });
  $('activeIndicator').textContent=people[active].name+' PLAYING';
@@ -139,6 +139,21 @@ function sample(){
   people[active].actions+=Math.max(0,(Number(s.trials)||0)-lastTrials);
  }
  lastFrame=frame;lastTrials=Number(s.trials)||0;
+ try{
+  const recent=w().JANE_PERCEPTION?.diagnostics?.().recentTrials||[];
+  for(const t of recent){
+   const k=String(t.id)+'|'+String(t.started||t.startFrame||0)+'|'+String(t.preHash||'');
+   if(seenTrialIds.has(k))continue;
+   seenTrialIds.add(k);
+   for(let i=0;i<3;i++)if(i!==active){
+    const p=people[i];p.observedTrials++;
+    p.observations.push({trial_id:t.id,frame,button:t.button,source_root:gameRoot,
+     note:'Shared witnessed action; not independently corroborated or labeled beneficial'});
+    if(p.observations.length>100)p.observations.shift();
+   }
+  }
+  if(seenTrialIds.size>5000)seenTrialIds.clear();
+ }catch(e){}
  if(monitor){
   const life=readLife();$('lifeRead').textContent=life===null?'—':life;
   if(life===null){$('sensorState').textContent='UNAVAILABLE';return}
@@ -190,7 +205,7 @@ async function load(file){
   const dt=new (w().DataTransfer)();dt.items.add(new (w().File)([buf],file.name,{type:'application/octet-stream'}));
   d.files=dt.files;d.dispatchEvent(new (w().Event)('change',{bubbles:true}));
   active=0;lastFrame=-1;lastTrials=0;handoffs=0;lifeHoldoff=0;lifeLast=null;lifeCandidate=null;monitor=null;
-  entries=[];people.forEach(p=>{p.turns=0;p.watched=0;p.actions=0});
+  entries=[];seenTrialIds.clear();people.forEach(p=>{p.turns=0;p.watched=0;p.actions=0;p.observedTrials=0;p.observations=[]});
   gameRoot=sessionId();
   entriesPush({kind:'load',frame:0,actor:'JANE',reason:'single cartridge started; 3 observers share this game state',game_root:gameRoot});
   $('handoffs').textContent=0;$('sensorState').textContent='MANUAL';$('lifeRead').textContent='—';
