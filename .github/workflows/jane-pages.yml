@@ -81,6 +81,9 @@ jobs:
       - name: Test AV-080 Jane–Toph teacher loop
         run: node tests/test_av080_coach.cjs
 
+      - name: Verify AV-081 preregistered teaching effect
+        run: node tests/test_av081_effect.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
