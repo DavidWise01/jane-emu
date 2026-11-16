@@ -1,0 +1,40 @@
+{
+  "schema": "jane.nes.arcade.index.v85",
+  "version": 85,
+  "title": "Real NES ROM Arcade",
+  "emulator": "dashboard/arena.html",
+  "frontend": "dashboard/v85.html",
+  "server": "server_v85.py",
+  "api": {
+    "index": "/api/v85/index",
+    "observe": "/api/v85/observe",
+    "ledger": "/api/v85/ledger"
+  },
+  "cartridge_handling": {
+    "location": "browser only",
+    "accepted": ".nes",
+    "max_bytes": 5000000,
+    "upload_to_python": false,
+    "repository_storage": false
+  },
+  "observation": {
+    "source": "existing in-browser JANE_PERCEPTION.status()",
+    "fields": [
+      "rom_id",
+      "frame",
+      "trials",
+      "running",
+      "actor",
+      "note",
+      "session_id"
+    ],
+    "storage": "local append-only JSONL",
+    "root_rule": "one continuous run shares one session ancestry"
+  },
+  "limits": [
+    "GitHub Pages cannot run a Python server",
+    "Teaching benefit is not inferred from frame or action counts",
+    "Automatic death handoff requires game-specific verified RAM address; otherwise manual confirmation"
+  ],
+  "legacy_simulations": "v81–v84 remain archived and explicitly synthetic"
+}
