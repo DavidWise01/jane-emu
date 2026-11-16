@@ -70,6 +70,9 @@ jobs:
       - name: Verify Wizard three-player arena
         run: node tests/test_wizard_arena.cjs
 
+      - name: Verify single-screen turn-taking arena
+        run: node tests/test_turn_arena.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
