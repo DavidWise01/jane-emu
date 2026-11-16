@@ -1520,6 +1520,12 @@ var i13ISSteps = 0;            // replay steps taken (for β anneal)
 // td_new = max(1, (td * factor) >> 8). Floor of 1 keeps entry alive.
 var I13_PD_EVERY = 64;    // decay sweep every 64 replay steps
 var I13_PD_FACTOR = 240;  // 240/256 ≈ 0.9375 — ~6.25% decay per sweep
+// ── BUILD 14: DUAL LEARNING RATE ──
+// Actor and critic have different learning needs. The critic (value head)
+// provides the baseline V(s) the actor trains against — it must be more
+// accurate than the actor, so it learns faster. Actor stays at 1× base LR,
+// critic at CRITIC_MULT × base LR. Both still decay hyperbolically.
+var I13_LR_CRITIC_MULT = 2;  // critic learns at 2× the actor rate
 
 // ── ACTION MAPPING ─────────────────────────────────────────
 // i13 action index → NES pad bitmask
@@ -1563,6 +1569,8 @@ function i13Learn(reward) {
   i13T[33] = rewQ8;
   // Hyperbolic decay: effectiveLR = baseLR * 256 / (256 + trainN)
   var effectiveLR = Math.max(1, (i13LR * 256 / (256 + i13TrainN)) | 0);
+  // BUILD 14: critic gets CRITIC_MULT × actor LR (faster baseline learning)
+  var criticLR = Math.min(effectiveLR * I13_LR_CRITIC_MULT, 127);  // cap at 127 Q8 (~0.5)
   var curV = i13T[34];  // live V (saved for next step's prevV)
   // ── N-STEP RETURNS: accumulate rewards in ring buffer ──
   // Store current reward and V(s) in ring
@@ -1596,7 +1604,7 @@ function i13Learn(reward) {
   // actor learns from TD error (not raw reward)
   i13Eval.call('agent_learn', [i13W, i13X, i13T, td, effectiveLR]);
   // critic learns to reduce TD error
-  i13Eval.call('value_learn', [i13W, i13T, td, effectiveLR]);
+  i13Eval.call('value_learn', [i13W, i13T, td, criticLR]);
   // save current V for next step's TD computation
   i13PrevV = curV;
   i13TrainN++;
@@ -1690,7 +1698,8 @@ function i13SaveBrain() {
     per: i13PER.map(function(e){return {f:e.f.slice(),td:e.td,sign:e.sign};}),
     perTotal: i13PERTotal,
     isBeta: i13ISBeta,
-    isSteps: i13ISSteps
+    isSteps: i13ISSteps,
+    lrCriticMult: I13_LR_CRITIC_MULT
   };
 }
 
@@ -1736,6 +1745,8 @@ function i13LoadBrain(b) {
   // IS correction state: restore or default
   i13ISBeta = b.isBeta || I13_IS_BETA_START;
   i13ISSteps = b.isSteps || 0;
+  // BUILD 14: dual LR (backward compat: missing → default 2)
+  if (b.lrCriticMult != null) I13_LR_CRITIC_MULT = b.lrCriticMult;
 }
 
 // Soft reset: zero trainer state but keep weights (Root Strength)
@@ -1813,7 +1824,9 @@ var api = {
   IS_BETA_END: I13_IS_BETA_END,
   IS_BETA_STEPS: I13_IS_BETA_STEPS,
   PD_EVERY: I13_PD_EVERY,
-  PD_FACTOR: I13_PD_FACTOR
+  PD_FACTOR: I13_PD_FACTOR,
+  get lrCriticMult() { return I13_LR_CRITIC_MULT; },
+  get effectiveCriticLR() { return Math.min(Math.max(1, (i13LR * 256 / (256 + i13TrainN)) | 0) * I13_LR_CRITIC_MULT, 127); }
 };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.I13BRAIN = api;
@@ -2586,7 +2599,7 @@ function chainUpdate(who,action,i13state){
   /* update {{I}} values */
   if(i13state){
     var iVal=$("ch-i").querySelector(".val");
-    iVal.textContent="W969["+i13state.seen+"] lr="+(i13.effectiveLR||5)+" ε"+qEps.toFixed(2)+" V"+(i13.valueV||0)+" δ"+(i13.tdError||0)+" tgt"+(i13.tgtAge||0)+" n"+(i13.nStepFill||0)+"/4 dc"+(i13.decayCount||0);
+    iVal.textContent="W969["+i13state.seen+"] lr="+(i13.effectiveLR||5)+"/"+(i13.effectiveCriticLR||10)+" ε"+qEps.toFixed(2)+" V"+(i13.valueV||0)+" δ"+(i13.tdError||0)+" tgt"+(i13.tgtAge||0)+" n"+(i13.nStepFill||0)+"/4 dc"+(i13.decayCount||0);
   }
   /* show action on cubit node */
   var actNames=["·","←","→","A","B","↑","↓","ST"],_ACT=i13.I13_ACT;
@@ -3013,7 +3026,7 @@ function xrayDraw(){
     txt(660,255,"V="+T[34],S.txt);
     txt(660,270,"δ="+(i13.tdError||0),S.txt);
     txt(660,285,"seen="+i13.seen,S.dim);
-    txt(660,300,"lr="+(i13.effectiveLR||0),S.dim);
+    txt(660,300,"lr="+(i13.effectiveLR||0)+"/"+(i13.effectiveCriticLR||0),S.dim);
     txt(660,315,"tgt="+(i13.tgtAge||0)+"/256",S.dim);
     txt(760,255,"n-step="+(i13.nStepFill||0)+"/4",S.dim);
     txt(760,270,"decay="+(i13.decayCount||0),S.dim);
