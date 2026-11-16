@@ -187,7 +187,6 @@ async function init(){
   if(!html.includes(frameClock))throw Error('NES frame-clock hook missing; speed control cannot safely initialize');
   html=html.replace(frameClock,'accum+=delta*(window.JANE_ARENA_SPEED||1);let steps=0;while(accum>=1000/60&&steps++<32)');
   html=html.replace('if(steps>=6)accum=0','if(steps>=32)accum=0');
-  html=html.replace('<head>','<head><script>window.JANE_ARENA_SPEED=1;<\/script>');
   $('game').addEventListener('load',()=>{
    try{
     ready=!!w().document.getElementById('romInput');
