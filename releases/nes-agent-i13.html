@@ -1535,6 +1535,17 @@ var I13_LR_CRITIC_MULT = 2;  // critic learns at 2× the actor rate
 var I13_GN_BASE_P = 77;      // 0.3 in Q8 (77/256 ≈ 0.301)
 var I13_GN_DECAY_DIV = 1000;  // p halves after 1000 learn steps
 var I13_GN_EVERY = 4;         // apply noise every 4 learn steps (not every step — too expensive)
+// ── BUILD 16: REWARD NORMALIZATION ──
+// Track running mean and variance of rewards via EMA. Normalize reward
+// before it enters TD computation so the signal scale stays consistent
+// regardless of game phase. α ≈ 0.012 (3/256 in Q8).
+// r_norm = (r - μ) * 256 / max(256, σ), where σ = sqrt(variance) in Q8.
+// First 64 rewards are unscaled (warmup — need enough samples for stable stats).
+var I13_RN_ALPHA = 3;         // EMA smoothing: 3/256 ≈ 0.012
+var I13_RN_WARMUP = 64;       // unscaled warmup period
+var i13RNMean = 0;            // running mean of reward (Q8)
+var i13RNVar = 256;           // running variance (Q8 squared, init to 1.0 in Q8)
+var i13RNCount = 0;           // how many rewards seen
 
 // ── ACTION MAPPING ─────────────────────────────────────────
 // i13 action index → NES pad bitmask
@@ -1575,6 +1586,25 @@ var i13DecayCount = 0;    // how many decay passes have fired
 function i13Learn(reward) {
   // reward is float, convert to Q8
   var rewQ8 = (reward * 256) | 0;
+  // ── BUILD 16: REWARD NORMALIZATION ──
+  // Update running stats and normalize reward after warmup
+  var rnDelta = rewQ8 - i13RNMean;
+  i13RNMean = i13RNMean + ((rnDelta * I13_RN_ALPHA + 128) >> 8);
+  var rnDeltaSq = (rnDelta * rnDelta) >> 8;  // Q8 squared
+  i13RNVar = i13RNVar + (((rnDeltaSq - i13RNVar) * I13_RN_ALPHA + 128) >> 8);
+  if (i13RNVar < 1) i13RNVar = 1;  // floor: no zero variance
+  i13RNCount++;
+  if (i13RNCount > I13_RN_WARMUP) {
+    // integer sqrt via Newton's method (Q8 scale)
+    var rnSigma = 16;  // initial guess
+    for (var sqi = 0; sqi < 8; sqi++) { if (rnSigma > 0) rnSigma = (rnSigma + (i13RNVar / rnSigma)) >> 1; }
+    if (rnSigma < 1) rnSigma = 1;
+    // normalize: r_norm = (r - μ) * 256 / max(256, σ)
+    var rnDenom = rnSigma > 256 ? rnSigma : 256;
+    rewQ8 = ((rewQ8 - i13RNMean) * 256 / rnDenom) | 0;
+    // clamp to prevent extreme normalized values
+    if (rewQ8 > 512) rewQ8 = 512; if (rewQ8 < -512) rewQ8 = -512;
+  }
   i13T[33] = rewQ8;
   // Hyperbolic decay: effectiveLR = baseLR * 256 / (256 + trainN)
   var effectiveLR = Math.max(1, (i13LR * 256 / (256 + i13TrainN)) | 0);
@@ -1730,7 +1760,10 @@ function i13SaveBrain() {
     lrCriticMult: I13_LR_CRITIC_MULT,
     gnBaseP: I13_GN_BASE_P,
     gnDecayDiv: I13_GN_DECAY_DIV,
-    gnEvery: I13_GN_EVERY
+    gnEvery: I13_GN_EVERY,
+    rnMean: i13RNMean,
+    rnVar: i13RNVar,
+    rnCount: i13RNCount
   };
 }
 
@@ -1782,6 +1815,10 @@ function i13LoadBrain(b) {
   if (b.gnBaseP != null) I13_GN_BASE_P = b.gnBaseP;
   if (b.gnDecayDiv != null) I13_GN_DECAY_DIV = b.gnDecayDiv;
   if (b.gnEvery != null) I13_GN_EVERY = b.gnEvery;
+  // BUILD 16: reward normalization (backward compat: missing → defaults)
+  if (b.rnMean != null) i13RNMean = b.rnMean;
+  if (b.rnVar != null) i13RNVar = b.rnVar;
+  if (b.rnCount != null) i13RNCount = b.rnCount;
 }
 
 // Soft reset: zero trainer state but keep weights (Root Strength)
@@ -1798,6 +1835,8 @@ function i13SoftReset() {
   i13PER = []; i13PERTotal = 0;
   // IS correction: reset β anneal on new fight
   i13ISBeta = I13_IS_BETA_START; i13ISSteps = 0;
+  // BUILD 16: reward normalization — fresh stats per fight
+  i13RNMean = 0; i13RNVar = 256; i13RNCount = 0;
   // weights survive — this IS root strength
 }
 
@@ -1865,7 +1904,13 @@ var api = {
   get gnBaseP() { return I13_GN_BASE_P; },
   get gnDecayDiv() { return I13_GN_DECAY_DIV; },
   get gnEvery() { return I13_GN_EVERY; },
-  get gnEffectiveP() { return (I13_GN_BASE_P * 256 / (256 + (i13TrainN / I13_GN_DECAY_DIV))) | 0; }
+  get gnEffectiveP() { return (I13_GN_BASE_P * 256 / (256 + (i13TrainN / I13_GN_DECAY_DIV))) | 0; },
+  // BUILD 16: reward normalization
+  get rnMean() { return i13RNMean; },
+  get rnVar() { return i13RNVar; },
+  get rnCount() { return i13RNCount; },
+  RN_ALPHA: I13_RN_ALPHA,
+  RN_WARMUP: I13_RN_WARMUP
 };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.I13BRAIN = api;
@@ -2638,7 +2683,7 @@ function chainUpdate(who,action,i13state){
   /* update {{I}} values */
   if(i13state){
     var iVal=$("ch-i").querySelector(".val");
-    iVal.textContent="W969["+i13state.seen+"] lr="+(i13.effectiveLR||5)+"/"+(i13.effectiveCriticLR||10)+" gn="+(i13.gnEffectiveP||0)+" ε"+qEps.toFixed(2)+" V"+(i13.valueV||0)+" δ"+(i13.tdError||0)+" tgt"+(i13.tgtAge||0)+" n"+(i13.nStepFill||0)+"/4 dc"+(i13.decayCount||0);
+    iVal.textContent="W969["+i13state.seen+"] lr="+(i13.effectiveLR||5)+"/"+(i13.effectiveCriticLR||10)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0)+"μ"+(i13.rnMean||0)+"σ²"+(i13.rnVar||256)+" ε"+qEps.toFixed(2)+" V"+(i13.valueV||0)+" δ"+(i13.tdError||0)+" tgt"+(i13.tgtAge||0)+" n"+(i13.nStepFill||0)+"/4 dc"+(i13.decayCount||0);
   }
   /* show action on cubit node */
   var actNames=["·","←","→","A","B","↑","↓","ST"],_ACT=i13.I13_ACT;
@@ -3068,7 +3113,7 @@ function xrayDraw(){
     txt(660,300,"lr="+(i13.effectiveLR||0)+"/"+(i13.effectiveCriticLR||0),S.dim);
     txt(660,315,"tgt="+(i13.tgtAge||0)+"/256",S.dim);
     txt(760,255,"n-step="+(i13.nStepFill||0)+"/4",S.dim);
-    txt(760,270,"decay="+(i13.decayCount||0)+" gn="+(i13.gnEffectiveP||0),S.dim);
+    txt(760,270,"decay="+(i13.decayCount||0)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0),S.dim);
     txt(760,285,"train="+i13.trainN,S.dim);
     txt(760,300,"W[969]",S.brain);
   } else { txt(410,200,"(brain offline)",S.dim); }
@@ -3407,7 +3452,7 @@ function drawInf(){if(!boxer||!boxer.inf)return;var inf=boxer.inf;inf.derive();
 Array.prototype.forEach.call($("tabs").children,function(b){b.onclick=function(){Array.prototype.forEach.call($("tabs").children,function(o){o.className=o===b?"on":"";$(o.getAttribute("data-t")).className="panel"+(o===b?" on":"");});
   var tt=b.getAttribute("data-t");if(tt==="pCub")drawGrid();if(tt==="pChroma")drawChroma(agent.view());if(tt==="pCubit")drawCubit(agent.view());if(tt==="pInf")drawInf();};});
 $("bPing").onclick=function(){ping();};$("bDrain").onclick=function(){rDrain=!rDrain;rsv.drain=rsv2.drain=rDrain;this.className="bad"+(rDrain?" on":"");this.textContent=rDrain?"Refill":"Drain reservoir";echo.on=false;echo.last=-1;};
-$("bScramble").onclick=function(){nnScramble=!nnScramble;this.className="bad"+(nnScramble?" on":"");this.textContent=nnScramble?"Stop scrambling":"Scramble labels";nnPos=0;nnNeg=0;nnPosN=0;nnNegN=0;nnRP=[];nnRN=[];i13PER=[];i13PERTotal=0;drawCubit(agent.view());};
+$("bScramble").onclick=function(){nnScramble=!nnScramble;this.className="bad"+(nnScramble?" on":"");this.textContent=nnScramble?"Stop scrambling":"Scramble labels";nnPos=0;nnNeg=0;nnPosN=0;nnNegN=0;nnRP=[];nnRN=[];i13PER=[];i13PERTotal=0;i13RNMean=0;i13RNVar=256;i13RNCount=0;drawCubit(agent.view());};
 /* ---- frozen kernel instance ---- */
 var kState=0,kInst=1,kSteps=0,kFiles={},kMan=JSON.parse(new TextDecoder().decode(b64(KDATA.manifest)));
 Object.keys(KDATA.files).forEach(function(f){kFiles[f]=b64(KDATA.files[f]);});
