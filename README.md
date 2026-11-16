@@ -54,3 +54,12 @@ The main [Play ↔ Learn Git dashboard](./dashboard/index.html) also exposes a v
 ## TE-083 — Teaching Recovery Arcade
 
 [Launch v83](./dashboard/v83.html). Run the original ten tests, preserve the DECOY counterexample and initial policy, then explicitly propose a repaired prediction rule. Patricia audits the revision on five predeclared fresh seeds (151, 157, 163, 167, 173), one per pattern family. The repair passes only if every audit pair beats the control and none regresses against the original taught rule. Audit results are appended to the browser-session ledger, including the revision event, and exported as JSON. The lesson is a deterministic toy policy, not evidence of actual autonomous NES learning. The [ROM-based arena](./dashboard/arena.html) remains unchanged.
+
+
+## TE-084 — Recursive Teaching · Python server + JSON indexes
+
+- [Arcade UI](./dashboard/v84.html) · [version index](./data/v84/index.json) · [lesson registry](./data/v84/lessons.json) · [Python server](./server_v84.py)
+- Run locally using `python server_v84.py` from the repository root; visit `http://127.0.0.1:8784/`. Python standard library only. Binds to loopback by default.
+- Local API: `GET /api/v84/index`, `GET /api/v84/lessons`, `GET /api/v84/audit` (read-only), `GET /api/v84/ledger`, and `POST /api/v84/run` with `{\"kind\":\"audit\"}` or `{\"kind\":\"trial\",\"seed\":151,\"family\":\"DECOY\"}`. POST appends JSONL evidence under `data/v84/runtime/evidence.jsonl` with parent SHA-256 digest chaining. The ledger is local, not auto-published. This chain is tamper-evident only relative to a trusted prior digest; it does not establish independent witnesses or prevent a privileged local operator rewriting storage.
+- GitHub Pages is STATIC and cannot execute the Python API. The v84 page detects this and disables server actions; static JSON indexes remain browsable. Run a local Python server for persisted trials.
+- Scope: a deterministic synthetic three-lane experiment, not actual NES training. The original ROM-based [NES arena](./dashboard/arena.html) remains accessible.
