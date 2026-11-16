@@ -72,3 +72,15 @@ Launch [Jane v85 real NES arcade](./dashboard/v85.html). The frontend **embeds t
 **Local JSON evidence server:** run `python server_v85.py` from the repository root (Python standard library), then visit `http://127.0.0.1:8785/`. The new server hosts the NES frontend, serves `data/v85/index.json` at `/api/v85/index`, exposes `/api/v85/ledger`, and accepts `POST /api/v85/observe`. Press **Save NES Observation** during a running ROM to append metadata to the local `data/v85/runtime/observations.jsonl` journal, chained by SHA-256 digest. This is observation evidence, **not proof of improved NES gameplay**; ROM bytes are neither posted nor stored by Python.
 
 GitHub Pages can host and execute the existing JavaScript NES emulator and load user-selected `.nes` files, but Pages **does not execute `.py` servers**. The frontend disables journal submission when its local API is unavailable. Existing v81–v84 synthetic demos are retained as historical prototypes, not the current NES arcade. Never treat a repeated observation of the same NES run as an independent witness.
+
+## AV-086 — NES-native action trials
+
+[Launch NES-native arcade](./dashboard/v86.html) · [Python server](./server_v86.py) · [JSON index](./data/v86/index.json).
+
+The frontend keeps the real in-browser NES emulator and reads completed action trials from the existing JANE_PERCEPTION diagnostics. It records buttons, frame ranges, available screen hashes, and pixel differences. Pixel differences are observations, not game rewards or proof of teaching effectiveness.
+
+Run locally: `python server_v86.py`; open `http://127.0.0.1:8786/`. The Python server accepts POST /api/v86/trials with a JSON object containing 1–30 trials. GET /api/v86/trials returns recent records, GET /api/v86/verify checks the hash chain, and GET /api/v86/index returns the protocol index. Locally persisted records go to data/v86/runtime/trials.jsonl. Identical session/trial pairs are deduplicated. The emulator ROM remains in the browser; no ROM bytes are submitted.
+
+The interface includes manual Save Action Trials, five-second auto-save when Python is present, and JSON export. On GitHub Pages, the browser can run the actual .nes emulator, but no Python server or backend persistence is available. Compatibility still depends on the emulator and ROM mapper.
+
+Tests: `python -m unittest discover -s tests -p 'test_server_v86.py'`. Next improvement: attach verified cartridge-specific life, score, or opponent-health outcomes; avoid treating arbitrary pixel changes as rewards. All observations from one emulator session share one witness ancestry.
