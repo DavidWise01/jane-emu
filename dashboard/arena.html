@@ -4,16 +4,16 @@
 <style>
 :root{color-scheme:dark;--bg:#071522;--panel:#102b3d;--edge:#3e6c83;--ink:#e5f5ff;--teal:#68e6f3;--gold:#ffc181}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -25%,#214d67,#061421 56%);color:var(--ink);font:13px/1.5 system-ui}
-header,main{max-width:1600px;margin:auto;padding:14px}header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--edge)}
-h1{font:900 clamp(21px,3vw,34px) ui-monospace,monospace;color:var(--teal);margin:0}h2{font:900 15px ui-monospace,monospace;letter-spacing:.04em;margin:0 0 10px}
+header,main{max-width:1440px;margin:auto;padding:12px}header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--edge)}
+h1{font:900 clamp(20px,2.6vw,29px) ui-monospace,monospace;color:var(--teal);margin:0}h2{font:900 15px ui-monospace,monospace;letter-spacing:.04em;margin:0 0 10px}
 a{color:var(--teal)}button,input,select{font:inherit}button{background:#16445c;color:inherit;border:1px solid #5b8295;border-radius:7px;padding:9px 12px;cursor:pointer;font-weight:800}button:hover{filter:brightness(1.2)}
 input,select{background:#041925;color:inherit;border:1px solid var(--edge);border-radius:6px;padding:8px}input[type=range]{accent-color:var(--teal)}
 .pill{border:1px solid var(--edge);border-radius:22px;padding:5px 10px;color:var(--teal);font:800 11px ui-monospace,monospace}
 .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--edge);background:var(--panel);border-radius:10px;padding:11px;margin:0 0 12px}
 .toolbar input[type=file]{max-width:250px}
 .grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(290px,.75fr);gap:12px}
-.panel{background:linear-gradient(140deg,#112f42,#071a2b);border:1px solid var(--edge);border-radius:11px;padding:12px;min-width:0}
-.game{height:min(62vh,620px);min-height:350px;background:#010810;border:3px solid var(--edge);border-radius:8px;overflow:hidden}
+.panel{background:#0b2232;border:1px solid var(--edge);border-radius:11px;padding:12px;min-width:0}
+.game{height:min(70vh,690px);min-height:370px;background:#010810;border:3px solid var(--edge);border-radius:8px;overflow:hidden}
 iframe{width:100%;height:100%;border:0;background:#020810}
 .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:space-between}
 .players{display:grid;gap:8px}
@@ -34,9 +34,10 @@ pre{border:1px solid var(--edge);background:#031523;padding:10px;border-radius:8
 <label>Load your NES ROM <input id="romAll" type="file" accept=".nes"></label>
 <label>Volume <input id="volume" type="range" min="0" max="100" value="40" aria-label="NES audio volume"><output id="volOutput">40%</output></label>
 <button id="mute" aria-pressed="false">Mute</button>
+<label for="speed">Speed <select id="speed" aria-label="NES emulation speed"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option></select></label>
 <button id="confirmDeath">Confirm life lost → next player</button>
-<button id="undo">Undo last handoff</button>
-<span id="status" role="status">Initializing shared NES…</span>
+<button id="undo">Undo handoff</button>
+<span id="status" role="status">Loading NES…</span>
 </div>
 <div class="grid">
 <section class="panel"><div class="row"><h2>ONE CONTINUOUS NES GAME</h2><span class="pill" id="activeIndicator">JANE PLAYING</span></div>
@@ -47,17 +48,17 @@ pre{border:1px solid var(--edge);background:#031523;padding:10px;border-radius:8
 <div class="meter"><strong id="handoffs">0</strong><small>HANDOFFS</small></div>
 <div class="meter"><strong id="watchRoots">1</strong><small>SHARED GAME ANCESTRY</small></div>
 </div>
-<div class="note">This is one NES game and one Player 1 controller: the cartridge continues without reset when the active policy rotates. All three observe the same screen. Observing the same play does not create three independent source roots.</div>
+<div class="note">One game, one controller. Two watch while one plays; life loss passes control without restarting. Observations share one source ancestry.</div>
 </section>
-<section class="panel"><h2>THREE TURN-TAKING AGENTS</h2>
+<section class="panel"><h2>TURN ORDER · WATCH / PLAY</h2>
 <div class="players" id="players"></div>
-<h2 style="margin-top:14px">DEATH / HANDOFF SENSOR</h2>
+<details id="advancedSensor" style="margin-top:14px"><summary style="cursor:pointer;color:var(--gold);font-weight:800">Automatic life detection · advanced</summary><div style="padding-top:10px"><h2>Game-specific death sensor</h2>
 <div class="row"><label for="lifeAddr">Optional lives RAM address (hex)</label><input id="lifeAddr" type="text" size="7" maxlength="4" placeholder="e.g. 075A"></div>
 <div class="row"><label for="lifeType">Life encoding</label><select id="lifeType"><option value="binary">Binary</option><option value="bcd">BCD</option></select></div>
 <div class="row"><button id="monitor">Enable RAM death detection</button><button id="disableMonitor">Disable sensor</button></div>
 <div class="note">NES games do not share a universal lives address. Enter a verified RAM location for the cartridge to enable automatic handoffs after a stable lives decrement. Without it, use Confirm life lost. Unknown screen transitions never trigger a handoff automatically.</div>
 <div class="meters"><div class="meter"><strong id="lifeRead">—</strong><small>LIVES VALUE</small></div><div class="meter"><strong id="sensorState">MANUAL</strong><small>DEATH SENSOR</small></div></div>
-<h2>WATCHER MEMORY / HANDOFF LOG</h2><pre id="log">Watching for a cartridge and first frame.</pre>
+</div></details><h2 style="margin-top:14px">WATCH / HANDOFF LOG</h2><pre id="log">Watching for a cartridge and first frame.</pre>
 <button id="export" type="button">Export turn/observer evidence JSON</button>
 </section></div>
 </main>
@@ -66,7 +67,7 @@ pre{border:1px solid var(--edge);background:#031523;padding:10px;border-radius:8
 'use strict';
 const $=id=>document.getElementById(id);
 const people=[{name:'JANE',mode:'fast',color:'#7ae7ef',turns:0,watched:0,actions:0,observedTrials:0,observations:[]},{name:'TOPH',mode:'careful',color:'#ffc185',turns:0,watched:0,actions:0,observedTrials:0,observations:[]},{name:'PATRICIA',mode:'balanced',color:'#c8adff',turns:0,watched:0,actions:0,observedTrials:0,observations:[]}];
-let active=0,ready=false,lastFrame=-1,lastTrials=0,turnStarted=0,handoffs=0,volume=40,muted=false,audioEnabled=false,
+let active=0,ready=false,lastFrame=-1,lastTrials=0,turnStarted=0,handoffs=0,volume=40,muted=false,audioEnabled=false,speed=1,
     monitor=null,lifeLast=null,lifeStable=0,lifeCandidate=null,lifeHoldoff=0,entries=[],gameRoot='',seenScenes=new Set(),seenTrialIds=new Set();
 const limit=1500;
 function status(s){$('status').textContent=s}
@@ -182,6 +183,11 @@ async function init(){
   const anchor="window.JANE_PERCEPTION={status:";
   if(!html.includes(anchor))throw Error('Could not locate NES inspection hook');
   html=html.replace(anchor,"window.JANE_ARENA_RAM={read:(addr)=>nes?.cpu?.mem?.[addr]};"+anchor);
+  const frameClock='accum+=delta;let steps=0;while(accum>=1000/60&&steps++<6)';
+  if(!html.includes(frameClock))throw Error('NES frame-clock hook missing; speed control cannot safely initialize');
+  html=html.replace(frameClock,'accum+=delta*(window.JANE_ARENA_SPEED||1);let steps=0;while(accum>=1000/60&&steps++<32)');
+  html=html.replace('if(steps>=6)accum=0','if(steps>=32)accum=0');
+  html=html.replace('<head>','<head><script>window.JANE_ARENA_SPEED=1;<\/script>');
   $('game').addEventListener('load',()=>{
    try{
     ready=!!w().document.getElementById('romInput');
@@ -191,7 +197,7 @@ async function init(){
       '.main{display:block!important;max-width:none!important}.main>section:first-child{width:100%!important;max-width:none!important;display:block!important}'+
       '.main>section:first-child .inner{padding:6px!important}.gamebox{max-width:100%!important}';
     w().document.head.appendChild(css);
-    setProfile();setVolume();status('One NES ready. Choose a cartridge; Jane plays first.');
+    w().JANE_ARENA_SPEED=speed;setProfile();setVolume();status('One NES ready · Jane plays first.');
    }catch(e){status('NES setup problem: '+e.message)}
   },{once:true});
   $('game').srcdoc=html;
@@ -214,6 +220,7 @@ async function load(file){
 }
 $('romAll').onchange=e=>load(e.target.files?.[0]);
 $('volume').oninput=e=>{volume=Number(e.target.value);audioEnabled=true;setVolume()};
+$('speed').onchange=e=>{speed=Number(e.target.value)||1;if(ready)w().JANE_ARENA_SPEED=speed;status('NES speed: '+speed+'× · one continuous game / three observers.');};
 $('mute').onclick=()=>{muted=!muted;audioEnabled=!muted;setVolume()};
 $('confirmDeath').onclick=()=>switchTurn('human-confirmed life loss',true);
 $('undo').onclick=()=>{
