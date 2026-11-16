@@ -1526,6 +1526,15 @@ var I13_PD_FACTOR = 240;  // 240/256 ≈ 0.9375 — ~6.25% decay per sweep
 // accurate than the actor, so it learns faster. Actor stays at 1× base LR,
 // critic at CRITIC_MULT × base LR. Both still decay hyperbolically.
 var I13_LR_CRITIC_MULT = 2;  // critic learns at 2× the actor rate
+// ── BUILD 15: GRADIENT NOISE INJECTION ──
+// After each learn step, each non-bias weight gets ±1 Q8 noise with
+// probability p. p decays: p = BASE_P * 256 / (256 + trainN / GN_DECAY_DIV).
+// Breaks symmetry in flat loss regions, helps escape local minima.
+// Noise is ±1 Q8 (~0.004 float) — same magnitude as L1 decay, so it
+// can perturb a weight off a fixed point but can't blow up the network.
+var I13_GN_BASE_P = 77;      // 0.3 in Q8 (77/256 ≈ 0.301)
+var I13_GN_DECAY_DIV = 1000;  // p halves after 1000 learn steps
+var I13_GN_EVERY = 4;         // apply noise every 4 learn steps (not every step — too expensive)
 
 // ── ACTION MAPPING ─────────────────────────────────────────
 // i13 action index → NES pad bitmask
@@ -1605,6 +1614,25 @@ function i13Learn(reward) {
   i13Eval.call('agent_learn', [i13W, i13X, i13T, td, effectiveLR]);
   // critic learns to reduce TD error
   i13Eval.call('value_learn', [i13W, i13T, td, criticLR]);
+  // ── BUILD 15: GRADIENT NOISE INJECTION ──
+  // Every GN_EVERY steps, perturb non-bias weights by ±1 Q8 with decaying probability
+  if (i13TrainN % I13_GN_EVERY === 0) {
+    var gnP = (I13_GN_BASE_P * 256 / (256 + (i13TrainN / I13_GN_DECAY_DIV))) | 0;
+    if (gnP > 0) {
+      // hidden input weights [0..719]
+      for (var gi = 0; gi < 720; gi++) {
+        if (((Math.random() * 256) | 0) < gnP) i13W[gi] += (Math.random() < 0.5) ? 1 : -1;
+      }
+      // output weights [744..935]
+      for (var gj = 744; gj < 936; gj++) {
+        if (((Math.random() * 256) | 0) < gnP) i13W[gj] += (Math.random() < 0.5) ? 1 : -1;
+      }
+      // value head weights [944..967]
+      for (var gk = 944; gk < 968; gk++) {
+        if (((Math.random() * 256) | 0) < gnP) i13W[gk] += (Math.random() < 0.5) ? 1 : -1;
+      }
+    }
+  }
   // save current V for next step's TD computation
   i13PrevV = curV;
   i13TrainN++;
@@ -1699,7 +1727,10 @@ function i13SaveBrain() {
     perTotal: i13PERTotal,
     isBeta: i13ISBeta,
     isSteps: i13ISSteps,
-    lrCriticMult: I13_LR_CRITIC_MULT
+    lrCriticMult: I13_LR_CRITIC_MULT,
+    gnBaseP: I13_GN_BASE_P,
+    gnDecayDiv: I13_GN_DECAY_DIV,
+    gnEvery: I13_GN_EVERY
   };
 }
 
@@ -1747,6 +1778,10 @@ function i13LoadBrain(b) {
   i13ISSteps = b.isSteps || 0;
   // BUILD 14: dual LR (backward compat: missing → default 2)
   if (b.lrCriticMult != null) I13_LR_CRITIC_MULT = b.lrCriticMult;
+  // BUILD 15: gradient noise (backward compat: missing → keep defaults)
+  if (b.gnBaseP != null) I13_GN_BASE_P = b.gnBaseP;
+  if (b.gnDecayDiv != null) I13_GN_DECAY_DIV = b.gnDecayDiv;
+  if (b.gnEvery != null) I13_GN_EVERY = b.gnEvery;
 }
 
 // Soft reset: zero trainer state but keep weights (Root Strength)
@@ -1826,7 +1861,11 @@ var api = {
   PD_EVERY: I13_PD_EVERY,
   PD_FACTOR: I13_PD_FACTOR,
   get lrCriticMult() { return I13_LR_CRITIC_MULT; },
-  get effectiveCriticLR() { return Math.min(Math.max(1, (i13LR * 256 / (256 + i13TrainN)) | 0) * I13_LR_CRITIC_MULT, 127); }
+  get effectiveCriticLR() { return Math.min(Math.max(1, (i13LR * 256 / (256 + i13TrainN)) | 0) * I13_LR_CRITIC_MULT, 127); },
+  get gnBaseP() { return I13_GN_BASE_P; },
+  get gnDecayDiv() { return I13_GN_DECAY_DIV; },
+  get gnEvery() { return I13_GN_EVERY; },
+  get gnEffectiveP() { return (I13_GN_BASE_P * 256 / (256 + (i13TrainN / I13_GN_DECAY_DIV))) | 0; }
 };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.I13BRAIN = api;
@@ -2599,7 +2638,7 @@ function chainUpdate(who,action,i13state){
   /* update {{I}} values */
   if(i13state){
     var iVal=$("ch-i").querySelector(".val");
-    iVal.textContent="W969["+i13state.seen+"] lr="+(i13.effectiveLR||5)+"/"+(i13.effectiveCriticLR||10)+" ε"+qEps.toFixed(2)+" V"+(i13.valueV||0)+" δ"+(i13.tdError||0)+" tgt"+(i13.tgtAge||0)+" n"+(i13.nStepFill||0)+"/4 dc"+(i13.decayCount||0);
+    iVal.textContent="W969["+i13state.seen+"] lr="+(i13.effectiveLR||5)+"/"+(i13.effectiveCriticLR||10)+" gn="+(i13.gnEffectiveP||0)+" ε"+qEps.toFixed(2)+" V"+(i13.valueV||0)+" δ"+(i13.tdError||0)+" tgt"+(i13.tgtAge||0)+" n"+(i13.nStepFill||0)+"/4 dc"+(i13.decayCount||0);
   }
   /* show action on cubit node */
   var actNames=["·","←","→","A","B","↑","↓","ST"],_ACT=i13.I13_ACT;
@@ -3029,7 +3068,7 @@ function xrayDraw(){
     txt(660,300,"lr="+(i13.effectiveLR||0)+"/"+(i13.effectiveCriticLR||0),S.dim);
     txt(660,315,"tgt="+(i13.tgtAge||0)+"/256",S.dim);
     txt(760,255,"n-step="+(i13.nStepFill||0)+"/4",S.dim);
-    txt(760,270,"decay="+(i13.decayCount||0),S.dim);
+    txt(760,270,"decay="+(i13.decayCount||0)+" gn="+(i13.gnEffectiveP||0),S.dim);
     txt(760,285,"train="+i13.trainN,S.dim);
     txt(760,300,"W[969]",S.brain);
   } else { txt(410,200,"(brain offline)",S.dim); }
