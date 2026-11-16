@@ -1561,6 +1561,14 @@ var i13GateW = new Int16Array(75);   // gate neuron weights [g*25+h] g=0..2, h=0
 var i13GateM = new Int16Array(24);   // mode action biases [m*8+a] m=0..2, a=0..7
 var i13GateMode = 0;                 // active mode (0=A, 1=B, 2=C)
 
+// BUILD 19: Fractal Gate — self-similar sub-gate at finer scale
+// Same structure as coarse gate: 3 neurons × (24 hidden + 1 bias) = 75 weights
+// 9 fine-mode biases: (coarse*3+fine) × 8 actions = 72 weights
+// Total new: 75 + 72 = 147 → 1215 overall
+var i13SubGateW = new Int16Array(75);  // sub-gate weights [g*25+h] — same layout as coarse gate
+var i13SubGateM = new Int16Array(72);  // fine-mode biases [(coarse*3+fine)*8+a]
+var i13SubGateMode = 0;               // active sub-mode (0=a, 1=b, 2=c)
+
 // ── ACTION MAPPING ─────────────────────────────────────────
 // i13 action index → NES pad bitmask
 // 0=none, 1=LEFT(64), 2=RIGHT(128), 3=A(1), 4=B(2), 5=UP(16), 6=DOWN(32), 7=START(8)
@@ -1584,36 +1592,50 @@ function i13Forward() {
   return i13LastAction;
 }
 
-// BUILD 18: Gate forward — 3-mode hard gate modifies action values
-// Runs AFTER i13Forward fills T[0..23] hidden + T[24..31] actions
-// Gate neurons read hidden layer, argmax picks mode, mode bias added to actions
+// BUILD 18+19: Fractal Gate forward — self-similar gate at two scales
+// Level 1 (coarse): 3 gate neurons read 24 hidden → mode A/B/C
+// Level 2 (fine):   3 sub-gate neurons read 24 hidden → sub-mode a/b/c
+// Same structure. Same mechanism. Different weights. Different scale.
+// action[a] += coarseBias[mode*8+a] + fineBias[(mode*3+sub)*8+a]
 function i13GateForward() {
-  // compute 3 gate scores from hidden activations
+  // ── LEVEL 1: COARSE GATE ──
   var gs0 = 0, gs1 = 0, gs2 = 0;
   for (var h = 0; h < 24; h++) {
-    gs0 += (i13GateW[h] * i13T[h]) >> 8;           // gate 0: W[0..23]
-    gs1 += (i13GateW[25 + h] * i13T[h]) >> 8;      // gate 1: W[25..48]
-    gs2 += (i13GateW[50 + h] * i13T[h]) >> 8;      // gate 2: W[50..73]
+    gs0 += (i13GateW[h] * i13T[h]) >> 8;
+    gs1 += (i13GateW[25 + h] * i13T[h]) >> 8;
+    gs2 += (i13GateW[50 + h] * i13T[h]) >> 8;
   }
-  gs0 += i13GateW[24];  // bias gate 0
-  gs1 += i13GateW[49];  // bias gate 1
-  gs2 += i13GateW[74];  // bias gate 2
-  // clamp gate scores
+  gs0 += i13GateW[24]; gs1 += i13GateW[49]; gs2 += i13GateW[74];
   if (gs0 > 32000) gs0 = 32000; if (gs0 < -32000) gs0 = -32000;
   if (gs1 > 32000) gs1 = 32000; if (gs1 < -32000) gs1 = -32000;
   if (gs2 > 32000) gs2 = 32000; if (gs2 < -32000) gs2 = -32000;
-  // argmax → active mode
   var mode = 0;
   if (gs1 > gs0) mode = 1;
   if (gs2 > (mode === 1 ? gs1 : gs0)) mode = 2;
   i13GateMode = mode;
-  // add active mode's bias vector to action values
+  // ── LEVEL 2: FINE SUB-GATE (same structure, different weights) ──
+  var ss0 = 0, ss1 = 0, ss2 = 0;
+  for (var h2 = 0; h2 < 24; h2++) {
+    ss0 += (i13SubGateW[h2] * i13T[h2]) >> 8;
+    ss1 += (i13SubGateW[25 + h2] * i13T[h2]) >> 8;
+    ss2 += (i13SubGateW[50 + h2] * i13T[h2]) >> 8;
+  }
+  ss0 += i13SubGateW[24]; ss1 += i13SubGateW[49]; ss2 += i13SubGateW[74];
+  if (ss0 > 32000) ss0 = 32000; if (ss0 < -32000) ss0 = -32000;
+  if (ss1 > 32000) ss1 = 32000; if (ss1 < -32000) ss1 = -32000;
+  if (ss2 > 32000) ss2 = 32000; if (ss2 < -32000) ss2 = -32000;
+  var sub = 0;
+  if (ss1 > ss0) sub = 1;
+  if (ss2 > (sub === 1 ? ss1 : ss0)) sub = 2;
+  i13SubGateMode = sub;
+  // ── COMPOSE: coarse bias + fine bias → action modification ──
   var mBase = mode * 8;
+  var fBase = (mode * 3 + sub) * 8;  // 9 fine addresses: 0..8
   for (var a = 0; a < 8; a++) {
-    var mod = i13T[24 + a] + i13GateM[mBase + a];
+    var mod = i13T[24 + a] + i13GateM[mBase + a] + i13SubGateM[fBase + a];
     i13T[24 + a] = mod > 32000 ? 32000 : (mod < -32000 ? -32000 : mod);
   }
-  // re-select action after gate modification
+  // re-select action after fractal gate modification
   var best = 0, bestV = i13T[24];
   for (var k = 1; k < 8; k++) {
     if (i13T[24 + k] > bestV) { best = k; bestV = i13T[24 + k]; }
@@ -1707,27 +1729,43 @@ function i13Learn(reward) {
     td = Math.max(-64, Math.min(64, tdRaw));
   }
   i13TDError = td;
-  // BUILD 18: gate learning — reinforce active gate neuron + mode bias
+  // BUILD 18+19: fractal gate learning — reinforce both gate levels
   var gateLR = Math.min(effectiveLR * 2, 127);  // gate learns 2× actor rate, cap 127
   if (gateLR < 1) gateLR = 1;
+  // ── LEVEL 1: coarse gate ──
   var gBase = i13GateMode * 25;
   for (var gh = 0; gh < 24; gh++) {
     var gGrad = (i13T[gh] * td) >> 8;
     if (gGrad > 64) gGrad = 64; if (gGrad < -64) gGrad = -64;
     i13GateW[gBase + gh] += (gateLR * gGrad) >> 8;
   }
-  i13GateW[gBase + 24] += (gateLR * td) >> 8;  // gate bias
-  // mode bias: update selected action's modifier for active mode
+  i13GateW[gBase + 24] += (gateLR * td) >> 8;  // coarse gate bias
   var mIdx = i13GateMode * 8 + i13T[32];
-  i13GateM[mIdx] += (gateLR * td) >> 8;
-  // clamp gate weights ±32000, mode biases ±1024
+  i13GateM[mIdx] += (gateLR * td) >> 8;         // coarse mode bias
+  // ── LEVEL 2: fine sub-gate (same learning rule — self-similar) ──
+  var sBase = i13SubGateMode * 25;
+  for (var sh = 0; sh < 24; sh++) {
+    var sGrad = (i13T[sh] * td) >> 8;
+    if (sGrad > 64) sGrad = 64; if (sGrad < -64) sGrad = -64;
+    i13SubGateW[sBase + sh] += (gateLR * sGrad) >> 8;
+  }
+  i13SubGateW[sBase + 24] += (gateLR * td) >> 8;  // fine gate bias
+  var fIdx = (i13GateMode * 3 + i13SubGateMode) * 8 + i13T[32];
+  i13SubGateM[fIdx] += (gateLR * td) >> 8;         // fine mode bias
+  // ── CLAMP both levels ──
   for (var gc = 0; gc < 75; gc++) {
     if (i13GateW[gc] > 32000) i13GateW[gc] = 32000;
     if (i13GateW[gc] < -32000) i13GateW[gc] = -32000;
+    if (i13SubGateW[gc] > 32000) i13SubGateW[gc] = 32000;
+    if (i13SubGateW[gc] < -32000) i13SubGateW[gc] = -32000;
   }
   for (var mc = 0; mc < 24; mc++) {
     if (i13GateM[mc] > 1024) i13GateM[mc] = 1024;
     if (i13GateM[mc] < -1024) i13GateM[mc] = -1024;
+  }
+  for (var fc = 0; fc < 72; fc++) {
+    if (i13SubGateM[fc] > 1024) i13SubGateM[fc] = 1024;
+    if (i13SubGateM[fc] < -1024) i13SubGateM[fc] = -1024;
   }
   // actor learns from TD error (not raw reward)
   i13Eval.call('agent_learn', [i13W, i13X, i13T, td, effectiveLR]);
@@ -1750,13 +1788,21 @@ function i13Learn(reward) {
       for (var gk = 944; gk < 968; gk++) {
         if (((Math.random() * 256) | 0) < gnP) i13W[gk] += (Math.random() < 0.5) ? 1 : -1;
       }
-      // BUILD 18: gate weights [0..74]
+      // BUILD 18+19: coarse gate weights [0..74]
       for (var gg = 0; gg < 75; gg++) {
         if (((Math.random() * 256) | 0) < gnP) i13GateW[gg] += (Math.random() < 0.5) ? 1 : -1;
       }
-      // BUILD 18: mode biases [0..23]
+      // BUILD 18+19: coarse mode biases [0..23]
       for (var gm = 0; gm < 24; gm++) {
         if (((Math.random() * 256) | 0) < gnP) i13GateM[gm] += (Math.random() < 0.5) ? 1 : -1;
+      }
+      // BUILD 19: sub-gate weights [0..74]
+      for (var sg = 0; sg < 75; sg++) {
+        if (((Math.random() * 256) | 0) < gnP) i13SubGateW[sg] += (Math.random() < 0.5) ? 1 : -1;
+      }
+      // BUILD 19: fine-mode biases [0..71]
+      for (var fm = 0; fm < 72; fm++) {
+        if (((Math.random() * 256) | 0) < gnP) i13SubGateM[fm] += (Math.random() < 0.5) ? 1 : -1;
       }
     }
   }
@@ -1786,7 +1832,7 @@ function i13Learn(reward) {
       if (i13W[dk] > 0) i13W[dk]--;
       else if (i13W[dk] < 0) i13W[dk]++;
     }
-    // BUILD 18: gate weight L1 decay
+    // BUILD 18+19: coarse gate weight L1 decay
     for (var dg = 0; dg < 75; dg++) {
       if (i13GateW[dg] > 0) i13GateW[dg]--;
       else if (i13GateW[dg] < 0) i13GateW[dg]++;
@@ -1794,6 +1840,15 @@ function i13Learn(reward) {
     for (var dm = 0; dm < 24; dm++) {
       if (i13GateM[dm] > 0) i13GateM[dm]--;
       else if (i13GateM[dm] < 0) i13GateM[dm]++;
+    }
+    // BUILD 19: sub-gate weight L1 decay
+    for (var ds = 0; ds < 75; ds++) {
+      if (i13SubGateW[ds] > 0) i13SubGateW[ds]--;
+      else if (i13SubGateW[ds] < 0) i13SubGateW[ds]++;
+    }
+    for (var df = 0; df < 72; df++) {
+      if (i13SubGateM[df] > 0) i13SubGateM[df]--;
+      else if (i13SubGateM[df] < 0) i13SubGateM[df]++;
     }
     i13DecayCount++;
   }
@@ -1874,7 +1929,10 @@ function i13SaveBrain() {
     ebDecayDiv: I13_EB_DECAY_DIV,
     gateW: Array.from(i13GateW),
     gateM: Array.from(i13GateM),
-    gateMode: i13GateMode
+    gateMode: i13GateMode,
+    subGateW: Array.from(i13SubGateW),
+    subGateM: Array.from(i13SubGateM),
+    subGateMode: i13SubGateMode
   };
 }
 
@@ -1941,6 +1999,14 @@ function i13LoadBrain(b) {
     for (var gmi = 0; gmi < 24; gmi++) i13GateM[gmi] = b.gateM[gmi];
   }
   i13GateMode = b.gateMode || 0;
+  // BUILD 19: sub-gate restore (backward compat — missing = keep zeros)
+  if (b.subGateW && b.subGateW.length === 75) {
+    for (var swi = 0; swi < 75; swi++) i13SubGateW[swi] = b.subGateW[swi];
+  }
+  if (b.subGateM && b.subGateM.length === 72) {
+    for (var smi = 0; smi < 72; smi++) i13SubGateM[smi] = b.subGateM[smi];
+  }
+  i13SubGateMode = b.subGateMode || 0;
 }
 
 // Soft reset: zero trainer state but keep weights (Root Strength)
@@ -1959,8 +2025,9 @@ function i13SoftReset() {
   i13ISBeta = I13_IS_BETA_START; i13ISSteps = 0;
   // BUILD 16: reward normalization — fresh stats per fight
   i13RNMean = 0; i13RNVar = 256; i13RNCount = 0;
-  // BUILD 18: gate mode reset (gate weights survive — root strength)
+  // BUILD 18+19: gate mode reset (gate weights survive — root strength)
   i13GateMode = 0;
+  i13SubGateMode = 0;
   // weights survive — this IS root strength
 }
 
@@ -2044,7 +2111,11 @@ var api = {
   get gateW() { return i13GateW; },
   get gateM() { return i13GateM; },
   get gateMode() { return i13GateMode; },
-  get gateModeLabel() { return ['A','B','C'][i13GateMode] || '?'; }
+  get gateModeLabel() { return ['A','B','C'][i13GateMode] || '?'; },
+  get subGateW() { return i13SubGateW; },
+  get subGateM() { return i13SubGateM; },
+  get subGateMode() { return i13SubGateMode; },
+  get fractalLabel() { return (['A','B','C'][i13GateMode]||'?') + (['a','b','c'][i13SubGateMode]||'?'); }
 };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.I13BRAIN = api;
@@ -2817,7 +2888,7 @@ function chainUpdate(who,action,i13state){
   /* update {{I}} values */
   if(i13state){
     var iVal=$("ch-i").querySelector(".val");
-    iVal.textContent="W1068["+i13state.seen+"] lr="+(i13.effectiveLR||5)+"/"+(i13.effectiveCriticLR||10)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0)+"μ"+(i13.rnMean||0)+"σ²"+(i13.rnVar||256)+" eb="+(i13.ebEffectiveBeta||0)+" G"+(i13.gateModeLabel||"A")+" ε"+qEps.toFixed(2)+" V"+(i13.valueV||0)+" δ"+(i13.tdError||0)+" tgt"+(i13.tgtAge||0)+" n"+(i13.nStepFill||0)+"/4 dc"+(i13.decayCount||0);
+    iVal.textContent="W1215["+i13state.seen+"] lr="+(i13.effectiveLR||5)+"/"+(i13.effectiveCriticLR||10)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0)+"μ"+(i13.rnMean||0)+"σ²"+(i13.rnVar||256)+" eb="+(i13.ebEffectiveBeta||0)+" F"+(i13.fractalLabel||"Aa")+" ε"+qEps.toFixed(2)+" V"+(i13.valueV||0)+" δ"+(i13.tdError||0)+" tgt"+(i13.tgtAge||0)+" n"+(i13.nStepFill||0)+"/4 dc"+(i13.decayCount||0);
   }
   /* show action on cubit node */
   var actNames=["·","←","→","A","B","↑","↓","ST"],_ACT=i13.I13_ACT;
@@ -3247,9 +3318,9 @@ function xrayDraw(){
     txt(660,300,"lr="+(i13.effectiveLR||0)+"/"+(i13.effectiveCriticLR||0),S.dim);
     txt(660,315,"tgt="+(i13.tgtAge||0)+"/256",S.dim);
     txt(760,255,"n-step="+(i13.nStepFill||0)+"/4",S.dim);
-    txt(760,270,"decay="+(i13.decayCount||0)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0)+" eb="+(i13.ebEffectiveBeta||0)+" G"+(i13.gateModeLabel||"A"),S.dim);
+    txt(760,270,"decay="+(i13.decayCount||0)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0)+" eb="+(i13.ebEffectiveBeta||0)+" F"+(i13.fractalLabel||"Aa"),S.dim);
     txt(760,285,"train="+i13.trainN,S.dim);
-    txt(760,300,"W[1068]",S.brain);
+    txt(760,300,"W[1215]",S.brain);
   } else { txt(410,200,"(brain offline)",S.dim); }
 
   /* ── 6. CONTROLLER ── */
