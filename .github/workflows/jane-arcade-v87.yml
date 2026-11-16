@@ -1,0 +1,63 @@
+name: Jane NES arcade · test and deploy
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'dashboard/**'
+      - 'releases/**'
+      - 'data/v87/**'
+      - 'server_v8*.py'
+      - 'tests/**'
+      - 'index.html'
+      - '.github/workflows/jane-arcade-v87.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: jane-arcade-pages
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate NES arcade assets and JSON indexes
+        shell: bash
+        run: |
+          python -m json.tool data/v87/index.json > /dev/null
+          python -m json.tool data/v86/index.json > /dev/null
+          test -s dashboard/v87.html
+          test -s dashboard/arena.html
+          test -s releases/Janes_Perception_v71_Mission_Control_Embedded_JPG_Story_NES.html
+          python -m py_compile server_v84.py server_v85.py server_v86.py
+      - name: Run Python observation journal tests
+        run: python -m unittest discover -s tests -p 'test_server_v86.py' -v
+  deploy:
+    needs: verify
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Stage static arcade, without local ROMs or runtime ledgers
+        shell: bash
+        run: |
+          mkdir -p _site
+          cp index.html _site/
+          cp -R dashboard releases _site/
+          mkdir -p _site/data/v87
+          cp data/v87/index.json _site/data/v87/
+          touch _site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy static NES arcade
+        id: deployment
+        uses: actions/deploy-pages@v4
