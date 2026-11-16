@@ -76,6 +76,9 @@ jobs:
       - name: Verify minimalist one-screen arena and NES speed controls
         run: node tests/test_arena_speed.cjs
 
+      - name: Test AV-080 Jane–Toph teacher loop
+        run: node tests/test_av080_coach.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
