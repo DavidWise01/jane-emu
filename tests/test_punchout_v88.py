@@ -22,11 +22,14 @@ class PunchOutAssets(unittest.TestCase):
         self.assertIn('id="rom"', text)
         self.assertIn('id="opponentDown"', text)
         self.assertIn('id="janeDown"', text)
+        for tab in ('match', 'coach', 'telemetry', 'evidence', 'system'):
+            self.assertIn('id="tab-' + tab + '"', text)
+        self.assertIn('class="workspace"', text)
 
     def test_inline_javascript_syntax(self):
         text = HTML.read_text(encoding="utf-8")
         blocks = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", text, re.S)
-        self.assertEqual(len(blocks), 2)
+        self.assertEqual(len(blocks), 3)
         for block in blocks:
             process = subprocess.run(
                 ["node", "--check"], input=block, text=True, capture_output=True,
