@@ -84,3 +84,11 @@ Run locally: `python server_v86.py`; open `http://127.0.0.1:8786/`. The Python s
 The interface includes manual Save Action Trials, five-second auto-save when Python is present, and JSON export. On GitHub Pages, the browser can run the actual .nes emulator, but no Python server or backend persistence is available. Compatibility still depends on the emulator and ROM mapper.
 
 Tests: `python -m unittest discover -s tests -p 'test_server_v86.py'`. Next improvement: attach verified cartridge-specific life, score, or opponent-health outcomes; avoid treating arbitrary pixel changes as rewards. All observations from one emulator session share one witness ancestry.
+
+## AV-087 — Embedded NES + GitHub Actions
+
+The default landing page is [Jane v87](./dashboard/v87.html). It embeds the existing actual JavaScript NES emulator via [the turn-taking arena](./dashboard/arena.html), accepts local `.nes` cartridge images, and saves bounded observed action-trial metadata to browser localStorage every five seconds. It provides local SHA-256 journal verification and JSON export. No Python server is required for playing or observing in a browser. No ROM is uploaded by this feature.
+
+[The Actions workflow](./.github/workflows/jane-arcade-v87.yml) validates JSON, compiles Python modules, runs tests, and deploys a static subset to GitHub Pages. GitHub Actions is a build/test/deploy environment, **not** a 24/7 NES hosting process. A browser executes the NES emulator after GitHub Pages loads the HTML/JS. The workflow deliberately excludes ROM uploads and local runtime journals. Its deployment requires Pages to be configured for GitHub Actions and relevant repository permissions.
+
+Python servers `server_v84.py`, `server_v85.py`, and `server_v86.py` remain optional development tools. They do not need to be running to use v87. Browser storage is device/browser scoped, may be cleared, and is not synchronized to GitHub. Export JSON to retain a durable archive. SHA-256 chaining can detect altered local journal entries relative to a trusted digest; it is not an independent witness or proof of improved NES gameplay.
