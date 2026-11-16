@@ -1,0 +1,67 @@
+{
+  "schema": "jane.cartridge.profile.v88",
+  "version": 88,
+  "profile_id": "nes.punchout",
+  "title": "Punch-Out!!",
+  "first_opponent": "Glass Joe",
+  "emulator": "dashboard/arena.html",
+  "frontend": "dashboard/v88.html",
+  "mode": "real in-browser NES emulation; user supplied ROM; no bundled game bytes",
+  "control_observations": {
+    "buttons": [
+      "A",
+      "B",
+      "UP",
+      "DOWN",
+      "LEFT",
+      "RIGHT",
+      "START",
+      "SELECT"
+    ],
+    "source": "existing emulator action diagnostics",
+    "meaning": "button selection only; outcome requires game-specific evidence"
+  },
+  "opponents": [
+    "Glass Joe",
+    "Von Kaiser",
+    "Piston Honda",
+    "Don Flamenco",
+    "King Hippo",
+    "Great Tiger",
+    "Bald Bull",
+    "Soda Popinski",
+    "Mr. Sandman",
+    "Super Macho Man",
+    "Mike Tyson"
+  ],
+  "match_event_types": [
+    "START",
+    "OPPONENT_DOWN",
+    "JANE_DOWN",
+    "WIN",
+    "LOSS"
+  ],
+  "validation": {
+    "source": "human-confirmed",
+    "automated_knockdown_detection": false,
+    "auto_promotion_of_coaching": false,
+    "program_goal": "Opponent down / Jane down / win-loss after human verification",
+    "next_step": "Instrument and independently validate ROM-specific RAM addresses for health, round and KO state"
+  },
+  "turn_taking": {
+    "rule": "one NES game state, rotating Jane / Toph / Patricia on confirmed life loss or knockdown; no separate controller port 3",
+    "first_player": "JANE"
+  },
+  "evidence": {
+    "trial_key": "jane.v88.nes.trials",
+    "match_key": "jane.v88.punchout.matches",
+    "shared_ancestry": "one ongoing game state is one root; observer duplication is not independent witness",
+    "storage": "browser localStorage and JSON export"
+  },
+  "deployment": {
+    "pages": "static browser emulator",
+    "github_actions": ".github/workflows/jane-arcade-v87.yml",
+    "python_server_required": false
+  },
+  "legal": "User must supply their own lawful ROM file; no copyrighted game ROM is distributed."
+}
