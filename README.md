@@ -49,3 +49,8 @@ The main [Play ↔ Learn Git dashboard](./dashboard/index.html) also exposes a v
 ## TE-082 — Teaching Transfer Arcade
 
 [Launch the v82 cross-pattern arcade](./dashboard/v82.html). Six STRAIGHT training seeds are followed by four distinct held-out hazard families (ZIGZAG, MIRROR, ACCELERATE, DECOY). The seed is paired within baseline/taught arms. This is a synthetic browser experiment, not actual NES learning. The preregistered gate requires positive held-out mean delta and improvements in at least three of the four distinct held-out families. DECOY is an explicit counterexample opportunity. Results remain local until exported as JSON. The NES emulator is preserved at [the actual NES arena](./dashboard/arena.html).
+
+
+## TE-083 — Teaching Recovery Arcade
+
+[Launch v83](./dashboard/v83.html). Run the original ten tests, preserve the DECOY counterexample and initial policy, then explicitly propose a repaired prediction rule. Patricia audits the revision on five predeclared fresh seeds (151, 157, 163, 167, 173), one per pattern family. The repair passes only if every audit pair beats the control and none regresses against the original taught rule. Audit results are appended to the browser-session ledger, including the revision event, and exported as JSON. The lesson is a deterministic toy policy, not evidence of actual autonomous NES learning. The [ROM-based arena](./dashboard/arena.html) remains unchanged.
