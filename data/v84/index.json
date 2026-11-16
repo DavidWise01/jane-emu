@@ -1,0 +1,66 @@
+{
+  "schema": "jane-arcade-index-v84",
+  "version": "84",
+  "invariant": "TE-084",
+  "title": "Recursive Teaching",
+  "entry": "dashboard/v84.html",
+  "server": "server_v84.py",
+  "api": {
+    "index": "/api/v84/index",
+    "lessons": "/api/v84/lessons",
+    "run": "/api/v84/run",
+    "audit": "/api/v84/audit",
+    "ledger": "/api/v84/ledger"
+  },
+  "mode": {
+    "github_pages": "static client; no Python API",
+    "local": "Python HTTP server with append-only runtime JSONL"
+  },
+  "training": {
+    "seeds": [
+      101,
+      103,
+      107,
+      109,
+      113,
+      127
+    ],
+    "family": "STRAIGHT"
+  },
+  "holdout": {
+    "seeds": [
+      131,
+      137,
+      139,
+      149
+    ],
+    "families": [
+      "ZIGZAG",
+      "MIRROR",
+      "ACCELERATE",
+      "DECOY"
+    ]
+  },
+  "recovery_audit": {
+    "seeds": [
+      151,
+      157,
+      163,
+      167,
+      173
+    ],
+    "families": [
+      "STRAIGHT",
+      "ZIGZAG",
+      "MIRROR",
+      "ACCELERATE",
+      "DECOY"
+    ],
+    "criterion": "all repaired scores exceed control and are >= original"
+  },
+  "witnesses": {
+    "source_ancestry": "one root per seed",
+    "caution": "replays are not independent witnesses"
+  },
+  "kind": "deterministic synthetic arcade; no NES emulator inference"
+}
