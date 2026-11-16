@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JANE v84 | RECURSIVE TEACHING SERVER ARCADE</title>
+<style>
+:root{color-scheme:dark;--ink:#e8f5ff;--cyan:#65f6f1;--gold:#ffc47b;--purple:#ba95ff;--panel:#111a37;--edge:#354c80}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -25%,#302458,#060a1e 65%);color:var(--ink);font:13px/1.5 system-ui}
+header,main{max-width:1550px;margin:auto;padding:14px}header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--edge)}
+h1{font:900 clamp(22px,2.7vw,38px) monospace;margin:0;letter-spacing:-1.3px;color:var(--cyan);text-shadow:0 0 20px #56ffee55}h2{font:900 15px monospace;letter-spacing:.09em;color:var(--gold);margin:0 0 10px}
+a{color:var(--cyan)}button,select{cursor:pointer;background:#243663;border:1px solid #6b83bb;color:var(--ink);border-radius:7px;padding:9px 12px;font:800 12px monospace}button:hover{background:#38518a}button:disabled{opacity:.42;cursor:default}
+small,.muted{color:#a7badb}.label{font:800 11px monospace;color:var(--purple);letter-spacing:.1em}.pill{border:1px solid var(--edge);padding:5px 10px;border-radius:30px;color:var(--cyan);font:800 11px monospace}
+.bar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cabinet{background:linear-gradient(150deg,#152043,#0a1229);border:1px solid var(--edge);border-radius:12px;padding:13px;min-width:0}
+.screen{height:min(55vh,460px);min-height:320px;background:#050a1c;border:5px solid #516bb0;border-radius:10px;box-shadow:inset 0 0 22px #0cf6e433,0 0 25px #7b6dff22;overflow:hidden}
+canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.stat{padding:8px;border-radius:7px;border:1px solid var(--edge);background:#070d23}.stat b{display:block;color:var(--cyan);font:900 22px monospace}.stat small{font:10px monospace}
+.tabs{display:flex;gap:5px;margin-bottom:12px;overflow:auto}.tabs button.active{background:var(--cyan);color:#041424}.tab{display:none;min-height:380px;max-height:490px;overflow:auto}.tab.active{display:block}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#050c20;color:#b7ebf1;border:1px solid var(--edge);border-radius:7px;padding:12px;max-height:310px;overflow:auto}
+table{width:100%;border-collapse:collapse;font:11px monospace}th,td{border-bottom:1px solid #38456e;padding:7px;text-align:left}
+.note{border-left:3px solid var(--gold);background:#ffc47b12;padding:9px;margin:9px 0;color:#bbd0e5}.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+footer{margin-top:12px;padding:12px;border:1px solid var(--edge);border-radius:9px}
+@media(max-width:830px){.grid{grid-template-columns:1fr}.screen{height:370px}.tab{max-height:none}.stats{grid-template-columns:repeat(2,1fr)}}
+</style></head>
+<body>
+<header><div><div class="label">ROOT 0 / PYTHON SERVER / JSON REGISTRY</div><h1>JANE v84 · RECURSIVE TEACHING</h1><div class="muted">JANE PLAYS · TOPH REVISES · PATRICIA AUDITS · EVIDENCE APPENDS</div></div><div class="row"><span class="pill" id="mode">CONNECTING</span><a href="./arena.html">NES ARENA</a><a href="./v83.html">PREVIOUS ARCADE</a></div></header>
+<main><div class="bar">
+<button id="trial">▶ RUN PAIRED TRIAL</button><button id="audit">★ RUN RECURSIVE AUDIT</button><button id="refresh">↻ REFRESH LEDGER</button><button id="download">⬇ EXPORT VIEW</button>
+<label>Family <select id="family"><option>STRAIGHT</option><option>ZIGZAG</option><option>MIRROR</option><option>ACCELERATE</option><option>DECOY</option></select></label>
+<label>Seed <select id="seed"><option>101</option><option>131</option><option>137</option><option>139</option><option>149</option><option>151</option><option>173</option></select></label>
+<span class="pill" id="status">READY</span></div>
+<div class="grid"><section class="cabinet"><h2>01 / SIMULATED ARCADE CABINET</h2>
+<div class="screen"><canvas id="screen" width="700" height="470" aria-label="Animated hazard trace from Python simulation"></canvas></div>
+<div class="stats"><div class="stat"><b id="base">—</b><small>CONTROL</small></div><div class="stat"><b id="original">—</b><small>ORIGINAL</small></div><div class="stat"><b id="repaired">—</b><small>REPAIRED</small></div><div class="stat"><b id="records">0</b><small>EVIDENCE EVENTS</small></div></div>
+<div class="note">This visualizes a deterministic Python toy environment. It is not the NES emulator, and no ROM bytes or NES scores are sent to this server.</div></section>
+<section class="cabinet"><h2>02 / RECURSIVE TEACHING CONSOLE</h2><nav class="tabs"><button data-tab="coach" class="active">COACH</button><button data-tab="auditlog">AUDIT</button><button data-tab="ledger">LEDGER</button><button data-tab="index">INDEX</button></nav>
+<div class="tab active" id="coach"><h2>TE-084 / TEACHER LEARNS FROM THE STUDENT</h2><pre id="teaching">TOPH-001: Original prediction strategy.
+Counterexample: DECOY family.
+TOPH-002: Revised prediction strategy.
+PATRICIA: Test unchanged criteria on locked fresh seeds.
+
+The repaired rule is a predeclared candidate.
+Only the server's fresh-seed audit can promote it.</pre>
+<div class="note">Witness ancestry: one synthetic seed is one root, even when replayed by multiple policies. Hash-chained JSONL is tamper-evident only relative to retained trusted digests; it does not establish independent witnesses.</div></div>
+<div class="tab" id="auditlog"><h2>FRESH-SEED AUDIT</h2><div class="pill" id="verdict">NOT RUN</div><pre id="auditdata">Run the audit through the Python API to generate and append a server record.</pre></div>
+<div class="tab" id="ledger"><h2>SERVER EVIDENCE</h2><table><thead><tr><th>Event</th><th>Digest</th><th>Time</th></tr></thead><tbody id="events"></tbody></table></div>
+<div class="tab" id="index"><h2>JSON INDEXES</h2><pre id="indexdata">Loading registry…</pre><h2>LESSON REGISTRY</h2><pre id="lessonsdata">Loading lessons…</pre></div></section></div>
+<footer><strong style="color:var(--gold)">RUN MODES</strong><p><b>Local Python:</b> <code>python server_v84.py</code>, then open <code>http://127.0.0.1:8784/</code>. Run and audit buttons persist evidence to <code>data/v84/runtime/evidence.jsonl</code> on the local server.</p>
+<p><b>GitHub Pages:</b> displays the public JSON indexes and animated preview. Python APIs cannot run on GitHub Pages; buttons requiring the server are disabled.</p></footer></main>
+<script>
+(()=>{'use strict';const $=id=>document.getElementById(id),ctx=$('screen').getContext('2d');
+let online=false,trace=[],tick=0,events=[],registry=null,lessons=null,lastResult=null;
+async function api(path,body){const opts=body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{};const response=await fetch(path,opts);if(!response.ok)throw new Error('HTTP '+response.status);return response.json()}
+async function init(){
+try{registry=await api('../data/v84/index.json');lessons=await api('../data/v84/lessons.json');$('indexdata').textContent=JSON.stringify(registry,null,2);$('lessonsdata').textContent=JSON.stringify(lessons,null,2)}catch(e){$('indexdata').textContent='Index unavailable: '+e.message}
+try{const result=await api('/api/v84/index');online=result.version==='84'}catch(e){online=false}
+$('mode').textContent=online?'PYTHON SERVER CONNECTED':'STATIC PAGES / PREVIEW';$('trial').disabled=!online;$('audit').disabled=!online;$('refresh').disabled=!online;
+if(online)await loadLedger();else $('status').textContent='API OFFLINE · PREVIEW ONLY';
+}
+async function loadLedger(){try{const data=await api('/api/v84/ledger');events=data.records||[];$('records').textContent=events.length;$('events').replaceChildren(...events.slice().reverse().map(e=>{let tr=document.createElement('tr');[e.event_type,e.digest?.slice(0,15)||'',e.timestamp_utc||''].forEach(v=>{let td=document.createElement('td');td.textContent=v;tr.append(td)});return tr}));}catch(e){$('status').textContent='LEDGER ERROR: '+e.message}}
+async function run(kind){if(!online)return;try{$('status').textContent='RUNNING '+kind.toUpperCase();let x=await api('/api/v84/run',kind==='audit'?{kind:'audit'}:{kind:'trial',seed:Number($('seed').value),family:$('family').value});lastResult=x;
+if(kind==='trial'){const p=x.result;trace=p.repaired.trace;$('base').textContent=p.control.score+'/20';$('original').textContent=p.original.score+'/20';$('repaired').textContent=p.repaired.score+'/20'}
+else{const p=x.result;$('verdict').textContent=p.passed?'PASS · CANDIDATE MEETS GATE':'FAIL · REVISION REJECTED';$('auditdata').textContent=JSON.stringify(p,null,2);$('teaching').textContent=(p.passed?'PATRICIA ACCEPTS THE LOCAL REPAIR GATE':'PATRICIA REJECTS THE LOCAL REPAIR GATE')+'\n\nTOPH-001 remains preserved.\nTOPH-002 remains an explicitly versioned correction.\n\n'+p.criterion}
+$('status').textContent='APPENDED '+x.evidence.digest.slice(0,12);await loadLedger()}catch(e){$('status').textContent='ERROR '+e.message}}
+$('trial').onclick=()=>run('trial');$('audit').onclick=()=>run('audit');$('refresh').onclick=loadLedger;
+$('download').onclick=()=>{const data=JSON.stringify({schema:'jane-v84-export',server_connected:online,events,registry,lessons,lastResult},null,2);const url=URL.createObjectURL(new Blob([data],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='jane-v84-view.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)};
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(t=>t.classList.toggle('active',t===b));document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.id===b.dataset.tab))});
+function draw(){const c=ctx.canvas,w=c.width,h=c.height;ctx.fillStyle='#050a1a';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#20335c';for(let x=0;x<w;x+=35){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}for(let y=0;y<h;y+=35){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
+ctx.font='bold 18px monospace';ctx.fillStyle='#61e9ef';ctx.fillText('JANE / TOPH / PATRICIA',25,40);ctx.fillStyle='#b99fff';ctx.fillText(online?'LIVE PYTHON EVIDENCE':'STATIC DEMONSTRATION MODE',25,69);
+for(let lane=0;lane<3;lane++){ctx.strokeStyle='#5472a0';ctx.strokeRect(120+lane*185,95,140,320)}
+if(trace.length){const item=trace[Math.floor(tick/10)%trace.length];ctx.fillStyle='#ff8c77';ctx.fillRect(165+item.hazard*185,180,48,48);ctx.fillStyle=item.safe?'#59f5ef':'#ff6688';ctx.beginPath();let x=190+item.lane*185;ctx.moveTo(x,365);ctx.lineTo(x-30,420);ctx.lineTo(x+30,420);ctx.fill();ctx.fillStyle='#fff';ctx.fillText('TICK '+item.tick+'  '+(item.safe?'SAFE':'HIT'),25,450)}
+else{ctx.fillStyle='#fcbf79';ctx.fillText('READY FOR PAIRED TRIAL',175,244);ctx.fillStyle='#96abc7';ctx.fillText('Press RUN when Python server is connected',90,285)}tick++;requestAnimationFrame(draw)}draw();init();
+})();
+</script></body></html>
