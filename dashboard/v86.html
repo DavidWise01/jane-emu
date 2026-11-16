@@ -1,0 +1,86 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JANE v86 — REAL NES ARCADE</title>
+<style>
+:root{color-scheme:dark;--ink:#e8f7ff;--teal:#5df9ef;--gold:#ffb86a;--edge:#49638c;--panel:#0c1a32}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -25%,#27345b,#060b1b 60%);color:var(--ink);font:13px/1.45 system-ui}
+header{padding:11px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--edge)}
+h1{font:900 clamp(22px,2.8vw,35px) monospace;color:var(--teal);margin:0;text-shadow:0 0 16px #39eccc4b}
+h2{font:900 14px monospace;color:var(--gold);letter-spacing:1px;margin:0 0 9px}
+p{margin:8px 0}a{color:var(--teal)}.muted{color:#a9bfd7}.pill{border:1px solid var(--edge);padding:5px 9px;border-radius:30px;font:800 11px monospace;color:var(--teal)}
+main{max-width:1800px;margin:auto;padding:12px}.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}
+.panel{background:linear-gradient(145deg,#122440,#081327);border:1px solid var(--edge);border-radius:10px;padding:12px;min-width:0}
+.game{width:100%;height:min(74vh,760px);min-height:470px;border:4px solid #4b83af;border-radius:7px;background:#03050d;overflow:hidden}iframe{width:100%;height:100%;border:0;display:block}
+button,input{font:inherit}button{padding:9px 11px;background:#18395a;color:#fff;border:1px solid #5984a4;border-radius:6px;cursor:pointer;font-weight:800}button:hover{background:#2c5472}button:disabled{opacity:.4;cursor:default}
+input[type=file]{max-width:260px}label{font:11px monospace;color:#b3cde0}.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:9px 0}
+.meters{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.meter{background:#030d1e;border:1px solid #344d77;border-radius:7px;padding:9px}.meter b{display:block;color:var(--teal);font:900 23px monospace}.meter small{font:10px monospace;color:#a0b9cd}
+pre{background:#030d1e;color:#b5e9f2;border:1px solid #344d77;padding:12px;border-radius:7px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:190px;overflow:auto;font:11px/1.55 monospace}
+.note{border-left:3px solid var(--gold);background:#ffb86a12;padding:10px;color:#c1d3e1;margin-top:10px}
+@media(max-width:950px){.grid{grid-template-columns:1fr}.game{height:65vh}}
+</style></head><body>
+<header><div><div class="muted" style="font:800 11px monospace">ROOT 0 · REAL CARTRIDGE EMULATION · PYTHON EVIDENCE</div><h1>JANE v86 / NES ARCADE</h1><span class="muted">JANE PLAYS · TOPH WATCHES & TEACHES · PATRICIA AUDITS</span></div><div><span class="pill" id="mode">CONNECTING</span> <a href="./arena.html">OPEN ORIGINAL ARENA</a></div></header>
+<main><div class="row"><label>LOAD YOUR .NES CARTRIDGE <input id="rom" type="file" accept=".nes"></label><button id="sample">SAVE ACTION TRIALS</button><label><input type="checkbox" id="auto" checked> Auto-save every 5s (Python only)</label><span class="pill" id="pending">0 PENDING</span><button id="reload">REFRESH LEDGER</button><button id="export">EXPORT OBSERVATIONS</button><span class="pill" id="state">EMULATOR LOADING</span></div>
+<div class="grid"><section class="panel"><h2>01 / LIVE NES EMULATOR</h2><div class="game"><iframe id="arena" src="./arena.html" title="Actual NES emulator with Jane TOPH Patricia turn-taking"></iframe></div>
+<div class="note">Load a legally held .nes file; the ROM stays inside your browser. The existing arena runs the emulator and supports speed control, Toph coaching, manual life-loss handoff, and optional verified RAM life detection. No synthetic game canvas is substituted.</div></section>
+<section class="panel"><h2>02 / LIVE NES EVIDENCE</h2><div class="meters"><div class="meter"><b id="frames">0</b><small>NES FRAMES</small></div><div class="meter"><b id="trials">0</b><small>OBSERVED ACTIONS</small></div><div class="meter"><b id="events">0</b><small>SAVED TRIALS</small></div></div>
+<h2 style="margin-top:17px">SAME-RUN ANCESTRY</h2><pre id="readout">Waiting for live NES perception instrumentation.</pre><h2>RECENT NES ACTION TRIALS</h2><pre id="recent">Actions will appear after a cartridge starts.</pre>
+<h2>NES ACTION-TRIAL JOURNAL</h2><pre id="ledger">Python server connection pending.</pre>
+<div class="note">Observations of the same cartridge run share one ancestry, regardless of how many agents watch. Frame counts are not evidence of winning, improvement, or learned game meaning. The server records only NES action metadata; no ROM bytes.</div>
+<h2 style="margin-top:15px">ARCHITECTURE</h2><pre>file.nes → BROWSER NES EMULATOR
+                    |
+        Jane / Toph / Patricia
+                    |
+         read-only observation
+                    |
+          POST /api/v86/observe
+                    |
+      server_v86.py → JSONL journal
+                    |
+      data/v86/index.json (registry)</pre></section></div></main>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);let server=false,session=crypto.randomUUID().replaceAll('-',''),events=[],pending=[],seen=new Set(),last=null,busy=false,polling=false;
+const allowed=new Set(['A','B','START','SELECT','UP','DOWN','LEFT','RIGHT','NONE']);
+function doc(){try{return $('arena').contentDocument}catch(e){return null}}
+function emulator(){try{return doc()?.getElementById('game')?.contentWindow}catch(e){return null}}
+function context(){try{return emulator()?.JANE_PERCEPTION}catch(e){return null}}
+function snapshot(){try{const s=context()?.status?.();if(!s)return null;return{rom_id:String(s.rom||'unloaded').slice(0,120),frame:Math.max(0,Math.round(Number(s.frame)||0)),trials:Math.max(0,Math.round(Number(s.trials)||0)),running:!!s.running,actor:String(doc()?.getElementById('activeIndicator')?.textContent||'UNKNOWN').split(' ')[0].toUpperCase(),session_id:session}}catch(e){return null}}
+function normHash(value){return typeof value==='string'&&/^[a-f0-9]{1,128}$/i.test(value)?value:null}
+function normButton(value){if(typeof value!=='string')return 'NONE';const text=value.toUpperCase().replace(/\s+/g,'');return text.length<=28&&text.split('+').every(x=>allowed.has(x))?text:'NONE'}
+function num(value,fallback){const n=Number(value);return Number.isSafeInteger(n)&&n>=0&&n<=1000000000?n:fallback}
+function delta(value){const n=Number(value);return value!==null&&value!==undefined&&Number.isFinite(n)&&n>=0&&n<=1?n:null}
+function capture(){const snap=snapshot();if(!snap||!snap.running||snap.rom_id==='unloaded')return;
+let raw=[];try{raw=context()?.diagnostics?.()?.recentTrials||[]}catch(e){}
+if(!Array.isArray(raw))return;
+for(const t of raw){if(!t||typeof t!=='object')continue;
+const start=num(t.startFrame??t.started??t.frame,snap.frame),end=num(t.endFrame??t.ended??t.frame,start);
+const id=String(t.id??(start+'-'+t.button+'-'+t.preHash)).slice(0,120);
+const key=session+'|'+id;if(seen.has(key))continue;seen.add(key);
+const trial={session_id:session,source_root:session,rom_id:snap.rom_id,trial_id:id,
+frame:start,end_frame:Math.max(end,start),button:normButton(t.button),
+pre_hash:normHash(t.preHash??t.pre_hash),post_hash:normHash(t.postHash??t.post_hash),
+pixel_delta:delta(t.observed_delta??t.pixel_delta??t.pixelChange??t.delta),
+actor:snap.actor};
+pending.push(trial);
+}if(seen.size>10000)seen=new Set(pending.map(t=>session+'|'+t.trial_id));
+$('recent').textContent=pending.slice(-8).map(x=>'F'+x.frame+' '+x.actor+' '+x.button+' pre:'+String(x.pre_hash||'?').slice(0,9)+' delta:'+(x.pixel_delta??'unknown')).join('\n')||'Waiting for completed NES actions.';
+$('pending').textContent=pending.length+' PENDING';
+}
+async function api(url,opts){const response=await fetch(url,{cache:'no-store',...opts});let data=await response.json();if(!response.ok)throw Error(data.error||('HTTP '+response.status));return data}
+async function save(){if(!server||busy||!pending.length)return;busy=true;const batch=pending.slice(0,30);
+try{const result=await api('/api/v86/trials',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({trials:batch})});
+pending=pending.slice(batch.length);$('pending').textContent=pending.length+' PENDING';$('state').textContent='RECORDED '+result.accepted+' / DUP '+result.duplicates;await refresh()}catch(e){$('state').textContent='SAVE ERROR: '+e.message}finally{busy=false}}
+async function refresh(){if(!server)return;try{const data=await api('/api/v86/trials');events=data.events||[];$('events').textContent=data.count;$('ledger').textContent=events.slice(-8).map(e=>'F'+e.trial.frame+' '+e.trial.button+' '+e.digest.slice(0,12)).join('\n')||'No saved trials yet.'}catch(e){$('ledger').textContent=e.message}}
+async function poll(){if(polling)return;polling=true;
+last=snapshot();$('frames').textContent=last?.frame??'0';$('trials').textContent=last?.trials??'0';
+$('readout').textContent=last?JSON.stringify(last,null,2):'Waiting for the NES emulator to start.';
+capture();polling=false}
+$('rom').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;if(!/\.nes$/i.test(file.name)||file.size>5000000){$('state').textContent='INVALID ROM (MAX 5 MB)';return}
+try{const d=doc(),input=d?.getElementById('romAll');if(!input)throw Error('Arena loading; retry');const bytes=await file.arrayBuffer(),dt=new DataTransfer();dt.items.add(new File([bytes],file.name,{type:'application/octet-stream'}));input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));session=crypto.randomUUID().replaceAll('-','');pending=[];seen.clear();$('state').textContent='ROM LOADED INTO REAL NES ARENA';}catch(err){$('state').textContent='LOAD ERROR: '+err.message}};
+$('sample').onclick=save;$('reload').onclick=refresh;
+$('export').onclick=()=>{const blob=new Blob([JSON.stringify({schema:'jane.nes.trials.export.v86',session_id:session,current:last,unsaved:pending,server_events:events},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='jane-v86-nes-actions.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1200)};
+async function init(){try{const i=await api('/api/v86/index');server=i.version===86}catch(e){server=false}
+$('mode').textContent=server?'PYTHON + LIVE NES':'GITHUB PAGES · LIVE NES / LOCAL EXPORT';
+$('sample').disabled=!server;$('reload').disabled=!server;$('auto').disabled=!server;
+$('state').textContent='LOAD YOUR .NES FILE';await refresh();setInterval(poll,750);
+setInterval(()=>{if(server&&$('auto').checked)save()},5000)}init();
+})();
+</script></body></html>
