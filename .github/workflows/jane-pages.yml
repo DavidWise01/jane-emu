@@ -8,6 +8,8 @@ on:
       - 'index.html'
       - 'releases/**'
       - 'dashboard/**'
+      - 'tests/**'
+      - 'memory/curation/**'
       - '.github/workflows/jane-pages.yml'
   workflow_dispatch:
 
