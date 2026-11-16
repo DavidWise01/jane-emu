@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JANE v81 — TEACHING EFFECTIVENESS ARCADE</title>
+<style>
+:root{color-scheme:dark;--bg:#060719;--panel:#101633;--line:#3d4f83;--cyan:#56fff1;--orange:#ffb15f;--violet:#c18fff;--ink:#e9f6ff}*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% -40%,#29215c,#060719 65%);color:var(--ink);font:13px/1.45 system-ui}
+header{padding:12px 20px;border-bottom:2px solid #427eae;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+h1{font:900 clamp(22px,3vw,38px) ui-monospace,monospace;letter-spacing:-1px;margin:2px 0;color:var(--cyan);text-shadow:0 0 16px #56fff188}
+h2{font:900 15px ui-monospace,monospace;margin:0 0 9px;color:var(--orange);letter-spacing:1px}
+small,.sub{color:#aec3e1}.tag{font:800 11px ui-monospace,monospace;color:var(--violet);letter-spacing:2px}
+a{color:var(--cyan)}button,select,input{font:inherit}button,select{background:#202b58;border:1px solid #6b82b8;color:white;padding:8px 10px;border-radius:6px}button{cursor:pointer;font-weight:800}button:hover{background:#344a7f}button:disabled{opacity:.4;cursor:not-allowed}
+main{padding:12px;max-width:1800px;margin:auto}.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.cabinet{background:linear-gradient(150deg,#151c3c,#090f22);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0;box-shadow:0 0 20px #010412}
+.screen{background:#01040e;border:5px solid #4a5fa1;border-radius:8px;position:relative;overflow:hidden;box-shadow:inset 0 0 30px #02d8ff30,0 0 18px #1aa8ff22;aspect-ratio:16/10}
+canvas{width:100%;height:100%;display:block;image-rendering:pixelated}.overlay{position:absolute;top:8px;left:10px;font:800 12px monospace;color:#d2fff9;text-shadow:1px 2px black;pointer-events:none}
+.tabs{display:flex;gap:6px;overflow:auto;padding:5px 0 12px}.tabs button[aria-selected=true]{background:var(--cyan);color:#081b31}
+.tab{display:none;height:calc(min(58vw,520px) - 2px);min-height:350px;overflow:auto}.tab.active{display:block}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}.metric{padding:10px;background:#070e26;border:1px solid var(--line);border-radius:8px}.metric b{display:block;color:var(--cyan);font:900 24px monospace}.metric span{font:10px monospace;color:#9cb7cf}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#030918;border:1px solid #293d6a;border-radius:7px;padding:12px;color:#b4e9f2;max-height:260px;overflow:auto}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}.pill{border:1px solid #5373aa;padding:4px 9px;border-radius:40px;color:var(--cyan);font:800 10px monospace}
+.characters{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}.char{background:#0a1532;border:1px solid #506898;padding:10px;border-radius:8px}.char strong{display:block;font:900 16px monospace;color:var(--violet)}
+.note{border-left:3px solid var(--orange);padding:9px;background:#ffb15f12;color:#c8d6ed}
+footer{margin-top:12px;padding:12px;border:1px solid #32466e;border-radius:8px}.hangar{display:flex;gap:8px;flex-wrap:wrap;padding-top:10px}
+.skin{width:75px;height:36px;border:1px solid #7792bb;border-radius:5px;cursor:pointer}
+table{border-collapse:collapse;width:100%;font:12px monospace}td,th{text-align:left;padding:8px;border-bottom:1px solid #36476b}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.tab{height:auto;min-height:350px}.metrics{grid-template-columns:repeat(3,1fr)}}
+</style></head>
+<body><header><div><div class="tag">ROOT 0 • WATCH / LEARN / PLAY / REPEAT</div><h1>JANE <span style="color:var(--orange)">v81</span> · TEACHING ARCADE</h1><div class="sub">ONE GAME ROOT · THREE ROLES · TESTED TEACHING • SELF-CONTAINED BROWSER LAB</div></div><div><span class="pill">TE-081</span> &nbsp; <a href="./arena.html">OPEN ACTUAL NES ARENA</a> &nbsp; <a href="../">DASHBOARD</a></div></header>
+<main>
+<div class="toolbar">
+<button id="start">▶ START SIMULATION</button><button id="pause">Ⅱ PAUSE</button><button id="step">STEP ROUND</button><button id="reset">↺ RESET</button>
+<label>Speed <select id="speed"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option></select></label>
+<button id="export">⬇ EXPORT EVIDENCE JSON</button><span id="status" class="pill">READY • DEMO SIMULATION</span>
+</div>
+<div class="grid"><section class="cabinet"><h2>01 / ARCADE CABINET · JANE PLAYS</h2>
+<div class="screen"><canvas id="game" width="640" height="400" aria-label="Animated arcade teaching simulation"></canvas><div class="overlay" id="hud">PRESS START — TEACHING TEST</div></div>
+<div class="metrics"><div class="metric"><b id="round">0</b><span>TRIALS</span></div><div class="metric"><b id="base">—</b><span>UNTUTORED BASELINE</span></div><div class="metric"><b id="taught">—</b><span>TAUGHT SCORE</span></div></div>
+<div class="characters"><div class="char"><strong>JANE</strong><small>plays and retests</small></div><div class="char"><strong>TOPH</strong><small>proposes a lesson</small></div><div class="char"><strong>PATRICIA</strong><small>audits held-out tests</small></div></div>
+<div class="note">This cabinet is a deterministic synthetic teaching experiment, NOT a commercial NES emulator or proof of learned game skill. Load your legally obtained ROM in the <a href="./arena.html">existing NES arena</a>.</div>
+</section><section class="cabinet"><h2>02 / TEACHING INSTRUMENTS</h2>
+<nav class="tabs" aria-label="Instrument tabs"><button data-tab="coach" aria-selected="true">COACH</button><button data-tab="evidence" aria-selected="false">EVIDENCE</button><button data-tab="tests" aria-selected="false">TESTS</button><button data-tab="about" aria-selected="false">KERNEL</button></nav>
+<div id="coach" class="tab active"><h2>TOPH'S LESSON</h2><p>Jane avoids moving hazards. TOPH teaches the bounded rule: <b>when a hazard enters the prediction corridor, move to the safe lane before it reaches the ship.</b></p>
+<label><input id="lesson" type="checkbox" checked> Enable TOPH lesson in the intervention arm</label>
+<div class="metrics"><div class="metric"><b id="delta">—</b><span>PAIRED DELTA</span></div><div class="metric"><b id="wins">0/0</b><span>TEACHING WINS / PAIRS</span></div><div class="metric"><b id="hold">—</b><span>HELD-OUT DELTA</span></div></div>
+<pre id="coachlog" role="log" aria-live="polite">TOPH: A lesson must survive a new seed.
+PATRICIA: Same seed within each A/B pair; different seed across pairs.
+JANE: Ready.</pre></div>
+<div id="evidence" class="tab"><h2>OBSERVATION LEDGER · LOCAL ONLY</h2><p>Records use deterministic seeds and append-only rows within this session. Export for review; no automatic Git uploads.</p><table><thead><tr><th>Seed</th><th>Baseline</th><th>Taught</th><th>Δ</th><th>Split</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div id="tests" class="tab"><h2>PREDECLARED EVALUATION</h2><pre>TE-081
+Intervention: hazard prediction lesson
+Control: reactive lane choice
+Pairing: same obstacle seed in A/B
+Training seeds: 101, 103, 107, 109, 113, 127
+Held-out seeds: 131, 137, 139, 149
+Metric: hazards safely avoided / 20
+Decision: improvement only if
+  held-out mean taught > baseline
+  AND >= 3 of 4 held-out pairs improve
+No reward inferred from pixel delta.
+No independent witness from same root.</pre><button id="runall">RUN ALL 10 PAIRED TESTS</button></div>
+<div id="about" class="tab"><h2>THE TEACHING EFFECTIVENESS GATE</h2><pre>OBSERVE -> PROPOSE -> TEST -> AUDIT
+            [TOPH]
+               ↓
+JANE: baseline -> lesson -> retest
+               ↓
+PATRICIA: compare paired evidence
+               ↓
+        HOLD-OUT / REJECT
+               ↺
+
+1 seed = 1 source root.
+Repeated replays != independent witnesses.
+Improvement is local to this task and test set.
+Any new criterion requires a new version.</pre><p><a href="https://github.com/DavidWise01/jane-emu">Source repository</a> · <a href="./arena.html">NES turn-taking cabinet</a></p></div>
+</section></div>
+<footer><details><summary style="cursor:pointer;font-weight:900;color:var(--orange)">SKIN HANGAR · SELECT ARCADE FINISH</summary><div id="skins" class="hangar"></div></details></footer>
+</main>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id), canvas=$('game'),ctx=canvas.getContext('2d');
+const seeds=[101,103,107,109,113,127,131,137,139,149];let ledger=[],index=0,running=false,timer=null,animation=0,active=null;
+let theme='#56fff1';
+function rng(seed){let x=seed>>>0;return()=>{x=(Math.imul(x,1664525)+1013904223)>>>0;return x/4294967296}}
+function trial(seed,teaching){let r=rng(seed),lane=1,avoided=0,trace=[];for(let i=0;i<20;i++){
+const hazard=Math.floor(r()*3), safe=(hazard+1+Math.floor(r()*2))%3;
+if(teaching){lane=safe}else if(i%3===0){lane=safe}else{lane=Math.floor(r()*3)}
+let success=lane!==hazard;if(success)avoided++;
+trace.push({hazard,lane,success});
+}return{score:avoided,trace}}
+function render(){ctx.clearRect(0,0,640,400);ctx.fillStyle='#03091a';ctx.fillRect(0,0,640,400);
+for(let y=0;y<400;y+=40){ctx.strokeStyle='#184169';ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(640,y);ctx.stroke()}
+for(let x=0;x<640;x+=64){ctx.strokeStyle='#102949';ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,400);ctx.stroke()}
+ctx.font='bold 16px monospace';ctx.fillStyle=theme;ctx.fillText('JANE // THREE LANES // ONE SOURCE ROOT',24,30);
+const tr=active?.trace||trial(101,false).trace, t=animation%20;
+for(let j=0;j<3;j++){let x=150+j*170;ctx.strokeStyle='#395781';ctx.lineWidth=2;ctx.strokeRect(x-60,62,120,280)}
+for(let k=0;k<5;k++){let p=tr[(t+k)%20],x=150+p.hazard*170,y=70+k*60;ctx.fillStyle='#ff715f';ctx.beginPath();ctx.moveTo(x,y-15);ctx.lineTo(x+16,y+15);ctx.lineTo(x-16,y+15);ctx.fill()}
+const p=tr[t];ctx.shadowBlur=20;ctx.shadowColor=theme;ctx.fillStyle=theme;let x=150+p.lane*170;ctx.beginPath();ctx.moveTo(x,335);ctx.lineTo(x-25,377);ctx.lineTo(x+25,377);ctx.fill();ctx.shadowBlur=0;
+ctx.fillStyle='#e7f8ff';ctx.fillText('SEED '+(active?.seed||101),22,390);
+}
+function refresh(){const train=ledger.filter(x=>x.split==='TRAIN'),hold=ledger.filter(x=>x.split==='HOLDOUT'),mean=a=>a.reduce((s,x)=>s+x.delta,0)/a.length;
+$('round').textContent=ledger.length;$('base').textContent=ledger.length?ledger.at(-1).baseline+'/20':'—';
+$('taught').textContent=ledger.length?ledger.at(-1).taught+'/20':'—';
+$('delta').textContent=ledger.length?(mean(ledger)>=0?'+':'')+mean(ledger).toFixed(2):'—';
+$('hold').textContent=hold.length?(mean(hold)>=0?'+':'')+mean(hold).toFixed(2):'—';
+$('wins').textContent=ledger.filter(x=>x.delta>0).length+'/'+ledger.length;
+$('rows').innerHTML=ledger.map(x=>'<tr><td>'+x.seed+'</td><td>'+x.baseline+'</td><td>'+x.taught+'</td><td>'+x.delta+'</td><td>'+x.split+'</td></tr>').join('');
+let pass=hold.length===4&&mean(hold)>0&&hold.filter(x=>x.delta>0).length>=3;
+$('coachlog').textContent=ledger.length?'TOPH: '+(ledger.at(-1).delta>0?'The intervention improved this paired seed.':'No improvement on this paired seed.')+'\nJANE: Baseline '+ledger.at(-1).baseline+'/20, taught '+ledger.at(-1).taught+'/20.'+'\nPATRICIA: '+(hold.length===4?(pass?'Held-out gate PASSED on this simulation.':'Held-out gate FAILED on this simulation.'):'Held-out gate pending; '+hold.length+'/4 seeds tested.')+'\nSource ancestry: paired A/B trials share a seed.':'TOPH: A lesson must survive a new seed.\nPATRICIA: Awaiting paired evidence.';
+}
+function step(){if(index>=seeds.length){stop();$('status').textContent='ALL 10 TESTS COMPLETE';return}
+let seed=seeds[index++],a=trial(seed,false),b=trial(seed,$('lesson').checked),entry={version:'TE-081',seed,baseline:a.score,taught:b.score,delta:b.score-a.score,split:index<=6?'TRAIN':'HOLDOUT',lesson_enabled:$('lesson').checked,ancestry:'synthetic-seed-'+seed};
+ledger.push(entry);active={seed,trace:b.trace};animation=0;refresh();$('status').textContent='PAIR '+index+'/10 · '+entry.split}
+function stop(){running=false;clearInterval(timer);timer=null}
+function start(){if(running)return;running=true;timer=setInterval(()=>{if(index<seeds.length)step();else stop()},Math.max(80,1300/Number($('speed').value)))}
+$('start').onclick=start;$('pause').onclick=()=>{stop();$('status').textContent='PAUSED'};$('step').onclick=()=>{stop();step()};
+$('reset').onclick=()=>{stop();ledger=[];index=0;active=null;refresh();$('status').textContent='RESET'};
+$('speed').onchange=()=>{if(running){stop();start()}};
+$('runall').onclick=()=>{stop();while(index<seeds.length)step()};
+$('export').onclick=()=>{const blob=new Blob([JSON.stringify({schema:'jane-teaching-effectiveness-v81',experimental:true,generated_at:new Date().toISOString(),records:ledger},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='jane-v81-evidence.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(t=>t.setAttribute('aria-selected',String(t===b)));document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.id===b.dataset.tab))});
+['#56fff1','#ffb15f','#ff6fe3','#9eff78','#d7ccff','#76baff','#fce07a','#fe7a7a','#b1ffff','#ffffff'].forEach(c=>{const b=document.createElement('button');b.className='skin';b.style.background='linear-gradient(135deg,#11162e,'+c+')';b.setAttribute('aria-label','Choose '+c+' skin');b.onclick=()=>{theme=c};$('skins').append(b)});
+(function loop(){animation++;render();requestAnimationFrame(loop)})();refresh();
+})();
+</script></body></html>
