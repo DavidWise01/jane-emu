@@ -1,0 +1,36 @@
+{
+  "schema": "jane-lessons-v84",
+  "lessons": [
+    {
+      "id": "TOPH-001",
+      "version": 1,
+      "kind": "original",
+      "status": "retained",
+      "rule": "Choose a lane adjacent to the predicted hazard. DECOY uses visible signal as prediction",
+      "source": "straight-pattern training",
+      "known_failure": "DECOY"
+    },
+    {
+      "id": "TOPH-002",
+      "version": 2,
+      "kind": "repair",
+      "status": "candidate",
+      "parent": "TOPH-001",
+      "rule": "For DECOY add one modulo three to visible signal before choosing a different lane; otherwise original policy",
+      "criterion": "5/5 audit families improve over control with no regression",
+      "audit_seeds": [
+        151,
+        157,
+        163,
+        167,
+        173
+      ]
+    }
+  ],
+  "recursive_teaching": {
+    "proposal": "TOPH learns from retained failure",
+    "evaluation": "PATRICIA applies unchanged audit",
+    "promotion": "candidate only until audit passes",
+    "scope": "synthetic deterministic demonstration"
+  }
+}
