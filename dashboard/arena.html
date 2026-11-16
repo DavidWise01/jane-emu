@@ -317,10 +317,10 @@ function armEffect(arm){
  if(effectRows.some(x=>x.run_root===gameRoot)){status('This game attempt was already measured. Reload the cartridge for a distinct run.');return}
  if(effectArmed){status('Finish or cancel the current experiment before arming another.');return}
  const recent=w().JANE_PERCEPTION?.diagnostics?.().recentTrials||[];
- const sample=recent.findLast?.(x=>x.rom===stat.rom&&typeof x.preHash==='string'&&x.preHash.length>0);
+ const sample=recent.findLast?.(x=>typeof x.rom==='string'&&x.rom&&typeof x.preHash==='string'&&x.preHash.length>0);
  const context=sample?.preHash;
  if(!context){status('No observed pre-action screen context yet; allow Jane to play briefly before arming.');return}
- const planned=effectiveness?.plan({rom:String(stat.rom),context,run_root:gameRoot,start_frame:Number(stat.frame)||0,arm});
+ const planned=effectiveness?.plan({rom:sample.rom,context,run_root:gameRoot,start_frame:Number(stat.frame)||0,arm});
  if(planned?.state!=='ARMED'){status(planned?.reason||'Plan could not be armed');return}
  effectArmed=planned;coachEnabled=arm==='coached';$('teachOn').checked=coachEnabled;
  coach?.setEnabled(coachEnabled);renderEffect();renderCoach();
