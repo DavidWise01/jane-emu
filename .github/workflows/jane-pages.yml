@@ -73,6 +73,9 @@ jobs:
       - name: Verify single-screen turn-taking arena
         run: node tests/test_turn_arena.cjs
 
+      - name: Verify minimalist one-screen arena and NES speed controls
+        run: node tests/test_arena_speed.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
