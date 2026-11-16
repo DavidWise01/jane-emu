@@ -70,6 +70,7 @@ let active=0,ready=false,lastFrame=-1,lastTrials=0,turnStarted=0,handoffs=0,volu
     monitor=null,lifeLast=null,lifeStable=0,lifeCandidate=null,lifeHoldoff=0,entries=[],gameRoot='',seenScenes=new Set();
 const limit=1500;
 function status(s){$('status').textContent=s}
+function sessionId(){return 'session-'+(typeof crypto.randomUUID==='function'?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2))}
 function w(){return $('game').contentWindow}
 function observer(){try{return w().JANE_PERCEPTION?.status?.()||null}catch(e){return null}}
 function safeRoot(){const s=observer();return s?.rom||'unloaded'}
@@ -131,7 +132,7 @@ function sample(){
  const frame=Number(s.frame)||0;
  $('frames').textContent=frame;$('trials').textContent=s.trials||0;
  if(!s.running)return;
- if(frame<lastFrame){entriesPush({kind:'reset',actor:people[active].name,frame,reason:'NES frame counter reset: hold current player; new session origin',game_root:gameRoot});lastTrials=0;gameRoot='session-'+crypto.randomUUID();lifeLast=null;lifeCandidate=null;}
+ if(frame<lastFrame){entriesPush({kind:'reset',actor:people[active].name,frame,reason:'NES frame counter reset: hold current player; new session origin',game_root:gameRoot});lastTrials=0;gameRoot=sessionId();lifeLast=null;lifeCandidate=null;}
  const df=lastFrame<0?0:Math.min(300,Math.max(0,frame-lastFrame));
  if(df){
   for(let i=0;i<3;i++)if(i!==active)people[i].watched+=df;
@@ -190,7 +191,7 @@ async function load(file){
   d.files=dt.files;d.dispatchEvent(new (w().Event)('change',{bubbles:true}));
   active=0;lastFrame=-1;lastTrials=0;handoffs=0;lifeHoldoff=0;lifeLast=null;lifeCandidate=null;monitor=null;
   entries=[];people.forEach(p=>{p.turns=0;p.watched=0;p.actions=0});
-  gameRoot='session-'+crypto.randomUUID();
+  gameRoot=sessionId();
   entriesPush({kind:'load',frame:0,actor:'JANE',reason:'single cartridge started; 3 observers share this game state',game_root:gameRoot});
   $('handoffs').textContent=0;$('sensorState').textContent='MANUAL';$('lifeRead').textContent='—';
   setProfile();status('Jane plays first; Toph and Patricia watch the same game.');
@@ -202,9 +203,9 @@ $('mute').onclick=()=>{muted=!muted;audioEnabled=!muted;setVolume()};
 $('confirmDeath').onclick=()=>switchTurn('human-confirmed life loss',true);
 $('undo').onclick=()=>{
  if(!entries.length||entries.at(-1)?.kind!=='handoff'){status('Undo requires most recent event to be a handoff.');return}
- const last=entries.pop();active=(active+2)%3;handoffs=Math.max(0,handoffs-1);people[active].turns=Math.max(0,people[active].turns-1);
+ const last=entries.at(-1);active=(active+2)%3;handoffs=Math.max(0,handoffs-1);people[active].turns=Math.max(0,people[active].turns-1);
  lifeHoldoff=0;setProfile();$('handoffs').textContent=handoffs;
- entriesPush({kind:'correction',actor:people[active].name,frame:Number(observer()?.frame)||0,reason:'manual handoff correction; prior event retained in export history only if downloaded before undo',game_root:gameRoot});
+ entriesPush({kind:'correction',actor:people[active].name,frame:Number(observer()?.frame)||0,reason:'manual handoff correction; original handoff remains in append-only history',game_root:gameRoot});
  status('Handoff corrected; same NES continues.');
 };
 $('monitor').onclick=()=>{
