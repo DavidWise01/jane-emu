@@ -61,7 +61,7 @@ Decision: improvement only if
   AND >= 3 of 4 held-out pairs improve
   AND four distinct holdout families
 Repair candidate predeclared before audit:
-For DECOY, shift prediction by +2 mod 3.
+For DECOY, shift prediction by +1 mod 3.
 For other families, original prediction.
 Audit uses fresh seeds 151,157,163,167,173.
 Gate: all audit pairs improve vs control,
@@ -95,8 +95,8 @@ function trial(seed,teaching,pattern,policy="original"){let r=rng(seed),lane=1,a
 if(pattern==='ZIGZAG')hazard=(base+i%3)%3;
 else if(pattern==='MIRROR')hazard=2-base;
 else if(pattern==='ACCELERATE')hazard=(base+Math.floor(i*i/13))%3;
-else if(pattern==='DECOY')hazard=(base+2)%3;
-const predicted=pattern==='DECOY'?(policy==='repaired'?(base+2)%3:base):hazard;
+else if(pattern==='DECOY')hazard=(base+1)%3;
+const predicted=pattern==='DECOY'?(policy==='repaired'?(base+1)%3:base):hazard;
 if(teaching){lane=(predicted+1)%3}else if(i%3===0){lane=(hazard+1)%3}else{lane=Math.floor(r()*3)}
 let success=lane!==hazard;if(success)avoided++;trace.push({hazard,lane,success});}
 return{score:avoided,trace}}
@@ -110,17 +110,17 @@ for(let k=0;k<5;k++){let p=tr[(t+k)%20],x=150+p.hazard*170,y=70+k*60;ctx.fillSty
 const p=tr[t];ctx.shadowBlur=20;ctx.shadowColor=theme;ctx.fillStyle=theme;let x=150+p.lane*170;ctx.beginPath();ctx.moveTo(x,335);ctx.lineTo(x-25,377);ctx.lineTo(x+25,377);ctx.fill();ctx.shadowBlur=0;
 ctx.fillStyle='#e7f8ff';ctx.fillText('SEED '+(active?.seed||101)+' | '+(active?.pattern||'STRAIGHT'),22,390);
 }
-function refresh(){const train=ledger.filter(x=>x.split==='TRAIN'),hold=ledger.filter(x=>x.split==='HOLDOUT'),mean=a=>a.reduce((s,x)=>s+x.delta,0)/a.length;
-$('round').textContent=ledger.length;$('base').textContent=ledger.length?ledger.at(-1).baseline+'/20':'—';
-$('taught').textContent=ledger.length?ledger.at(-1).taught+'/20':'—';
-$('delta').textContent=ledger.length?(mean(ledger)>=0?'+':'')+mean(ledger).toFixed(2):'—';
+function refresh(){const train=ledger.filter(x=>x.split==='TRAIN'),hold=ledger.filter(x=>x.split==='HOLDOUT'),scored=ledger.filter(x=>typeof x.delta==='number'),mean=a=>a.length?a.reduce((s,x)=>s+x.delta,0)/a.length:0;
+$('round').textContent=ledger.length;$('base').textContent=scored.length?scored.at(-1).baseline+'/20':'—';
+$('taught').textContent=scored.length?scored.at(-1).taught+'/20':'—';
+$('delta').textContent=scored.length?(mean(scored)>=0?'+':'')+mean(scored).toFixed(2):'—';
 $('hold').textContent=hold.length?(mean(hold)>=0?'+':'')+mean(hold).toFixed(2):'—';
-$('wins').textContent=ledger.filter(x=>x.delta>0).length+'/'+ledger.length;
+$('wins').textContent=scored.filter(x=>x.delta>0).length+'/'+scored.length;
 $('rows').innerHTML=ledger.map(x=>'<tr><td>'+x.seed+'</td><td>'+x.pattern+'</td><td>'+x.baseline+'</td><td>'+x.taught+'</td><td>'+x.delta+'</td><td>'+x.split+'</td></tr>').join('');
 let pass=hold.length===4&&new Set(hold.map(x=>x.pattern)).size===4&&mean(hold)>0&&hold.filter(x=>x.delta>0).length>=3;
 const audits=ledger.filter(x=>x.split==='AUDIT');let accepted=audits.length===5&&audits.every(x=>x.delta>0&&x.repaired>=x.original);
 $('phase').textContent=audited?(accepted?'PHASE 3 · REPAIR ACCEPTED':'PHASE 3 · REPAIR REJECTED'):repair?'PHASE 2 · REVISION FROZEN':'PHASE 1 · ORIGINAL LESSON';$('recover').disabled=repair||index<seeds.length;$('audit').disabled=!repair||audited;
-$('coachlog').textContent=ledger.length?'TOPH: '+(repair?'Revised the DECOY prediction rule; original trial preserved.':'Original lesson under test.')+'\nJANE: Last observed baseline '+ledger.at(-1).baseline+'/20; taught '+ledger.at(-1).taught+'/20.'+'\nPATRICIA: '+(audited?(accepted?'REPAIR ACCEPTED: five fresh seeds passed.':'REPAIR REJECTED: at least one audit gate failed.'):(repair?'Revision frozen; run fresh-seed audit.':(hold.length===4?(pass?'Original transfer gate PASSED.':'Original transfer gate FAILED.'):'Awaiting original held-out trials.')))+'\nEvidence: same-seed A/B results share one source root.':'TOPH: Preserve original failure before a revision.\nPATRICIA: New audit seeds must be held out.';
+$('coachlog').textContent=scored.length?'TOPH: '+(repair?'Revised the DECOY prediction rule; original trial preserved.':'Original lesson under test.')+'\nJANE: Last observed baseline '+ledger.at(-1).baseline+'/20; taught '+ledger.at(-1).taught+'/20.'+'\nPATRICIA: '+(audited?(accepted?'REPAIR ACCEPTED: five fresh seeds passed.':'REPAIR REJECTED: at least one audit gate failed.'):(repair?'Revision frozen; run fresh-seed audit.':(hold.length===4?(pass?'Original transfer gate PASSED.':'Original transfer gate FAILED.'):'Awaiting original held-out trials.')))+'\nEvidence: same-seed A/B results share one source root.':'TOPH: Preserve original failure before a revision.\nPATRICIA: New audit seeds must be held out.';
 }
 function step(){if(index>=seeds.length){stop();$('status').textContent='ALL 10 TESTS COMPLETE';return}
 let seed=seeds[index],pattern=patterns[index];index++;let a=trial(seed,false,pattern),b=trial(seed,$('lesson').checked,pattern),entry={version:'TE-083',seed,pattern,baseline:a.score,taught:b.score,delta:b.score-a.score,split:index<=6?'TRAIN':'HOLDOUT',lesson_enabled:$('lesson').checked,ancestry:'synthetic-seed-'+seed};
@@ -129,7 +129,7 @@ function stop(){running=false;clearInterval(timer);timer=null}
 function start(){if(running)return;running=true;timer=setInterval(()=>{if(index<seeds.length)step();else stop()},Math.max(80,1300/Number($('speed').value)))}
 $('start').onclick=start;$('pause').onclick=()=>{stop();$('status').textContent='PAUSED'};$('step').onclick=()=>{stop();step()};
 $('reset').onclick=()=>{stop();ledger=[];index=0;active=null;repair=false;audited=false;refresh();$('status').textContent='RESET (NEW SESSION)'};
-$('recover').onclick=()=>{if(index!==seeds.length||repair)return;stop();repair=true;ledger.push({version:'TE-083',split:'REVISION',pattern:'DECOY',seed:'—',baseline:'—',taught:'—',delta:'—',policy:'DECOY shift +2 (mod 3)',parent:'original evidence retained'});refresh();$('status').textContent='REPAIR PROPOSED · LOCKED AUDIT READY'};
+$('recover').onclick=()=>{if(index!==seeds.length||repair)return;stop();repair=true;ledger.push({version:'TE-083',split:'REVISION',pattern:'DECOY',seed:'—',baseline:'—',taught:'—',delta:null,policy:'DECOY shift +1 (mod 3)',parent:'original evidence retained'});refresh();$('status').textContent='REPAIR PROPOSED · LOCKED AUDIT READY'};
 $('audit').onclick=()=>{if(!repair||audited)return;stop();audited=true;for(let k=0;k<auditSeeds.length;k++){const seed=auditSeeds[k],pattern=auditPatterns[k];const base=trial(seed,false,pattern),old=trial(seed,true,pattern,'original'),fixed=trial(seed,true,pattern,'repaired');ledger.push({version:'TE-083',split:'AUDIT',seed,pattern,baseline:base.score,original:old.score,repaired:fixed.score,taught:fixed.score,delta:fixed.score-base.score,ancestry:'synthetic-seed-'+seed,policy:'repaired'});active={seed,pattern,trace:fixed.trace};}refresh();$('status').textContent='FRESH-SEED AUDIT COMPLETE'};
 $('speed').onchange=()=>{if(running){stop();start()}};
 $('runall').onclick=()=>{stop();while(index<seeds.length)step()};
