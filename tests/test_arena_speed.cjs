@@ -1,7 +1,7 @@
 const fs=require('node:fs'),assert=require('node:assert/strict');
 const html=fs.readFileSync('dashboard/arena.html','utf8');
 function check(title,fn){fn();console.log('PASS '+title)}
-check('minimal arena retains exactly one NES screen',()=>assert.equal((html.match(/<iframe\\b/g)||[]).length,1));
+check('minimal arena retains exactly one NES screen',()=>assert.equal(html.split('<iframe ').length-1,1));
 check('speed selector has 1x 2x 4x 8x',()=>{
  for(const [v] of [['1'],['2'],['4'],['8']])assert.ok(html.includes('<option value="'+v+'">'));
 });
