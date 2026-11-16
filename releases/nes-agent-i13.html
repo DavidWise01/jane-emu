@@ -1547,6 +1547,10 @@ var i13RNMean = 0;            // running mean of reward (Q8)
 var i13RNVar = 256;           // running variance (Q8 squared, init to 1.0 in Q8)
 var i13RNCount = 0;           // how many rewards seen
 
+// BUILD 17: Entropy Bonus — action gap penalty prevents policy collapse
+var I13_EB_BETA = 3;          // penalty coefficient (Q8, ~0.012)
+var I13_EB_DECAY_DIV = 2000;  // β halves after 2000 learn steps
+
 // ── ACTION MAPPING ─────────────────────────────────────────
 // i13 action index → NES pad bitmask
 // 0=none, 1=LEFT(64), 2=RIGHT(128), 3=A(1), 4=B(2), 5=UP(16), 6=DOWN(32), 7=START(8)
@@ -1604,6 +1608,21 @@ function i13Learn(reward) {
     rewQ8 = ((rewQ8 - i13RNMean) * 256 / rnDenom) | 0;
     // clamp to prevent extreme normalized values
     if (rewQ8 > 512) rewQ8 = 512; if (rewQ8 < -512) rewQ8 = -512;
+  }
+  // BUILD 17: entropy bonus — penalize peaked action distributions
+  var ebBeta = (I13_EB_BETA * 256 / (256 + (i13TrainN / I13_EB_DECAY_DIV))) | 0;
+  if (ebBeta > 0) {
+    var ebMax1 = -32000, ebMax2 = -32000;
+    for (var ei = 0; ei < 8; ei++) {
+      var av = i13T[24 + ei];
+      if (av > ebMax1) { ebMax2 = ebMax1; ebMax1 = av; }
+      else if (av > ebMax2) { ebMax2 = av; }
+    }
+    var ebGap = ebMax1 - ebMax2;
+    if (ebGap < 0) ebGap = 0;
+    var ebPenalty = (ebGap * ebBeta) >> 8;
+    if (ebPenalty > 64) ebPenalty = 64;
+    rewQ8 -= ebPenalty;
   }
   i13T[33] = rewQ8;
   // Hyperbolic decay: effectiveLR = baseLR * 256 / (256 + trainN)
@@ -1763,7 +1782,9 @@ function i13SaveBrain() {
     gnEvery: I13_GN_EVERY,
     rnMean: i13RNMean,
     rnVar: i13RNVar,
-    rnCount: i13RNCount
+    rnCount: i13RNCount,
+    ebBeta: I13_EB_BETA,
+    ebDecayDiv: I13_EB_DECAY_DIV
   };
 }
 
@@ -1819,6 +1840,9 @@ function i13LoadBrain(b) {
   if (b.rnMean != null) i13RNMean = b.rnMean;
   if (b.rnVar != null) i13RNVar = b.rnVar;
   if (b.rnCount != null) i13RNCount = b.rnCount;
+  // BUILD 17: entropy bonus (backward compat: missing → keep defaults)
+  if (b.ebBeta != null) I13_EB_BETA = b.ebBeta;
+  if (b.ebDecayDiv != null) I13_EB_DECAY_DIV = b.ebDecayDiv;
 }
 
 // Soft reset: zero trainer state but keep weights (Root Strength)
@@ -1910,7 +1934,11 @@ var api = {
   get rnVar() { return i13RNVar; },
   get rnCount() { return i13RNCount; },
   RN_ALPHA: I13_RN_ALPHA,
-  RN_WARMUP: I13_RN_WARMUP
+  RN_WARMUP: I13_RN_WARMUP,
+  // BUILD 17: entropy bonus
+  get ebBeta() { return I13_EB_BETA; },
+  get ebDecayDiv() { return I13_EB_DECAY_DIV; },
+  get ebEffectiveBeta() { return (I13_EB_BETA * 256 / (256 + (i13TrainN / I13_EB_DECAY_DIV))) | 0; }
 };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.I13BRAIN = api;
@@ -2683,7 +2711,7 @@ function chainUpdate(who,action,i13state){
   /* update {{I}} values */
   if(i13state){
     var iVal=$("ch-i").querySelector(".val");
-    iVal.textContent="W969["+i13state.seen+"] lr="+(i13.effectiveLR||5)+"/"+(i13.effectiveCriticLR||10)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0)+"μ"+(i13.rnMean||0)+"σ²"+(i13.rnVar||256)+" ε"+qEps.toFixed(2)+" V"+(i13.valueV||0)+" δ"+(i13.tdError||0)+" tgt"+(i13.tgtAge||0)+" n"+(i13.nStepFill||0)+"/4 dc"+(i13.decayCount||0);
+    iVal.textContent="W969["+i13state.seen+"] lr="+(i13.effectiveLR||5)+"/"+(i13.effectiveCriticLR||10)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0)+"μ"+(i13.rnMean||0)+"σ²"+(i13.rnVar||256)+" eb="+(i13.ebEffectiveBeta||0)+" ε"+qEps.toFixed(2)+" V"+(i13.valueV||0)+" δ"+(i13.tdError||0)+" tgt"+(i13.tgtAge||0)+" n"+(i13.nStepFill||0)+"/4 dc"+(i13.decayCount||0);
   }
   /* show action on cubit node */
   var actNames=["·","←","→","A","B","↑","↓","ST"],_ACT=i13.I13_ACT;
@@ -3113,7 +3141,7 @@ function xrayDraw(){
     txt(660,300,"lr="+(i13.effectiveLR||0)+"/"+(i13.effectiveCriticLR||0),S.dim);
     txt(660,315,"tgt="+(i13.tgtAge||0)+"/256",S.dim);
     txt(760,255,"n-step="+(i13.nStepFill||0)+"/4",S.dim);
-    txt(760,270,"decay="+(i13.decayCount||0)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0),S.dim);
+    txt(760,270,"decay="+(i13.decayCount||0)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0)+" eb="+(i13.ebEffectiveBeta||0),S.dim);
     txt(760,285,"train="+i13.trainN,S.dim);
     txt(760,300,"W[969]",S.brain);
   } else { txt(410,200,"(brain offline)",S.dim); }
