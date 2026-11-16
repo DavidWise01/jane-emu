@@ -1,0 +1,130 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JANE v88 — PUNCH-OUT!! NES ARENA</title>
+<style>
+:root{color-scheme:dark;--ink:#e8f7ff;--teal:#5df9ef;--gold:#ffb86a;--edge:#49638c;--panel:#0c1a32}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -25%,#27345b,#060b1b 60%);color:var(--ink);font:13px/1.45 system-ui}
+header{padding:11px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--edge)}
+h1{font:900 clamp(22px,2.8vw,35px) monospace;color:var(--teal);margin:0;text-shadow:0 0 16px #39eccc4b}
+h2{font:900 14px monospace;color:var(--gold);letter-spacing:1px;margin:0 0 9px}
+p{margin:8px 0}a{color:var(--teal)}.muted{color:#a9bfd7}.pill{border:1px solid var(--edge);padding:5px 9px;border-radius:30px;font:800 11px monospace;color:var(--teal)}
+main{max-width:1800px;margin:auto;padding:12px}.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}
+.panel{background:linear-gradient(145deg,#122440,#081327);border:1px solid var(--edge);border-radius:10px;padding:12px;min-width:0}
+.game{width:100%;height:min(74vh,760px);min-height:470px;border:4px solid #4b83af;border-radius:7px;background:#03050d;overflow:hidden}iframe{width:100%;height:100%;border:0;display:block}
+button,input{font:inherit}button{padding:9px 11px;background:#18395a;color:#fff;border:1px solid #5984a4;border-radius:6px;cursor:pointer;font-weight:800}button:hover{background:#2c5472}button:disabled{opacity:.4;cursor:default}
+input[type=file]{max-width:260px}label{font:11px monospace;color:#b3cde0}.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:9px 0}
+.meters{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.meter{background:#030d1e;border:1px solid #344d77;border-radius:7px;padding:9px}.meter b{display:block;color:var(--teal);font:900 23px monospace}.meter small{font:10px monospace;color:#a0b9cd}
+pre{background:#030d1e;color:#b5e9f2;border:1px solid #344d77;padding:12px;border-radius:7px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:190px;overflow:auto;font:11px/1.55 monospace}
+.note{border-left:3px solid var(--gold);background:#ffb86a12;padding:10px;color:#c1d3e1;margin-top:10px}
+@media(max-width:950px){.grid{grid-template-columns:1fr}.game{height:65vh}}
+select{padding:8px;background:#163452;color:#eefcff;border:1px solid #567ba4;border-radius:6px;font:12px monospace} #fightCoach,#fightLedger{max-height:150px}</style></head><body>
+<header><div><div class="muted" style="font:800 11px monospace">ROOT 0 · REAL CARTRIDGE EMULATION · EMBEDDED EVIDENCE</div><h1>JANE v88 / PUNCH-OUT!!</h1><span class="muted">FIRST CARTRIDGE: PUNCH-OUT!! · JANE BOXES · TOPH COACHES · PATRICIA AUDITS</span></div><div><span class="pill" id="mode">CONNECTING</span> <a href="./arena.html">OPEN ORIGINAL ARENA</a></div></header>
+<main><div class="row"><label>LOAD YOUR .NES CARTRIDGE <input id="rom" type="file" accept=".nes"></label><button id="sample">SAVE LOCAL TRIALS</button><label><input type="checkbox" id="auto" checked> Auto-save every 5s</label><span class="pill" id="pending">0 PENDING</span><button id="reload">VERIFY CHAIN</button><button id="export">EXPORT OBSERVATIONS</button><span class="pill" id="state">EMULATOR LOADING</span></div>
+<div class="grid"><section class="panel"><h2>01 / LIVE NES EMULATOR</h2><div class="game"><iframe id="arena" src="./arena.html" title="Actual NES emulator with Jane TOPH Patricia turn-taking"></iframe></div>
+<div class="note">Load a legally held .nes file; the ROM stays inside your browser. The existing arena runs the emulator and supports speed control, Toph coaching, manual life-loss handoff, and optional verified RAM life detection. No synthetic game canvas is substituted.</div></section>
+<section class="panel"><h2>02 / LIVE NES EVIDENCE</h2><div class="meters"><div class="meter"><b id="frames">0</b><small>NES FRAMES</small></div><div class="meter"><b id="trials">0</b><small>OBSERVED ACTIONS</small></div><div class="meter"><b id="events">0</b><small>LOCAL TRIALS</small></div></div>
+<h2 style="margin-top:17px">SAME-RUN ANCESTRY</h2><pre id="readout">Waiting for live NES perception instrumentation.</pre><h2>RECENT NES ACTION TRIALS</h2><pre id="recent">Actions will appear after a cartridge starts.</pre>
+<h2>EMBEDDED BROWSER JOURNAL</h2><pre id="ledger">Local browser evidence initializes automatically.</pre>
+<div class="note">Observations of the same cartridge run share one ancestry, regardless of how many agents watch. Frame counts are not evidence of winning, improvement, or learned game meaning. Trial metadata is kept locally in your browser; no ROM bytes are uploaded.</div>
+<h2 style="margin-top:15px">03 / PUNCH-OUT!! FIGHT DESK</h2>
+<div class="row"><label>OPPONENT <select id="opponent"><option>Glass Joe</option><option>Von Kaiser</option><option>Piston Honda</option><option>Don Flamenco</option><option>King Hippo</option><option>Great Tiger</option><option>Bald Bull</option><option>Soda Popinski</option><option>Mr. Sandman</option><option>Super Macho Man</option><option>Mike Tyson</option></select></label>
+<label>ROUND <select id="fightRound"><option>1</option><option>2</option><option>3</option></select></label></div>
+<div class="row"><button id="newFight">NEW FIGHT</button><button id="opponentDown">OPPONENT DOWN</button><button id="janeDown">JANE DOWN + HANDOFF</button><button id="fightWin">CONFIRM WIN</button><button id="fightLoss">CONFIRM LOSS</button></div>
+<div class="meters"><div class="meter"><b id="kdFor">0</b><small>OPPONENT DOWNS</small></div><div class="meter"><b id="kdAgainst">0</b><small>JANE DOWNS</small></div><div class="meter"><b id="fightCount">0</b><small>VERIFIED FIGHTS</small></div></div>
+<div class="note">Manual confirmations are labeled human-reported, not ROM-verified. Jane and TOPH action trials come from the existing NES emulator. No undocumented Punch-Out RAM addresses are assumed. If Jane is knocked down, the handoff button also requests the arena's normal controller rotation.</div>
+<h2>TOPH'S BOXING LESSON QUEUE</h2><pre id="fightCoach">Start Glass Joe. Observe punch/dodge timing; record actual results before changing the lesson.</pre>
+<h2>PATRICIA'S MATCH EVIDENCE</h2><pre id="fightLedger">No confirmed fight events yet.</pre>
+<button id="fightExport">EXPORT FIGHT EVIDENCE JSON</button>
+<h2 style="margin-top:15px">ARCHITECTURE</h2><pre>file.nes → BROWSER NES EMULATOR
+                    |
+        Jane / Toph / Patricia
+                    |
+         read-only observation
+                    |
+          localStorage · punches / match events
+                    |
+      embedded SHA-256 event chain
+                    |
+      data/v88/index.json (registry)</pre></section></div></main>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);const KEY='jane.v88.nes.trials';let session=crypto.randomUUID().replaceAll('-',''),entries=[],pending=[],seen=new Set(),last=null,busy=false;
+const allowed=new Set(['A','B','START','SELECT','UP','DOWN','LEFT','RIGHT','NONE']);
+function doc(){try{return $('arena').contentDocument}catch(e){return null}}
+function emulator(){try{return doc()?.getElementById('game')?.contentWindow}catch(e){return null}}
+function context(){try{return emulator()?.JANE_PERCEPTION}catch(e){return null}}
+function snap(){try{const s=context()?.status?.();if(!s)return null;return{rom_id:String(s.rom||'unloaded').slice(0,120),frame:Math.max(0,Math.round(Number(s.frame)||0)),trials:Math.max(0,Math.round(Number(s.trials)||0)),running:!!s.running,actor:String(doc()?.getElementById('activeIndicator')?.textContent||'UNKNOWN').split(' ')[0].toUpperCase(),session_id:session}}catch(e){return null}}
+function hashValue(v){return typeof v==='string'&&/^[a-f0-9]{1,128}$/i.test(v)?v:null}
+function button(v){if(typeof v!=='string')return 'NONE';const s=v.toUpperCase().replaceAll(' ','');return s.length<=28&&s.split('+').every(x=>allowed.has(x))?s:'NONE'}
+function num(v,d){const n=Number(v);return Number.isSafeInteger(n)&&n>=0&&n<=1e9?n:d}
+function normalizedDelta(v){if(v===null||v===undefined)return null;const n=Number(v);return Number.isFinite(n)&&n>=0&&n<=1?n:null}
+function capture(){let s=snap();if(!s||!s.running||s.rom_id==='unloaded')return;
+let trials=[];try{trials=context()?.diagnostics?.()?.recentTrials||[]}catch(e){}if(!Array.isArray(trials))return;
+for(const t of trials){if(!t||typeof t!=='object')continue;
+const frame=num(t.startFrame??t.started??t.frame,s.frame),end=num(t.endFrame??t.ended??t.frame,frame);
+const trial_id=String(t.id??(frame+'-'+t.button+'-'+t.preHash)).slice(0,120);const key=session+'|'+trial_id;if(seen.has(key))continue;seen.add(key);
+pending.push({session_id:session,source_root:session,rom_id:s.rom_id,trial_id,frame,end_frame:Math.max(frame,end),button:button(t.button),pre_hash:hashValue(t.preHash??t.pre_hash),post_hash:hashValue(t.postHash??t.post_hash),pixel_delta:normalizedDelta(t.observed_delta??t.pixel_delta??t.pixelChange??t.delta),actor:s.actor});
+}
+$('pending').textContent=pending.length+' PENDING';
+$('recent').textContent=pending.slice(-8).map(x=>'F'+x.frame+' '+x.button+' '+String(x.pre_hash||'?').slice(0,9)+' | Δ '+(x.pixel_delta??'unknown')).join('\n')||'Waiting for completed NES actions.';}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(entries));return true}catch(e){$('state').textContent='STORAGE FULL — EXPORT JSON';return false}}
+async function hash(record){const bytes=new TextEncoder().encode(JSON.stringify(record));const digest=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(digest),x=>x.toString(16).padStart(2,'0')).join('')}
+function render(){const len=entries.length;$('events').textContent=len;$('ledger').textContent=entries.slice(-9).map(x=>'F'+x.trial.frame+' '+x.trial.button+' '+x.digest.slice(0,14)).join('\n')||'No recorded action trials yet.';}
+async function save(){if(busy||!pending.length)return;busy=true;const batch=pending.slice(0,30);try{
+let parent=entries.length?entries[entries.length-1].digest:'0'.repeat(64);
+for(const trial of batch){let item={schema:'jane.nes.trial.v88',parent_digest:parent,recorded_utc:new Date().toISOString(),trial};item.digest=await hash(item);parent=item.digest;entries.push(item);}
+if(!persist()){entries.splice(entries.length-batch.length,batch.length);return}
+pending.splice(0,batch.length);$('pending').textContent=pending.length+' PENDING';$('state').textContent='SAVED '+batch.length+' TO BROWSER';render()
+}catch(e){$('state').textContent='SAVE ERROR: '+e.message}finally{busy=false}}
+async function verify(){let parent='0'.repeat(64);for(let k=0;k<entries.length;k++){const row=entries[k],check={schema:row.schema,parent_digest:row.parent_digest,recorded_utc:row.recorded_utc,trial:row.trial};if(row.parent_digest!==parent||await hash(check)!==row.digest){$('state').textContent='CHAIN INVALID AT '+k;return false}parent=row.digest}$('state').textContent='CHAIN VALID · '+entries.length+' RECORDS';return true}
+function poll(){last=snap();$('frames').textContent=last?.frame??'0';$('trials').textContent=last?.trials??'0';$('readout').textContent=last?JSON.stringify(last,null,2):'Waiting for NES emulator';capture()}
+$('rom').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;if(!/\.nes$/i.test(file.name)||file.size>5e6){$('state').textContent='INVALID .NES (MAX 5MB)';return}try{
+const d=doc(),input=d?.getElementById('romAll');if(!input)throw Error('Emulator is loading');const buf=await file.arrayBuffer(),dt=new DataTransfer();dt.items.add(new File([buf],file.name,{type:'application/octet-stream'}));input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));session=crypto.randomUUID().replaceAll('-','');seen.clear();pending=[];$('state').textContent='ROM SENT TO NES EMULATOR'}catch(err){$('state').textContent='LOAD ERROR: '+err.message}};
+$('sample').onclick=save;$('reload').onclick=verify;
+$('export').onclick=()=>{const text=JSON.stringify({schema:'jane.nes.export.v88',current:last,records:entries,unsaved:pending},null,2),url=URL.createObjectURL(new Blob([text],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='jane-v88-nes-evidence.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+try{const rows=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(rows))entries=rows.filter(x=>x?.schema==='jane.nes.trial.v88')}catch(e){}
+$('mode').textContent='EMBEDDED · NO SERVER REQUIRED';$('state').textContent='LOAD YOUR .NES FILE';render();verify();
+setInterval(poll,750);setInterval(()=>{if($('auto').checked)save()},5000);
+})();
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id),KEY='jane.v88.punchout.matches';
+let fights=[],events=[],fight=null,working=false,root=crypto.randomUUID().replaceAll('-','');
+try{const obj=JSON.parse(localStorage.getItem(KEY)||'{}');if(Array.isArray(obj.events))events=obj.events;if(Array.isArray(obj.fights))fights=obj.fights;}catch(e){}
+function arena(){try{return $('arena').contentDocument}catch(e){return null}}
+function frame(){try{return Math.max(0,Math.floor(Number(arena()?.getElementById('frames')?.textContent)||0))}catch(e){return 0}}
+function newRoot(){return crypto.randomUUID().replaceAll('-','')}
+function actor(){return String(arena()?.getElementById('activeIndicator')?.textContent||'UNKNOWN').split(' ')[0]}
+function render(){
+$('kdFor').textContent=fight?.opponent_downs??0;$('kdAgainst').textContent=fight?.jane_downs??0;
+$('fightCount').textContent=fights.filter(f=>f.status==='WIN'||f.status==='LOSS').length;
+$('fightLedger').textContent=events.slice(-10).map(e=>'F'+e.frame+' '+e.kind+' '+e.opponent+' '+e.actor+' '+e.source+' '+e.digest.slice(0,10)).join('\n')||'No fight confirmations yet.';
+const opponents=fight?.opponent_downs??0,downs=fight?.jane_downs??0;
+$('fightCoach').textContent=[
+'TOPH: '+(fight?'Observing '+fight.opponent+' · round '+fight.round:'Start a fresh Glass Joe fight'),
+'OPPONENT DOWNS '+opponents+' | JANE DOWNS '+downs,
+'LESSON HYPOTHESIS: compare action timing around confirmed knockdowns.',
+'PATRICIA: a human confirmation is not a verified RAM event.',
+'Do not award improvement without repeatable game outcomes and paired starts.'
+].join('\n')}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({schema:'jane.punchout.v88',fights,events}));return true}catch(e){$('state').textContent='FIGHT STORAGE FULL — EXPORT';return false}}
+async function sha(text){const bytes=new TextEncoder().encode(text),d=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(d),x=>x.toString(16).padStart(2,'0')).join('')}
+async function record(kind){if(working)return;working=true;try{
+if(!fight&&kind!=='START'){ $('state').textContent='START A FIGHT FIRST';return}
+let before=fight?structuredClone(fight):null;
+if(kind==='START'){if(fight?.status==='ACTIVE'){$('state').textContent='FINISH CURRENT FIGHT FIRST';return}
+fight={root:newRoot(),opponent:$('opponent').value,round:Number($('fightRound').value),opponent_downs:0,jane_downs:0,status:'ACTIVE',start_frame:frame()};root=fight.root;}
+if(kind==='OPPONENT_DOWN')fight.opponent_downs++;
+if(kind==='JANE_DOWN')fight.jane_downs++;
+if(kind==='WIN'||kind==='LOSS'){fight.status=kind;fight.end_frame=frame()}
+let item={schema:'jane.punchout.event.v88',root:root,frame:frame(),kind,opponent:fight.opponent,round:fight.round,actor:actor(),source:'human-confirmed',time_utc:new Date().toISOString(),parent_digest:events.at(-1)?.digest||'0'.repeat(64)};
+item.digest=await sha(JSON.stringify(item));events.push(item);
+if(kind==='WIN'||kind==='LOSS')fights.push(structuredClone(fight));
+if(!save()){events.pop();if(kind==='WIN'||kind==='LOSS')fights.pop();fight=before;return}
+if(kind==='JANE_DOWN'){const handoff=arena()?.getElementById('confirmDeath');if(handoff)handoff.click();}
+$('state').textContent='PUNCH-OUT EVENT '+kind+' RECORDED';render();
+}finally{working=false}}
+$('newFight').onclick=()=>record('START');$('opponentDown').onclick=()=>record('OPPONENT_DOWN');$('janeDown').onclick=()=>record('JANE_DOWN');$('fightWin').onclick=()=>record('WIN');$('fightLoss').onclick=()=>record('LOSS');
+$('fightExport').onclick=()=>{const payload=JSON.stringify({schema:'jane.punchout.export.v88',profile:'punchout',current:fight,events,fights,source_note:'manual match events, shared cartridge ancestry'},null,2);const url=URL.createObjectURL(new Blob([payload],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='jane-punchout-v88.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)};
+$('rom').addEventListener('change',()=>{if(fight?.status==='ACTIVE')fight.status='ABANDONED';fight=null;render()});
+render();
+})();
+</script></script></body></html>
