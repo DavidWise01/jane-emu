@@ -92,3 +92,13 @@ The default landing page is [Jane v87](./dashboard/v87.html). It embeds the exis
 [The Actions workflow](./.github/workflows/jane-arcade-v87.yml) validates JSON, compiles Python modules, runs tests, and deploys a static subset to GitHub Pages. GitHub Actions is a build/test/deploy environment, **not** a 24/7 NES hosting process. A browser executes the NES emulator after GitHub Pages loads the HTML/JS. The workflow deliberately excludes ROM uploads and local runtime journals. Its deployment requires Pages to be configured for GitHub Actions and relevant repository permissions.
 
 Python servers `server_v84.py`, `server_v85.py`, and `server_v86.py` remain optional development tools. They do not need to be running to use v87. Browser storage is device/browser scoped, may be cleared, and is not synchronized to GitHub. Export JSON to retain a durable archive. SHA-256 chaining can detect altered local journal entries relative to a trusted digest; it is not an independent witness or proof of improved NES gameplay.
+
+## AV-088 — First cartridge: Punch-Out!!
+
+[Launch Jane v88 Punch-Out!! arcade](./dashboard/v88.html) · [Punch-Out JSON profile](./data/v88/punchout.json) · [Actions workflow](./.github/workflows/jane-arcade-v87.yml).
+
+The arcade runs the existing actual NES emulator inside its game cabinet; the game file must be selected locally by the user. Glass Joe is the first opponent in the match desk. Jane, Toph and Patricia continue sharing a single emulator and taking turns through the existing handoff system. The match desk adds manual opponent knockdowns, Jane knockdowns, win/loss confirmation, round and opponent selection, browser-local match evidence, and JSON export. Confirm Jane Down also requests a handoff through the existing arena controls.
+
+Opponent knockdowns, match victories and losses are **human-confirmed labels**, not automatically recognized from the ROM. The NES emulator continues to capture controller/frame/pixel observations separately, and no undocumented memory offsets are assumed. Browser-local evidence is not Git-published automatically. A ROM-based gameplay test with a lawfully supplied cartridge is still needed to establish mapper compatibility and player behavior.
+
+GitHub Actions now validates data/v88/punchout.json and stages dashboard/v88.html for Pages; Python servers are optional and not required to play. Only user-owned ROM files chosen locally at runtime are used. The next target is verified game-specific RAM observation for round, health, and knockdown state, followed by controlled before/after teaching trials.
