@@ -84,6 +84,7 @@ try{const rows=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(rows
 $('mode').textContent='EMBEDDED · NO SERVER REQUIRED';$('state').textContent='LOAD YOUR .NES FILE';render();verify();
 setInterval(poll,750);setInterval(()=>{if($('auto').checked)save()},5000);
 })();
+</script>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),KEY='jane.v88.punchout.matches';
@@ -127,4 +128,4 @@ $('fightExport').onclick=()=>{const payload=JSON.stringify({schema:'jane.punchou
 $('rom').addEventListener('change',()=>{if(fight?.status==='ACTIVE')fight.status='ABANDONED';fight=null;render()});
 render();
 })();
-</script></script></body></html>
+</script></body></html>
