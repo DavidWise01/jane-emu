@@ -58,10 +58,16 @@ pre{border:1px solid var(--edge);background:#031523;padding:10px;border-radius:8
 <div class="row"><button id="monitor">Enable RAM death detection</button><button id="disableMonitor">Disable sensor</button></div>
 <div class="note">NES games do not share a universal lives address. Enter a verified RAM location for the cartridge to enable automatic handoffs after a stable lives decrement. Without it, use Confirm life lost. Unknown screen transitions never trigger a handoff automatically.</div>
 <div class="meters"><div class="meter"><strong id="lifeRead">—</strong><small>LIVES VALUE</small></div><div class="meter"><strong id="sensorState">MANUAL</strong><small>DEATH SENSOR</small></div></div>
-</div></details><h2 style="margin-top:14px">WATCH / HANDOFF LOG</h2><pre id="log">Watching for a cartridge and first frame.</pre>
+</div></details><h2 style="margin-top:14px">TOPH → JANE · LIVE COACHING</h2>
+<div class="row"><label for="teachOn">Toph sends bounded experiments</label><input id="teachOn" type="checkbox" checked></div>
+<div class="meters"><div class="meter"><strong id="teachCount">0</strong><small>QUESTIONS PROPOSED</small></div><div class="meter"><strong id="teachResults">0</strong><small>OBSERVED RETURNS</small></div></div>
+<pre id="teachLog">Toph is watching Jane. Teaching begins after repeated action evidence on the same screen context.</pre>
+<div class="note">Toph proposes *questions*, never winning actions. Jane remains the only controller; recommendations are tested occasionally in the existing action loop. Patricia audits the log. All three share the same source ancestry.</div>
+<h2 style="margin-top:14px">WATCH / HANDOFF LOG</h2><pre id="log">Watching for a cartridge and first frame.</pre>
 <button id="export" type="button">Export turn/observer evidence JSON</button>
 </section></div>
 </main>
+<script src="./av080_coach.js"></script>
 <script>
 (()=>{
 'use strict';
@@ -70,12 +76,21 @@ const people=[{name:'JANE',mode:'fast',color:'#7ae7ef',turns:0,watched:0,actions
 let active=0,ready=false,lastFrame=-1,lastTrials=0,turnStarted=0,handoffs=0,volume=40,muted=false,audioEnabled=false,speed=1,
     monitor=null,lifeLast=null,lifeStable=0,lifeCandidate=null,lifeHoldoff=0,entries=[],gameRoot='',seenScenes=new Set(),seenTrialIds=new Set();
 const limit=1500;
+const coach=window.JaneTophCoach?.create();let coachEnabled=true;window.JANE_TOPH_COACH={recommend(ctx){if(active!==0||!coachEnabled)return null;return coach?.recommend(ctx)||null}};
 function status(s){$('status').textContent=s}
 function sessionId(){return 'session-'+(typeof crypto.randomUUID==='function'?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2))}
 function w(){return $('game').contentWindow}
 function observer(){try{return w().JANE_PERCEPTION?.status?.()||null}catch(e){return null}}
 function safeRoot(){const s=observer();return s?.rom||'unloaded'}
 function entriesPush(e){entries.push(e);if(entries.length>limit)entries.shift();paintLog()}
+function renderCoach(){
+ const st=coach?.status();if(!st)return;
+ $('teachCount').textContent=st.teachings;$('teachResults').textContent=st.feedback;
+ $('teachLog').textContent=st.lessons.slice(-8).map(e=>
+  'F'+e.frame+' TOPH '+(e.kind==='teaching'?'ASK JANE':'OBSERVED')+' '+e.button+
+  ' · '+(e.kind==='teaching'?e.reason:'pixel Δ '+(100*e.observed_delta).toFixed(2)+'% (benefit unknown)')).join('\n')||
+  'TOPH WATCHING · Waiting for two observed trials from the same exact screen context.';
+}
 function renderPlayers(){
  $('players').textContent='';
  people.forEach((p,i)=>{
@@ -114,7 +129,7 @@ function switchTurn(reason,verified){
  turnStarted=frame;lifeHoldoff=frame+120;
  entriesPush({kind:'handoff',actor:leaving.name,to:people[active].name,frame,game_root:gameRoot,verified,reason});
  // Do not reset NES; only update which policy schedule controls Player 1.
- setProfile();$('handoffs').textContent=handoffs;
+ setProfile();coach?.setEnabled(coachEnabled&&active===0);$('handoffs').textContent=handoffs;
  status(leaving.name+' → '+people[active].name+' · '+reason+' · same NES state');
  return true;
 }
@@ -146,6 +161,8 @@ function sample(){
    const k=String(t.id)+'|'+String(t.started||t.startFrame||0)+'|'+String(t.preHash||'');
    if(seenTrialIds.has(k))continue;
    seenTrialIds.add(k);
+   if(coach){const feedback=coach.observe(t);if(feedback)entriesPush({kind:'teaching-feedback',actor:'TOPH',frame,
+      reason:'Jane tested '+feedback.button+' → observed pixel change '+(feedback.observed_delta*100).toFixed(2)+'%; benefit unknown',game_root:gameRoot});}
    for(let i=0;i<3;i++)if(i!==active){
     const p=people[i];p.observedTrials++;
     p.observations.push({trial_id:t.id,frame,button:t.button,source_root:gameRoot,
@@ -186,6 +203,9 @@ async function init(){
   const frameClock='accum+=delta;let steps=0;while(accum>=1000/60&&steps++<6)';
   if(!html.includes(frameClock))throw Error('NES frame-clock hook missing; speed control cannot safely initialize');
   html=html.replace(frameClock,'accum+=delta*(window.JANE_ARENA_SPEED||1);let steps=0;while(accum>=1000/60&&steps++<32)');
+  const actionHook='function chooseAction(){';
+  if(!html.includes(actionHook))throw Error('NES action-selection hook unavailable; Toph coaching disabled');
+  html=html.replace(actionHook,"function chooseAction(){const coaching=window.parent?.JANE_TOPH_COACH?.recommend?.({rom:romID,hash:perception?.hash||'',frame,title:titleLesson.stage});if(coaching&&ACTIONS.includes(coaching)&&!coaching.includes('+')&&!['START','SELECT'].includes(coaching))return coaching;");
   html=html.replace('if(steps>=6)accum=0','if(steps>=32)accum=0');
   $('game').addEventListener('load',()=>{
    try{
@@ -211,13 +231,14 @@ async function load(file){
   d.files=dt.files;d.dispatchEvent(new (w().Event)('change',{bubbles:true}));
   active=0;lastFrame=-1;lastTrials=0;handoffs=0;lifeHoldoff=0;lifeLast=null;lifeCandidate=null;monitor=null;
   entries=[];seenTrialIds.clear();people.forEach(p=>{p.turns=0;p.watched=0;p.actions=0;p.observedTrials=0;p.observations=[]});
-  gameRoot=sessionId();
+  gameRoot=sessionId();coach?.reset('',gameRoot);coach?.setEnabled(coachEnabled);renderCoach();
   entriesPush({kind:'load',frame:0,actor:'JANE',reason:'single cartridge started; 3 observers share this game state',game_root:gameRoot});
   $('handoffs').textContent=0;$('sensorState').textContent='MANUAL';$('lifeRead').textContent='—';
   setProfile();status('Jane plays first; Toph and Patricia watch the same game.');
  }catch(e){status('ROM load failed: '+e.message)}
 }
 $('romAll').onchange=e=>load(e.target.files?.[0]);
+$('teachOn').onchange=e=>{coachEnabled=e.target.checked;coach?.setEnabled(coachEnabled&&active===0);renderCoach();status('Toph coaching '+(coachEnabled?'enabled':'paused')+'; Jane remains Player 1.');};
 $('volume').oninput=e=>{volume=Number(e.target.value);audioEnabled=true;setVolume()};
 $('speed').onchange=e=>{speed=Number(e.target.value)||1;if(ready)w().JANE_ARENA_SPEED=speed;status('NES speed: '+speed+'× · one continuous game / three observers.');};
 $('mute').onclick=()=>{muted=!muted;audioEnabled=!muted;setVolume()};
@@ -240,7 +261,7 @@ $('monitor').onclick=()=>{
 $('disableMonitor').onclick=()=>{monitor=null;lifeLast=null;lifeCandidate=null;$('sensorState').textContent='MANUAL';status('Automatic lives sensor disabled; manual death confirmation active.')};
 $('export').onclick=()=>{
  const blob=new Blob([JSON.stringify({schema:'jane.turn-taking.v1',rom:safeRoot(),game_root:gameRoot,
-  observation_roots:1,players:people,events:entries,note:'All observations share the same NES starting state lineage.'},null,2)],{type:'application/json'});
+  observation_roots:1,players:people,teaching:coach?.status()||null,events:entries,note:'All observations share the same NES starting state lineage.'},null,2)],{type:'application/json'});
  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='jane-toph-patricia-watch-learn-play.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
 setInterval(sample,500);renderPlayers();init();
