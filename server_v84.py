@@ -27,6 +27,7 @@ def play(seed: int, family: str, policy: str) -> dict:
     if family not in FAMILIES or policy not in ("control", "original", "repaired"):
         raise ValueError("unknown family or policy")
     rng = random.Random(seed)
+    control_rng = random.Random(seed ^ 0xA5A5A5A5)
     avoided = 0
     trace = []
     for tick in range(20):
@@ -36,7 +37,7 @@ def play(seed: int, family: str, policy: str) -> dict:
                   "DECOY": (base + 1) % 3}[family]
         prediction = base if family == "DECOY" and policy == "original" else hazard
         if policy == "control":
-            lane = (hazard + 1) % 3 if tick % 3 == 0 else rng.randrange(3)
+            lane = (hazard + 1) % 3 if tick % 3 == 0 else control_rng.randrange(3)
         else:
             lane = (prediction + 1) % 3
         safe = lane != hazard
