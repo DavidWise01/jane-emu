@@ -1,4 +1,4 @@
-name: Jane NES arcade · test and deploy
+name: Jane Punch-Out NES arcade · test and deploy
 on:
   push:
     branches: [main]
@@ -6,6 +6,7 @@ on:
       - 'dashboard/**'
       - 'releases/**'
       - 'data/v87/**'
+      - 'data/v88/**'
       - 'server_v8*.py'
       - 'tests/**'
       - 'index.html'
@@ -30,6 +31,8 @@ jobs:
         shell: bash
         run: |
           python -m json.tool data/v87/index.json > /dev/null
+          python -m json.tool data/v88/punchout.json > /dev/null
+          test -s dashboard/v88.html
           python -m json.tool data/v86/index.json > /dev/null
           test -s dashboard/v87.html
           test -s dashboard/arena.html
@@ -51,8 +54,9 @@ jobs:
           mkdir -p _site
           cp index.html _site/
           cp -R dashboard releases _site/
-          mkdir -p _site/data/v87
+          mkdir -p _site/data/v87 _site/data/v88
           cp data/v87/index.json _site/data/v87/
+          cp data/v88/punchout.json _site/data/v88/
           touch _site/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
