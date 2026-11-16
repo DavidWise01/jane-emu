@@ -1,0 +1,39 @@
+{
+  "schema": "jane.nes.index.v86",
+  "version": 86,
+  "kind": "actual NES emulator with optional local Python trial journal",
+  "entry": "dashboard/v86.html",
+  "emulator": "dashboard/arena.html",
+  "server": "server_v86.py",
+  "api": {
+    "index": "/api/v86/index",
+    "trials": "/api/v86/trials",
+    "verify": "/api/v86/verify"
+  },
+  "storage": "data/v86/runtime/trials.jsonl",
+  "witness": {
+    "rule": "same emulator session is one root",
+    "derived_records": "not independent witnesses"
+  },
+  "trial": {
+    "allowed_buttons": [
+      "A",
+      "B",
+      "START",
+      "SELECT",
+      "UP",
+      "DOWN",
+      "LEFT",
+      "RIGHT",
+      "NONE"
+    ],
+    "pixel_delta": "observational only",
+    "benefit": "unverified until game-specific objective validated"
+  },
+  "limits": [
+    "ROM file stays in browser",
+    "Python provides a journal, not NES emulation",
+    "GitHub Pages static mode cannot save server evidence",
+    "No automatic learning or winning claims"
+  ]
+}
