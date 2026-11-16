@@ -40,6 +40,8 @@ jobs:
           python -m py_compile server_v84.py server_v85.py server_v86.py
       - name: Run Python observation journal tests
         run: python -m unittest discover -s tests -p 'test_server_v86.py' -v
+      - name: Check Punch-Out profile and embedded JavaScript
+        run: python -m unittest discover -s tests -p 'test_punchout_v88.py' -v
   deploy:
     needs: verify
     runs-on: ubuntu-latest
