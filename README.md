@@ -63,3 +63,12 @@ The main [Play ↔ Learn Git dashboard](./dashboard/index.html) also exposes a v
 - Local API: `GET /api/v84/index`, `GET /api/v84/lessons`, `GET /api/v84/audit` (read-only), `GET /api/v84/ledger`, and `POST /api/v84/run` with `{\"kind\":\"audit\"}` or `{\"kind\":\"trial\",\"seed\":151,\"family\":\"DECOY\"}`. POST appends JSONL evidence under `data/v84/runtime/evidence.jsonl` with parent SHA-256 digest chaining. The ledger is local, not auto-published. This chain is tamper-evident only relative to a trusted prior digest; it does not establish independent witnesses or prevent a privileged local operator rewriting storage.
 - GitHub Pages is STATIC and cannot execute the Python API. The v84 page detects this and disables server actions; static JSON indexes remain browsable. Run a local Python server for persisted trials.
 - Scope: a deterministic synthetic three-lane experiment, not actual NES training. The original ROM-based [NES arena](./dashboard/arena.html) remains accessible.
+
+
+## AV-085 — Real .nes cartridges, not simulated hazards
+
+Launch [Jane v85 real NES arcade](./dashboard/v85.html). The frontend **embeds the existing actual NES arena** (`dashboard/arena.html`) and loads a user-selected local `.nes` ROM into that browser emulator. The emulator itself (not Python) runs the ROM and supplies Jane/Toph/Patricia turn-taking, coaching telemetry, speed and game-specific death monitoring. An empty ROM is not included; use a legally obtained cartridge image.
+
+**Local JSON evidence server:** run `python server_v85.py` from the repository root (Python standard library), then visit `http://127.0.0.1:8785/`. The new server hosts the NES frontend, serves `data/v85/index.json` at `/api/v85/index`, exposes `/api/v85/ledger`, and accepts `POST /api/v85/observe`. Press **Save NES Observation** during a running ROM to append metadata to the local `data/v85/runtime/observations.jsonl` journal, chained by SHA-256 digest. This is observation evidence, **not proof of improved NES gameplay**; ROM bytes are neither posted nor stored by Python.
+
+GitHub Pages can host and execute the existing JavaScript NES emulator and load user-selected `.nes` files, but Pages **does not execute `.py` servers**. The frontend disables journal submission when its local API is unavailable. Existing v81–v84 synthetic demos are retained as historical prototypes, not the current NES arcade. Never treat a repeated observation of the same NES run as an independent witness.
