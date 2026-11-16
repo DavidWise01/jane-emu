@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JANE / Punch-Out!! · Technical Arcade</title><style>:root{color-scheme:dark;--bg:#080e16;--surface:#101a27;--surface2:#152230;--line:#2d4151;--ink:#e8eef2;--muted:#91a5b3;--cyan:#69e1dc;--amber:#eebc78;--red:#ee8188}
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{background:var(--bg);color:var(--ink);font:12px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+button,input,select{font:inherit}button{border:1px solid #3b5262;color:#dcebf1;background:#1b2b39;padding:7px 11px;border-radius:5px;cursor:pointer;font-weight:650;white-space:nowrap}button:hover{background:#284353;border-color:#5b9b9b}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}button:disabled{opacity:.45;cursor:default}
+button.primary{background:#1d5659;border-color:#378d90;color:#e8ffff}button.alert{border-color:#805257;color:#ffc4c4;background:#412930}button.positive{border-color:#497c64;background:#223e35}
+select,input[type=file]{max-width:100%;background:#0a1721;border:1px solid #3b5363;color:var(--ink);padding:7px;border-radius:5px}input[type=checkbox]{accent-color:var(--cyan)}
+a{color:var(--cyan);text-decoration:none}a:hover{text-decoration:underline}h1,h2,h3,p{margin-top:0}h1{font:750 18px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.03em;margin:0}h2{font:750 12px ui-monospace,monospace;letter-spacing:.09em;text-transform:uppercase;color:#becbd5;margin:0 0 12px}
+kbd,.mono,pre,.tag,.pill{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.app{height:100dvh;min-height:610px;display:flex;flex-direction:column;overflow:hidden}
+.topbar{min-height:58px;padding:10px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;gap:13px;align-items:center}.emblem{height:32px;width:32px;display:grid;place-items:center;border:1px solid #467477;color:var(--cyan);background:#183236;font:900 13px monospace;border-radius:5px}
+.brand small{display:block;color:var(--muted);font:10px monospace;letter-spacing:.05em;margin-top:3px}.topright{display:flex;align-items:center;gap:15px}.topright a{font:11px monospace}
+.pill{border:1px solid #365464;border-radius:4px;color:var(--cyan);padding:5px 8px;white-space:nowrap;font-size:10px}
+.controlbar{min-height:55px;display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--line);background:#0c1520;flex-wrap:wrap}
+.field{display:flex;align-items:center;gap:7px;color:var(--muted);font:10px monospace;white-space:nowrap}
+.field input[type=file]{max-width:245px;font:11px system-ui}.controlbar .auto{margin-left:auto}.controlbar .status{color:#b8d1d5}
+.workspace{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.12fr) minmax(390px,.88fr);gap:1px;background:var(--line)}
+.stage,.instruments{background:var(--bg);min-width:0;min-height:0;display:flex;flex-direction:column}
+.stage-head,.instrument-head{height:43px;padding:0 15px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);flex:none}
+.stage-head .left{display:flex;gap:10px;align-items:center}.tag{font-size:10px;font-weight:800;color:var(--cyan);letter-spacing:.09em}.subtle{font:10px monospace;color:var(--muted)}
+.game{flex:1;min-height:0;margin:10px;border:1px solid #314b5d;border-radius:6px;background:#03070c;overflow:hidden}
+.game iframe{width:100%;height:100%;display:block;border:0;background:#060d15}
+.stage-foot{height:35px;padding:8px 15px;display:flex;gap:12px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);font:10px monospace;color:var(--muted);flex:none}
+.tabstrip{height:40px;display:flex;align-items:stretch;gap:2px;padding:4px 10px 0;border-bottom:1px solid var(--line);flex:none;overflow-x:auto}
+.tabstrip button{background:transparent;color:var(--muted);border:0;border-radius:4px 4px 0 0;padding:6px 13px;font:750 11px monospace}
+.tabstrip button[aria-selected=true]{background:#1a2d3b;color:var(--cyan);box-shadow:inset 0 -2px var(--cyan)}
+.tabcontent{min-height:0;overflow:auto;padding:15px 16px;flex:1;scrollbar-width:thin;scrollbar-color:#3d5e6c transparent}
+.tabpage[hidden]{display:none!important}.tabpage{display:block}
+.section{border:1px solid var(--line);border-radius:6px;background:#101a25;padding:13px;margin-bottom:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:9px 0}.row:first-child{margin-top:0}.row:last-child{margin-bottom:0}
+.fieldset{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:9px;margin-bottom:13px}
+.fieldset label{display:grid;gap:5px;color:var(--muted);font:10px monospace}.fieldset select{width:100%}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:13px}
+.metric{background:#0d1721;border:1px solid var(--line);border-radius:5px;padding:10px}.metric b{display:block;font:750 23px monospace;color:#d7f4f2;margin:1px 0 2px}.metric small{font:10px monospace;color:var(--muted);text-transform:uppercase}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;margin:7px 0 0;border:1px solid #263948;border-radius:5px;background:#0a131d;color:#b2d5dc;padding:11px;font:11px/1.55 ui-monospace,monospace;max-height:280px;overflow:auto}
+.helper{font-size:11px;color:var(--muted);line-height:1.55;margin:8px 0}.signal{color:var(--cyan)}.warning{color:var(--amber)}
+.footerbar{height:30px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 16px;border-top:1px solid var(--line);background:#0b1420;font:10px monospace;color:var(--muted)}
+@media(max-width:980px){.app{height:auto;min-height:100dvh;overflow:visible}.workspace{display:flex;flex-direction:column}.stage{height:70vh;min-height:490px}.instruments{min-height:510px}.tabcontent{max-height:650px}.controlbar .auto{margin-left:0}.footerbar{height:auto;min-height:30px;flex-wrap:wrap;padding:8px 16px}}
+@media(max-width:550px){.topbar{padding:9px}.topright a{display:none}.controlbar{padding:8px}.controlbar .field input[type=file]{max-width:185px}.fieldset{grid-template-columns:1fr 90px}.metrics{gap:5px}.metric{padding:7px}.metric b{font-size:18px}}
+</style></head>
+<body><div class="app">
+<header class="topbar"><div class="brand"><div class="emblem">J</div><div><h1>JANE <span style="color:var(--cyan)">/</span> PUNCH-OUT!!</h1><small>v89 · NES TIMING LAB · ROOT 0</small></div></div><div class="topright"><span id="mode" class="pill">INITIALIZING</span><a href="./arena.html">Advanced emulator</a></div></header>
+<div class="controlbar">
+<label class="field">CARTRIDGE <input id="rom" type="file" accept=".nes" aria-label="Load local NES cartridge"></label>
+<span id="state" class="pill status" role="status">LOAD .NES ROM</span>
+<button id="sample">Save trials</button><button id="reload">Verify evidence</button><button id="export">Export trials</button>
+<label class="field auto"><input type="checkbox" id="auto" checked> AUTO-SAVE / 5S</label><span id="pending" class="pill">0 PENDING</span>
+</div>
+<main class="workspace">
+<section class="stage" aria-label="NES emulator"><div class="stage-head"><div class="left"><span class="tag">01 / NES EMULATOR</span><span class="subtle">LIVE CARTRIDGE · ONE GAME STATE</span></div><span class="subtle">JANE / TOPH / PATRICIA</span></div>
+<div class="game"><iframe id="arena" src="./arena.html" title="NES emulator with Jane, Toph and Patricia"></iframe></div>
+<div class="stage-foot"><span>ROM bytes remain in your browser</span><span>Emulator controls remain available inside the game pane</span></div></section>
+<section class="instruments" aria-label="Punch-Out instruments"><div class="instrument-head"><span class="tag">02 / INSTRUMENTS</span><span class="subtle">MATCH · COACHING · TELEMETRY</span></div>
+<nav class="tabstrip" aria-label="Instrument tabs"><button type="button" data-tab="match" aria-selected="true">MATCH</button><button type="button" data-tab="coach" aria-selected="false">TOPH</button><button type="button" data-tab="telemetry" aria-selected="false">TELEMETRY</button><button type="button" data-tab="evidence" aria-selected="false">EVIDENCE</button><button type="button" data-tab="timing" aria-selected="false">TIMING</button><button type="button" data-tab="system" aria-selected="false">SYSTEM</button></nav>
+<div class="tabcontent">
+<section class="tabpage" id="tab-match">
+<div class="section"><h2>Fight configuration</h2><div class="fieldset"><label>OPPONENT<select id="opponent"><option>Glass Joe</option><option>Von Kaiser</option><option>Piston Honda</option><option>Don Flamenco</option><option>King Hippo</option><option>Great Tiger</option><option>Bald Bull</option><option>Soda Popinski</option><option>Mr. Sandman</option><option>Super Macho Man</option><option>Mike Tyson</option></select></label><label>ROUND<select id="fightRound"><option>1</option><option>2</option><option>3</option></select></label></div>
+<div class="row"><button id="newFight" class="primary">Start fight</button><button id="opponentDown">Opponent down</button><button id="janeDown" class="alert">Jane down / handoff</button></div>
+<div class="row"><button id="fightWin" class="positive">Confirm win</button><button id="fightLoss" class="alert">Confirm loss</button><button id="fightExport">Export match JSON</button></div>
+<p class="helper">Results and knockdowns are manually confirmed; no unverified game-specific RAM offsets are used.</p></div>
+<div class="metrics"><div class="metric"><b id="kdFor">0</b><small>Opponent downs</small></div><div class="metric"><b id="kdAgainst">0</b><small>Jane downs</small></div><div class="metric"><b id="fightCount">0</b><small>Completed fights</small></div></div>
+<div class="section"><h2>Recent match events</h2><pre id="fightLedger">No confirmed fight events.</pre></div>
+</section>
+<section class="tabpage" id="tab-coach" hidden><div class="section"><h2>TOPH / teaching inspection</h2><pre id="fightCoach">Start with Glass Joe. Observe timing and confirm outcomes.</pre><p class="helper">Teaching effectiveness requires comparable attempts and verified fight outcomes. Pixel movement alone is not a reward.</p></div></section>
+<section class="tabpage" id="tab-telemetry" hidden><div class="metrics"><div class="metric"><b id="frames">0</b><small>NES frames</small></div><div class="metric"><b id="trials">0</b><small>Action count</small></div><div class="metric"><b id="events">0</b><small>Saved trials</small></div></div><div class="section"><h2>Live emulator status</h2><pre id="readout">Waiting for emulator.</pre></div><div class="section"><h2>Recent action trials</h2><pre id="recent">No completed action trials yet.</pre></div></section>
+<section class="tabpage" id="tab-evidence" hidden><div class="section"><h2>Browser evidence journal</h2><pre id="ledger">Local browser evidence initializes automatically.</pre><p class="helper">All observations from one continuous game state share one source ancestry. The digest chain only helps detect modifications relative to trusted digests.</p></div></section>
+<section class="tabpage" id="tab-timing" hidden>
+<div class="section"><h2>AV-089 / Glass Joe timing trials</h2>
+<p class="helper">Record a visible opponent cue, then record Jane's attempted response and independently label its outcome. This is human observation, not automatic attack recognition.</p>
+<div class="fieldset"><label>CUE<select id="cueType"><option value="windup">Punch windup</option><option value="attack">Attack begins</option><option value="recovery">Opponent recovery</option><option value="unknown">Unknown visual cue</option></select></label><label>RESPONSE<select id="responseType"><option value="LEFT">LEFT dodge</option><option value="RIGHT">RIGHT dodge</option><option value="DOWN">DOWN dodge</option><option value="A">A punch</option><option value="B">B punch</option><option value="NONE">No action</option></select></label></div>
+<div class="row"><button id="markCue" class="primary">1 · Mark cue</button><button id="markResponse">2 · Mark response</button></div>
+<div class="row"><button id="outcomeSuccess" class="positive">3 · Effective</button><button id="outcomeFailure" class="alert">3 · Ineffective</button><button id="outcomeUnknown">3 · Unverified</button></div>
+<p class="helper" id="timingState">No timing trial started. Load a cartridge and begin a fight.</p>
+</div>
+<div class="metrics"><div class="metric"><b id="timingCount">0</b><small>Completed trials</small></div><div class="metric"><b id="timingSuccess">0</b><small>Effective / labeled</small></div><div class="metric"><b id="timingLag">—</b><small>Median frame lag</small></div></div>
+<div class="section"><h2>Reproducibility ledger</h2><pre id="timingLedger">No cue-response trials.</pre><div class="row"><button id="timingExport">Export timing JSON</button><button id="timingClear" class="alert">Clear timing journal</button></div><p class="helper">Frame lag uses emulator frame counters. If missing or unchanged, latency is unknown. Trials in one game run have shared ancestry, not independent witnesses. Clear is permanent.</p></div></section>
+<section class="tabpage" id="tab-system" hidden><div class="section"><h2>Runtime architecture</h2><pre>Local .nes cartridge
+  → Embedded NES emulator
+  → Jane controller / Toph coach
+  → Patricia observation
+  → Browser-local action + match journals
+  → JSON export (manual)
+
+GitHub Actions: verify + static Pages deploy
+Python: optional development tools</pre></div><div class="section"><h2>Evidence constraints</h2><p class="helper">Game files are not distributed or uploaded. Match controls are human-labeled. GitHub Pages hosts the front end; it does not run a permanent Python server.</p><a href="../data/v88/punchout.json">Cartridge profile JSON</a></div></section>
+</div></section></main>
+<footer class="footerbar"><span>AV-089 / GLASS JOE TIMING LAB</span><span>OBSERVATION ≠ REWARD &nbsp;·&nbsp; REPEATED SOURCES ≠ INDEPENDENT WITNESSES</span></footer>
+</div>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);const KEY='jane.v88.nes.trials';let session=crypto.randomUUID().replaceAll('-',''),entries=[],pending=[],seen=new Set(),last=null,busy=false;
+const allowed=new Set(['A','B','START','SELECT','UP','DOWN','LEFT','RIGHT','NONE']);
+function doc(){try{return $('arena').contentDocument}catch(e){return null}}
+function emulator(){try{return doc()?.getElementById('game')?.contentWindow}catch(e){return null}}
+function context(){try{return emulator()?.JANE_PERCEPTION}catch(e){return null}}
+function snap(){try{const s=context()?.status?.();if(!s)return null;return{rom_id:String(s.rom||'unloaded').slice(0,120),frame:Math.max(0,Math.round(Number(s.frame)||0)),trials:Math.max(0,Math.round(Number(s.trials)||0)),running:!!s.running,actor:String(doc()?.getElementById('activeIndicator')?.textContent||'UNKNOWN').split(' ')[0].toUpperCase(),session_id:session}}catch(e){return null}}
+function hashValue(v){return typeof v==='string'&&/^[a-f0-9]{1,128}$/i.test(v)?v:null}
+function button(v){if(typeof v!=='string')return 'NONE';const s=v.toUpperCase().replaceAll(' ','');return s.length<=28&&s.split('+').every(x=>allowed.has(x))?s:'NONE'}
+function num(v,d){const n=Number(v);return Number.isSafeInteger(n)&&n>=0&&n<=1e9?n:d}
+function normalizedDelta(v){if(v===null||v===undefined)return null;const n=Number(v);return Number.isFinite(n)&&n>=0&&n<=1?n:null}
+function capture(){let s=snap();if(!s||!s.running||s.rom_id==='unloaded')return;
+let trials=[];try{trials=context()?.diagnostics?.()?.recentTrials||[]}catch(e){}if(!Array.isArray(trials))return;
+for(const t of trials){if(!t||typeof t!=='object')continue;
+const frame=num(t.startFrame??t.started??t.frame,s.frame),end=num(t.endFrame??t.ended??t.frame,frame);
+const trial_id=String(t.id??(frame+'-'+t.button+'-'+t.preHash)).slice(0,120);const key=session+'|'+trial_id;if(seen.has(key))continue;seen.add(key);
+pending.push({session_id:session,source_root:session,rom_id:s.rom_id,trial_id,frame,end_frame:Math.max(frame,end),button:button(t.button),pre_hash:hashValue(t.preHash??t.pre_hash),post_hash:hashValue(t.postHash??t.post_hash),pixel_delta:normalizedDelta(t.observed_delta??t.pixel_delta??t.pixelChange??t.delta),actor:s.actor});
+}
+$('pending').textContent=pending.length+' PENDING';
+$('recent').textContent=pending.slice(-8).map(x=>'F'+x.frame+' '+x.button+' '+String(x.pre_hash||'?').slice(0,9)+' | Δ '+(x.pixel_delta??'unknown')).join('\n')||'Waiting for completed NES actions.';}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(entries));return true}catch(e){$('state').textContent='STORAGE FULL — EXPORT JSON';return false}}
+async function hash(record){const bytes=new TextEncoder().encode(JSON.stringify(record));const digest=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(digest),x=>x.toString(16).padStart(2,'0')).join('')}
+function render(){const len=entries.length;$('events').textContent=len;$('ledger').textContent=entries.slice(-9).map(x=>'F'+x.trial.frame+' '+x.trial.button+' '+x.digest.slice(0,14)).join('\n')||'No recorded action trials yet.';}
+async function save(){if(busy||!pending.length)return;busy=true;const batch=pending.slice(0,30);try{
+let parent=entries.length?entries[entries.length-1].digest:'0'.repeat(64);
+for(const trial of batch){let item={schema:'jane.nes.trial.v88',parent_digest:parent,recorded_utc:new Date().toISOString(),trial};item.digest=await hash(item);parent=item.digest;entries.push(item);}
+if(!persist()){entries.splice(entries.length-batch.length,batch.length);return}
+pending.splice(0,batch.length);$('pending').textContent=pending.length+' PENDING';$('state').textContent='SAVED '+batch.length+' TO BROWSER';render()
+}catch(e){$('state').textContent='SAVE ERROR: '+e.message}finally{busy=false}}
+async function verify(){let parent='0'.repeat(64);for(let k=0;k<entries.length;k++){const row=entries[k],check={schema:row.schema,parent_digest:row.parent_digest,recorded_utc:row.recorded_utc,trial:row.trial};if(row.parent_digest!==parent||await hash(check)!==row.digest){$('state').textContent='CHAIN INVALID AT '+k;return false}parent=row.digest}$('state').textContent='CHAIN VALID · '+entries.length+' RECORDS';return true}
+function poll(){last=snap();$('frames').textContent=last?.frame??'0';$('trials').textContent=last?.trials??'0';$('readout').textContent=last?JSON.stringify(last,null,2):'Waiting for NES emulator';capture()}
+$('rom').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;if(!/\.nes$/i.test(file.name)||file.size>5e6){$('state').textContent='INVALID .NES (MAX 5MB)';return}try{
+const d=doc(),input=d?.getElementById('romAll');if(!input)throw Error('Emulator is loading');const buf=await file.arrayBuffer(),dt=new DataTransfer();dt.items.add(new File([buf],file.name,{type:'application/octet-stream'}));input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));session=crypto.randomUUID().replaceAll('-','');seen.clear();pending=[];$('state').textContent='ROM SENT TO NES EMULATOR'}catch(err){$('state').textContent='LOAD ERROR: '+err.message}};
+$('sample').onclick=save;$('reload').onclick=verify;
+$('export').onclick=()=>{const text=JSON.stringify({schema:'jane.nes.export.v88',current:last,records:entries,unsaved:pending},null,2),url=URL.createObjectURL(new Blob([text],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='jane-v88-nes-evidence.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+try{const rows=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(rows))entries=rows.filter(x=>x?.schema==='jane.nes.trial.v88')}catch(e){}
+$('mode').textContent='EMBEDDED · NO SERVER REQUIRED';$('state').textContent='LOAD YOUR .NES FILE';render();verify();
+setInterval(poll,750);setInterval(()=>{if($('auto').checked)save()},5000);
+})();
+</script>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id),KEY='jane.v88.punchout.matches';
+let fights=[],events=[],fight=null,working=false,root=crypto.randomUUID().replaceAll('-','');
+try{const obj=JSON.parse(localStorage.getItem(KEY)||'{}');if(Array.isArray(obj.events))events=obj.events;if(Array.isArray(obj.fights))fights=obj.fights;}catch(e){}
+function arena(){try{return $('arena').contentDocument}catch(e){return null}}
+function frame(){try{return Math.max(0,Math.floor(Number(arena()?.getElementById('frames')?.textContent)||0))}catch(e){return 0}}
+function newRoot(){return crypto.randomUUID().replaceAll('-','')}
+function actor(){return String(arena()?.getElementById('activeIndicator')?.textContent||'UNKNOWN').split(' ')[0]}
+function render(){
+$('kdFor').textContent=fight?.opponent_downs??0;$('kdAgainst').textContent=fight?.jane_downs??0;
+$('fightCount').textContent=fights.filter(f=>f.status==='WIN'||f.status==='LOSS').length;
+$('fightLedger').textContent=events.slice(-10).map(e=>'F'+e.frame+' '+e.kind+' '+e.opponent+' '+e.actor+' '+e.source+' '+e.digest.slice(0,10)).join('\n')||'No fight confirmations yet.';
+const opponents=fight?.opponent_downs??0,downs=fight?.jane_downs??0;
+$('fightCoach').textContent=[
+'TOPH: '+(fight?'Observing '+fight.opponent+' · round '+fight.round:'Start a fresh Glass Joe fight'),
+'OPPONENT DOWNS '+opponents+' | JANE DOWNS '+downs,
+'LESSON HYPOTHESIS: compare action timing around confirmed knockdowns.',
+'PATRICIA: a human confirmation is not a verified RAM event.',
+'Do not award improvement without repeatable game outcomes and paired starts.'
+].join('\n')}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({schema:'jane.punchout.v88',fights,events}));return true}catch(e){$('state').textContent='FIGHT STORAGE FULL — EXPORT';return false}}
+async function sha(text){const bytes=new TextEncoder().encode(text),d=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(d),x=>x.toString(16).padStart(2,'0')).join('')}
+async function record(kind){if(working)return;working=true;try{
+if(!fight&&kind!=='START'){ $('state').textContent='START A FIGHT FIRST';return}
+let before=fight?structuredClone(fight):null;
+if(kind==='START'){if(fight?.status==='ACTIVE'){$('state').textContent='FINISH CURRENT FIGHT FIRST';return}
+fight={root:newRoot(),opponent:$('opponent').value,round:Number($('fightRound').value),opponent_downs:0,jane_downs:0,status:'ACTIVE',start_frame:frame()};root=fight.root;}
+if(kind==='OPPONENT_DOWN')fight.opponent_downs++;
+if(kind==='JANE_DOWN')fight.jane_downs++;
+if(kind==='WIN'||kind==='LOSS'){fight.status=kind;fight.end_frame=frame()}
+let item={schema:'jane.punchout.event.v88',root:root,frame:frame(),kind,opponent:fight.opponent,round:fight.round,actor:actor(),source:'human-confirmed',time_utc:new Date().toISOString(),parent_digest:events.at(-1)?.digest||'0'.repeat(64)};
+item.digest=await sha(JSON.stringify(item));events.push(item);
+if(kind==='WIN'||kind==='LOSS')fights.push(structuredClone(fight));
+if(!save()){events.pop();if(kind==='WIN'||kind==='LOSS')fights.pop();fight=before;return}
+if(kind==='JANE_DOWN'){const handoff=arena()?.getElementById('confirmDeath');if(handoff)handoff.click();}
+$('state').textContent='PUNCH-OUT EVENT '+kind+' RECORDED';render();
+}finally{working=false}}
+$('newFight').onclick=()=>record('START');$('opponentDown').onclick=()=>record('OPPONENT_DOWN');$('janeDown').onclick=()=>record('JANE_DOWN');$('fightWin').onclick=()=>record('WIN');$('fightLoss').onclick=()=>record('LOSS');
+$('fightExport').onclick=()=>{const payload=JSON.stringify({schema:'jane.punchout.export.v88',profile:'punchout',current:fight,events,fights,source_note:'manual match events, shared cartridge ancestry'},null,2);const url=URL.createObjectURL(new Blob([payload],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='jane-punchout-v88.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)};
+$('rom').addEventListener('change',()=>{if(fight?.status==='ACTIVE')fight.status='ABANDONED';fight=null;render()});
+render();
+})();
+</script><script>
+(()=>{'use strict';
+const buttons=[...document.querySelectorAll('[data-tab]')];
+const choose=id=>{buttons.forEach(b=>{const on=b.dataset.tab===id;b.setAttribute('aria-selected',String(on));document.getElementById('tab-'+b.dataset.tab).hidden=!on})};
+buttons.forEach(b=>b.addEventListener('click',()=>choose(b.dataset.tab)));
+choose('match');
+const iframe=document.getElementById('arena');
+iframe.addEventListener('load',()=>{
+  try{
+    const d=iframe.contentDocument;
+    if(!d)return;
+    const style=d.createElement('style');
+    style.textContent='header{display:none!important}main{max-width:none!important;padding:6px!important}.grid{grid-template-columns:minmax(0,1fr)!important}.grid>.panel:nth-child(2){display:none!important}.toolbar{margin-bottom:5px!important;padding:6px!important}.toolbar>label:first-child{display:none!important}.game{height:calc(100vh - 230px)!important;min-height:300px!important}.note{display:none!important}';
+    d.head.appendChild(style);
+  }catch(e){}
+});
+})();
+</script><script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id), KEY='jane.v89.punchout.timing';
+let rows=[],active=null,run=crypto.randomUUID(),count=0;
+try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(v))rows=v.filter(x=>x&&x.schema==='jane.punchout.timing.v89').slice(-2000)}catch(_){}
+const snap=()=>{try{const d=$('arena').contentDocument, e=d?.getElementById('game')?.contentWindow?.JANE_PERCEPTION?.status?.();const n=Number(e?.frame);return {frame:Number.isSafeInteger(n)&&n>=0?n:null,rom:String(e?.rom||'unloaded').slice(0,120),running:!!e?.running,actor:String(d?.getElementById('activeIndicator')?.textContent||'UNKNOWN').split(' ')[0]}}catch(_){return {frame:null,rom:'unavailable',running:false,actor:'UNKNOWN'}}};
+const stamp=()=>({time_utc:new Date().toISOString(),...snap()});
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(rows));return true}catch(e){$('timingState').textContent='STORAGE FAILURE — EXPORT FIRST';return false}};
+const median=a=>{if(!a.length)return null;const s=a.slice().sort((a,b)=>a-b),m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2};
+function render(){const ok=rows.filter(r=>r.outcome==='effective').length,lags=rows.map(r=>r.lag_frames).filter(x=>x!==null);
+$('timingCount').textContent=rows.length;$('timingSuccess').textContent=ok;$('timingLag').textContent=median(lags)??'—';
+$('timingLedger').textContent=rows.slice(-12).map(r=>['#'+r.trial,'F'+(r.cue.frame??'?'),'→F'+(r.response?.frame??'?'),r.response_type,r.outcome,'lag '+(r.lag_frames??'?'),r.cue_type].join(' ')).join('\n')||'No cue-response trials.'}
+$('markCue').onclick=()=>{const s=stamp();if(!s.running||s.rom==='unloaded'){$('timingState').textContent='A running cartridge is required';return}if(active){$('timingState').textContent='Finish or label the current trial first';return}active={cue:s,cue_type:$('cueType').value,response_type:$('responseType').value,response:null};$('timingState').textContent='Cue at frame '+(s.frame??'?')+'; mark Jane response next.'};
+$('markResponse').onclick=()=>{if(!active||active.response){$('timingState').textContent='Mark one cue before one response';return}const s=stamp();if(s.rom!==active.cue.rom){active=null;$('timingState').textContent='Cartridge changed; trial discarded';return}active.response=s;$('timingState').textContent='Response marked at frame '+(s.frame??'?')+'. Label outcome.'};
+function finish(outcome){if(!active?.response){$('timingState').textContent='Cue and response required before outcome';return}const a=active,lag=a.cue.frame!==null&&a.response.frame!==null&&a.response.frame>=a.cue.frame?a.response.frame-a.cue.frame:null;
+const row={schema:'jane.punchout.timing.v89',trial:++count,run,source_root:run,cue_type:a.cue_type,response_type:a.response_type,cue:a.cue,response:a.response,lag_frames:lag,outcome,outcome_source:'manual',assumed_independent:false};
+rows.push(row);if(!persist()){rows.pop();count--;return}active=null;$('timingState').textContent='Trial '+row.trial+' saved · '+outcome+' · frame lag '+(lag??'unknown');render()}
+$('outcomeSuccess').onclick=()=>finish('effective');$('outcomeFailure').onclick=()=>finish('ineffective');$('outcomeUnknown').onclick=()=>finish('unverified');
+$('timingExport').onclick=()=>{const blob=new Blob([JSON.stringify({schema:'jane.punchout.timing.export.v89',source_note:'manual labels; repeated game observations are one root',rows},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='jane-v89-glass-joe-timing.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)};
+$('timingClear').onclick=()=>{if(!confirm('Permanently clear locally saved AV-089 timing trials? Export first if needed.'))return;rows=[];active=null;count=0;persist();render();$('timingState').textContent='Timing journal cleared'};
+$('rom').addEventListener('change',()=>{active=null;run=crypto.randomUUID();count=rows.length;$('timingState').textContent='New cartridge run / new source root'});count=rows.length;render();
+})();
+</script></body></html>
