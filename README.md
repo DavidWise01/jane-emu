@@ -39,3 +39,8 @@ Play at [Wizard Arena](./dashboard/arena.html) or [Play ↔ Learn dashboard](./d
 A master **0–100% speaker-volume slider**, plus mute/unmute, controls Jane's audible APU, with Toph and Patricia muted to prevent three soundtracks mixing. The three machines still emulate audio for their own sensors. Each cabinet displays frames, observed actions and scene counts. Those are not game victory scores; enter the actual visible game scores and click **Finish / Judge** to declare the winner. This avoids inventing game objectives from pixel motion.
 
 The main [Play ↔ Learn Git dashboard](./dashboard/index.html) also exposes a volume slider and a link to the arena. GitHub Pages uses the Pages Actions workflow and tests `tests/test_wizard_arena.cjs` alongside learning policy tests.
+
+
+## TE-081 — Teaching Effectiveness Arcade (v81)
+
+[Launch v81 teaching arcade](./dashboard/v81.html). A self-contained canvas arcade lab presents Jane (student), TOPH (teacher), and Patricia (auditor), with speed control, pause, deterministic paired baseline/intervention trials, preregistered 6 training + 4 held-out seeds, a held-out improvement gate, skin hangar, and JSON evidence export. Simulation outcomes are illustrative synthetic measurements and **not** demonstrated improvement in a real NES cartridge. The same-seed A/B pair has one witness ancestry. The [actual ROM-based NES arena](./dashboard/arena.html) remains available separately. This release does not transmit ROMs or commit browser experiment logs automatically.
