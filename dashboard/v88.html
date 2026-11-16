@@ -172,7 +172,7 @@ iframe.addEventListener('load',()=>{
     const d=iframe.contentDocument;
     if(!d)return;
     const style=d.createElement('style');
-    style.textContent='header{display:none!important}main{max-width:none!important;padding:6px!important}.grid{grid-template-columns:minmax(0,1fr)!important}.grid>.panel:nth-child(2){display:none!important}.toolbar{margin-bottom:5px!important;padding:6px!important}.game{height:calc(100vh - 230px)!important;min-height:300px!important}.note{display:none!important}';
+    style.textContent='header{display:none!important}main{max-width:none!important;padding:6px!important}.grid{grid-template-columns:minmax(0,1fr)!important}.grid>.panel:nth-child(2){display:none!important}.toolbar{margin-bottom:5px!important;padding:6px!important}.toolbar>label:first-child{display:none!important}.game{height:calc(100vh - 230px)!important;min-height:300px!important}.note{display:none!important}';
     d.head.appendChild(style);
   }catch(e){}
 });
