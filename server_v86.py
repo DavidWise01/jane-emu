@@ -43,7 +43,8 @@ def validate_trial(row):
             raise ValueError("invalid " + key)
     if row["end_frame"] < row["frame"]:
         raise ValueError("end before start")
-    if row.get("button") not in ALLOWED:
+    buttons = row.get("button")
+    if not isinstance(buttons, str) or len(buttons) > 28 or not buttons or any(part not in ALLOWED for part in buttons.split("+")):
         raise ValueError("unsupported button")
     if row.get("actor") not in ("JANE", "TOPH", "PATRICIA", "UNKNOWN"):
         raise ValueError("invalid actor")
