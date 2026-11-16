@@ -90,13 +90,13 @@ function renderPlayers(){
 function paintLog(){$('log').textContent=entries.slice(-16).map(e=>'F'+e.frame+' ['+e.actor+'] '+e.kind+' · '+e.reason).join('\n')||'Waiting for evidence…'}
 function setProfile(){
  const s=w().document.getElementById('reactionSelect');
- if(s){s.value=people[active].mode;s.dispatchEvent(new w().Event('change',{bubbles:true}))}
+ if(s){s.value=people[active].mode;s.dispatchEvent(new (w().Event)('change',{bubbles:true}))}
  renderPlayers();
 }
 function setVolume(){
  const slider=w().document.getElementById('volSlider');
  if(!slider)return;
- slider.value=muted?0:volume;slider.dispatchEvent(new w().Event('input',{bubbles:true}));
+ slider.value=muted?0:volume;slider.dispatchEvent(new (w().Event)('input',{bubbles:true}));
  if(audioEnabled&&!muted&&volume>0){
   const b=w().document.getElementById('soundBtn');
   if(b&&/SOUND OFF/i.test(b.textContent||''))b.click();
@@ -186,8 +186,8 @@ async function load(file){
  if(!/\.nes$/i.test(file.name)||file.size>5e6){status('Choose a valid local .nes ROM under 5 MB.');return}
  try{
   const buf=await file.arrayBuffer(),d=w().document.getElementById('romInput');
-  const dt=new w().DataTransfer();dt.items.add(new w().File([buf],file.name,{type:'application/octet-stream'}));
-  d.files=dt.files;d.dispatchEvent(new w().Event('change',{bubbles:true}));
+  const dt=new (w().DataTransfer)();dt.items.add(new (w().File)([buf],file.name,{type:'application/octet-stream'}));
+  d.files=dt.files;d.dispatchEvent(new (w().Event)('change',{bubbles:true}));
   active=0;lastFrame=-1;lastTrials=0;handoffs=0;lifeHoldoff=0;lifeLast=null;lifeCandidate=null;monitor=null;
   entries=[];people.forEach(p=>{p.turns=0;p.watched=0;p.actions=0});
   gameRoot='session-'+crypto.randomUUID();
