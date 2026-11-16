@@ -1551,6 +1551,16 @@ var i13RNCount = 0;           // how many rewards seen
 var I13_EB_BETA = 3;          // penalty coefficient (Q8, ~0.012)
 var I13_EB_DECAY_DIV = 2000;  // β halves after 2000 learn steps
 
+// BUILD 18: Gate A,B,C — 3-mode hard gate on output layer
+// 3 gate neurons read 24 hidden activations → argmax selects mode
+// active mode's bias vector added to action values before selection
+// gate weights: 3 × (24 hidden + 1 bias) = 75
+// mode biases:  3 × 8 action modifiers   = 24
+// total new: 99 weights → 1068 overall
+var i13GateW = new Int16Array(75);   // gate neuron weights [g*25+h] g=0..2, h=0..23, bias at g*25+24
+var i13GateM = new Int16Array(24);   // mode action biases [m*8+a] m=0..2, a=0..7
+var i13GateMode = 0;                 // active mode (0=A, 1=B, 2=C)
+
 // ── ACTION MAPPING ─────────────────────────────────────────
 // i13 action index → NES pad bitmask
 // 0=none, 1=LEFT(64), 2=RIGHT(128), 3=A(1), 4=B(2), 5=UP(16), 6=DOWN(32), 7=START(8)
@@ -1572,6 +1582,44 @@ function i13Forward() {
   i13CallsPerFrame = i13Eval.getCallCount();
   i13LastAction = i13T[32];
   return i13LastAction;
+}
+
+// BUILD 18: Gate forward — 3-mode hard gate modifies action values
+// Runs AFTER i13Forward fills T[0..23] hidden + T[24..31] actions
+// Gate neurons read hidden layer, argmax picks mode, mode bias added to actions
+function i13GateForward() {
+  // compute 3 gate scores from hidden activations
+  var gs0 = 0, gs1 = 0, gs2 = 0;
+  for (var h = 0; h < 24; h++) {
+    gs0 += (i13GateW[h] * i13T[h]) >> 8;           // gate 0: W[0..23]
+    gs1 += (i13GateW[25 + h] * i13T[h]) >> 8;      // gate 1: W[25..48]
+    gs2 += (i13GateW[50 + h] * i13T[h]) >> 8;      // gate 2: W[50..73]
+  }
+  gs0 += i13GateW[24];  // bias gate 0
+  gs1 += i13GateW[49];  // bias gate 1
+  gs2 += i13GateW[74];  // bias gate 2
+  // clamp gate scores
+  if (gs0 > 32000) gs0 = 32000; if (gs0 < -32000) gs0 = -32000;
+  if (gs1 > 32000) gs1 = 32000; if (gs1 < -32000) gs1 = -32000;
+  if (gs2 > 32000) gs2 = 32000; if (gs2 < -32000) gs2 = -32000;
+  // argmax → active mode
+  var mode = 0;
+  if (gs1 > gs0) mode = 1;
+  if (gs2 > (mode === 1 ? gs1 : gs0)) mode = 2;
+  i13GateMode = mode;
+  // add active mode's bias vector to action values
+  var mBase = mode * 8;
+  for (var a = 0; a < 8; a++) {
+    var mod = i13T[24 + a] + i13GateM[mBase + a];
+    i13T[24 + a] = mod > 32000 ? 32000 : (mod < -32000 ? -32000 : mod);
+  }
+  // re-select action after gate modification
+  var best = 0, bestV = i13T[24];
+  for (var k = 1; k < 8; k++) {
+    if (i13T[24 + k] > bestV) { best = k; bestV = i13T[24 + k]; }
+  }
+  i13T[32] = best;
+  i13LastAction = best;
 }
 
 // Get NES pad bitmask for current action
@@ -1659,6 +1707,28 @@ function i13Learn(reward) {
     td = Math.max(-64, Math.min(64, tdRaw));
   }
   i13TDError = td;
+  // BUILD 18: gate learning — reinforce active gate neuron + mode bias
+  var gateLR = Math.min(effectiveLR * 2, 127);  // gate learns 2× actor rate, cap 127
+  if (gateLR < 1) gateLR = 1;
+  var gBase = i13GateMode * 25;
+  for (var gh = 0; gh < 24; gh++) {
+    var gGrad = (i13T[gh] * td) >> 8;
+    if (gGrad > 64) gGrad = 64; if (gGrad < -64) gGrad = -64;
+    i13GateW[gBase + gh] += (gateLR * gGrad) >> 8;
+  }
+  i13GateW[gBase + 24] += (gateLR * td) >> 8;  // gate bias
+  // mode bias: update selected action's modifier for active mode
+  var mIdx = i13GateMode * 8 + i13T[32];
+  i13GateM[mIdx] += (gateLR * td) >> 8;
+  // clamp gate weights ±32000, mode biases ±1024
+  for (var gc = 0; gc < 75; gc++) {
+    if (i13GateW[gc] > 32000) i13GateW[gc] = 32000;
+    if (i13GateW[gc] < -32000) i13GateW[gc] = -32000;
+  }
+  for (var mc = 0; mc < 24; mc++) {
+    if (i13GateM[mc] > 1024) i13GateM[mc] = 1024;
+    if (i13GateM[mc] < -1024) i13GateM[mc] = -1024;
+  }
   // actor learns from TD error (not raw reward)
   i13Eval.call('agent_learn', [i13W, i13X, i13T, td, effectiveLR]);
   // critic learns to reduce TD error
@@ -1679,6 +1749,14 @@ function i13Learn(reward) {
       // value head weights [944..967]
       for (var gk = 944; gk < 968; gk++) {
         if (((Math.random() * 256) | 0) < gnP) i13W[gk] += (Math.random() < 0.5) ? 1 : -1;
+      }
+      // BUILD 18: gate weights [0..74]
+      for (var gg = 0; gg < 75; gg++) {
+        if (((Math.random() * 256) | 0) < gnP) i13GateW[gg] += (Math.random() < 0.5) ? 1 : -1;
+      }
+      // BUILD 18: mode biases [0..23]
+      for (var gm = 0; gm < 24; gm++) {
+        if (((Math.random() * 256) | 0) < gnP) i13GateM[gm] += (Math.random() < 0.5) ? 1 : -1;
       }
     }
   }
@@ -1707,6 +1785,15 @@ function i13Learn(reward) {
     for (var dk = 944; dk < 968; dk++) {  // value head weights [944..967]
       if (i13W[dk] > 0) i13W[dk]--;
       else if (i13W[dk] < 0) i13W[dk]++;
+    }
+    // BUILD 18: gate weight L1 decay
+    for (var dg = 0; dg < 75; dg++) {
+      if (i13GateW[dg] > 0) i13GateW[dg]--;
+      else if (i13GateW[dg] < 0) i13GateW[dg]++;
+    }
+    for (var dm = 0; dm < 24; dm++) {
+      if (i13GateM[dm] > 0) i13GateM[dm]--;
+      else if (i13GateM[dm] < 0) i13GateM[dm]++;
     }
     i13DecayCount++;
   }
@@ -1784,7 +1871,10 @@ function i13SaveBrain() {
     rnVar: i13RNVar,
     rnCount: i13RNCount,
     ebBeta: I13_EB_BETA,
-    ebDecayDiv: I13_EB_DECAY_DIV
+    ebDecayDiv: I13_EB_DECAY_DIV,
+    gateW: Array.from(i13GateW),
+    gateM: Array.from(i13GateM),
+    gateMode: i13GateMode
   };
 }
 
@@ -1843,6 +1933,14 @@ function i13LoadBrain(b) {
   // BUILD 17: entropy bonus (backward compat: missing → keep defaults)
   if (b.ebBeta != null) I13_EB_BETA = b.ebBeta;
   if (b.ebDecayDiv != null) I13_EB_DECAY_DIV = b.ebDecayDiv;
+  // BUILD 18: gate A,B,C (backward compat: missing → zero init)
+  if (b.gateW && b.gateW.length === 75) {
+    for (var gwi = 0; gwi < 75; gwi++) i13GateW[gwi] = b.gateW[gwi];
+  }
+  if (b.gateM && b.gateM.length === 24) {
+    for (var gmi = 0; gmi < 24; gmi++) i13GateM[gmi] = b.gateM[gmi];
+  }
+  i13GateMode = b.gateMode || 0;
 }
 
 // Soft reset: zero trainer state but keep weights (Root Strength)
@@ -1861,6 +1959,8 @@ function i13SoftReset() {
   i13ISBeta = I13_IS_BETA_START; i13ISSteps = 0;
   // BUILD 16: reward normalization — fresh stats per fight
   i13RNMean = 0; i13RNVar = 256; i13RNCount = 0;
+  // BUILD 18: gate mode reset (gate weights survive — root strength)
+  i13GateMode = 0;
   // weights survive — this IS root strength
 }
 
@@ -1938,7 +2038,13 @@ var api = {
   // BUILD 17: entropy bonus
   get ebBeta() { return I13_EB_BETA; },
   get ebDecayDiv() { return I13_EB_DECAY_DIV; },
-  get ebEffectiveBeta() { return (I13_EB_BETA * 256 / (256 + (i13TrainN / I13_EB_DECAY_DIV))) | 0; }
+  get ebEffectiveBeta() { return (I13_EB_BETA * 256 / (256 + (i13TrainN / I13_EB_DECAY_DIV))) | 0; },
+  // BUILD 18: gate A,B,C
+  gateForward: i13GateForward,
+  get gateW() { return i13GateW; },
+  get gateM() { return i13GateM; },
+  get gateMode() { return i13GateMode; },
+  get gateModeLabel() { return ['A','B','C'][i13GateMode] || '?'; }
 };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.I13BRAIN = api;
@@ -2711,7 +2817,7 @@ function chainUpdate(who,action,i13state){
   /* update {{I}} values */
   if(i13state){
     var iVal=$("ch-i").querySelector(".val");
-    iVal.textContent="W969["+i13state.seen+"] lr="+(i13.effectiveLR||5)+"/"+(i13.effectiveCriticLR||10)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0)+"μ"+(i13.rnMean||0)+"σ²"+(i13.rnVar||256)+" eb="+(i13.ebEffectiveBeta||0)+" ε"+qEps.toFixed(2)+" V"+(i13.valueV||0)+" δ"+(i13.tdError||0)+" tgt"+(i13.tgtAge||0)+" n"+(i13.nStepFill||0)+"/4 dc"+(i13.decayCount||0);
+    iVal.textContent="W1068["+i13state.seen+"] lr="+(i13.effectiveLR||5)+"/"+(i13.effectiveCriticLR||10)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0)+"μ"+(i13.rnMean||0)+"σ²"+(i13.rnVar||256)+" eb="+(i13.ebEffectiveBeta||0)+" G"+(i13.gateModeLabel||"A")+" ε"+qEps.toFixed(2)+" V"+(i13.valueV||0)+" δ"+(i13.tdError||0)+" tgt"+(i13.tgtAge||0)+" n"+(i13.nStepFill||0)+"/4 dc"+(i13.decayCount||0);
   }
   /* show action on cubit node */
   var actNames=["·","←","→","A","B","↑","↓","ST"],_ACT=i13.I13_ACT;
@@ -2800,7 +2906,7 @@ var frames=0;function one(){var pad=human;if(agentOn)pad=blind?agent.step(zeros,
     var cf=null,bpad=-1;qDriving=false;
     if(agentOn&&!blind){cf=nnFeats(nes.ram,agent.view());cnet.forward(cf);
       /* i13 BRAIN: fill input, run forward pass through i13 interpreter */
-      i13.fillInput(cf);i13.forward();}
+      i13.fillInput(cf);i13.forward();i13.gateForward();}
     if(boxer){var prevFights=boxer.fights;
     /* integration binding 1: reservoir energy → boxer exploration gate */
     var re=0;for(var ri=0;ri<24;ri++)re+=Math.abs(rsv.x[ri]);boxer.rsvEnergy=re/24;
@@ -3141,9 +3247,9 @@ function xrayDraw(){
     txt(660,300,"lr="+(i13.effectiveLR||0)+"/"+(i13.effectiveCriticLR||0),S.dim);
     txt(660,315,"tgt="+(i13.tgtAge||0)+"/256",S.dim);
     txt(760,255,"n-step="+(i13.nStepFill||0)+"/4",S.dim);
-    txt(760,270,"decay="+(i13.decayCount||0)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0)+" eb="+(i13.ebEffectiveBeta||0),S.dim);
+    txt(760,270,"decay="+(i13.decayCount||0)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0)+" eb="+(i13.ebEffectiveBeta||0)+" G"+(i13.gateModeLabel||"A"),S.dim);
     txt(760,285,"train="+i13.trainN,S.dim);
-    txt(760,300,"W[969]",S.brain);
+    txt(760,300,"W[1068]",S.brain);
   } else { txt(410,200,"(brain offline)",S.dim); }
 
   /* ── 6. CONTROLLER ── */
@@ -3480,7 +3586,7 @@ function drawInf(){if(!boxer||!boxer.inf)return;var inf=boxer.inf;inf.derive();
 Array.prototype.forEach.call($("tabs").children,function(b){b.onclick=function(){Array.prototype.forEach.call($("tabs").children,function(o){o.className=o===b?"on":"";$(o.getAttribute("data-t")).className="panel"+(o===b?" on":"");});
   var tt=b.getAttribute("data-t");if(tt==="pCub")drawGrid();if(tt==="pChroma")drawChroma(agent.view());if(tt==="pCubit")drawCubit(agent.view());if(tt==="pInf")drawInf();};});
 $("bPing").onclick=function(){ping();};$("bDrain").onclick=function(){rDrain=!rDrain;rsv.drain=rsv2.drain=rDrain;this.className="bad"+(rDrain?" on":"");this.textContent=rDrain?"Refill":"Drain reservoir";echo.on=false;echo.last=-1;};
-$("bScramble").onclick=function(){nnScramble=!nnScramble;this.className="bad"+(nnScramble?" on":"");this.textContent=nnScramble?"Stop scrambling":"Scramble labels";nnPos=0;nnNeg=0;nnPosN=0;nnNegN=0;nnRP=[];nnRN=[];i13PER=[];i13PERTotal=0;i13RNMean=0;i13RNVar=256;i13RNCount=0;drawCubit(agent.view());};
+$("bScramble").onclick=function(){nnScramble=!nnScramble;this.className="bad"+(nnScramble?" on":"");this.textContent=nnScramble?"Stop scrambling":"Scramble labels";nnPos=0;nnNeg=0;nnPosN=0;nnNegN=0;nnRP=[];nnRN=[];i13.softReset();drawCubit(agent.view());};
 /* ---- frozen kernel instance ---- */
 var kState=0,kInst=1,kSteps=0,kFiles={},kMan=JSON.parse(new TextDecoder().decode(b64(KDATA.manifest)));
 Object.keys(KDATA.files).forEach(function(f){kFiles[f]=b64(KDATA.files[f]);});
