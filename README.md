@@ -44,3 +44,8 @@ The main [Play ↔ Learn Git dashboard](./dashboard/index.html) also exposes a v
 ## TE-081 — Teaching Effectiveness Arcade (v81)
 
 [Launch v81 teaching arcade](./dashboard/v81.html). A self-contained canvas arcade lab presents Jane (student), TOPH (teacher), and Patricia (auditor), with speed control, pause, deterministic paired baseline/intervention trials, preregistered 6 training + 4 held-out seeds, a held-out improvement gate, skin hangar, and JSON evidence export. Simulation outcomes are illustrative synthetic measurements and **not** demonstrated improvement in a real NES cartridge. The same-seed A/B pair has one witness ancestry. The [actual ROM-based NES arena](./dashboard/arena.html) remains available separately. This release does not transmit ROMs or commit browser experiment logs automatically.
+
+
+## TE-082 — Teaching Transfer Arcade
+
+[Launch the v82 cross-pattern arcade](./dashboard/v82.html). Six STRAIGHT training seeds are followed by four distinct held-out hazard families (ZIGZAG, MIRROR, ACCELERATE, DECOY). The seed is paired within baseline/taught arms. This is a synthetic browser experiment, not actual NES learning. The preregistered gate requires positive held-out mean delta and improvements in at least three of the four distinct held-out families. DECOY is an explicit counterexample opportunity. Results remain local until exported as JSON. The NES emulator is preserved at [the actual NES arena](./dashboard/arena.html).
