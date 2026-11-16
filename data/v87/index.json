@@ -1,0 +1,26 @@
+{
+  "schema": "jane.nes.index.v87",
+  "version": 87,
+  "title": "Embedded Real NES Arcade",
+  "entry": "dashboard/v87.html",
+  "emulator": "dashboard/arena.html",
+  "mode": "browser-first; no Python server required",
+  "actions_workflow": ".github/workflows/jane-arcade-v87.yml",
+  "evidence": {
+    "storage": "browser localStorage",
+    "key": "jane.v87.nes.trials",
+    "format": "JSON export and SHA-256 chained local observations",
+    "auto_save_seconds": 5,
+    "restriction": "same emulator session is one witness ancestry; pixel delta is not reward"
+  },
+  "github_pages": {
+    "executes_browser_emulator": true,
+    "executes_python": false,
+    "rom_bytes_uploaded": false
+  },
+  "optional_python": {
+    "server": "server_v86.py",
+    "purpose": "development and optional local observation journal"
+  },
+  "security": "User-supplied ROM remains in the browser. No ROMs included in repository."
+}
