@@ -3,10 +3,10 @@ const {JaneTophCoach}=(()=>({JaneTophCoach:require('../dashboard/av080_coach.js'
 function test(name,fn){fn();console.log('PASS '+name)}
 const ctx={rom:'game-1',hash:'screen-A',frame:500,title:'LEARNED'};
 function make(){const c=JaneTophCoach.create();c.reset('game-1','session-1');return c}
-function obs(c,id,button='A',hash='screen-A',delta=.02){return c.observe({id,rom:'game-1',preHash:hash,button,delta,startFrame:100+id,endFrame:110+id})}
+function obs(c,id,button='A',hash='screen-A',delta=.02){return c.observe({id,rom:'game-1',preHash:hash,button,delta,startFrame:(id<=2?100+id:600+id),endFrame:(id<=2?110+id:610+id)})}
 test('fresh state never claims lesson',()=>{const c=make();assert.equal(c.recommend(ctx),null);assert.equal(c.status().teachings,0)});
 test('two same-context trials authorize an experiment question only',()=>{
- const c=make();obs(c,1);obs(c,2);assert.equal(c.recommend(ctx),'B');assert.equal(c.status().latest.benefit,undefined);
+ const c=make();obs(c,1);obs(c,2);assert.equal(c.recommend(ctx),'B');assert.equal(c.status().latest.benefit,'UNKNOWN');
 });
 test('menu screens and early frames never receive intervention',()=>{
  const c=make();obs(c,1);obs(c,2);assert.equal(c.recommend({...ctx,title:'WAIT'}),null);
