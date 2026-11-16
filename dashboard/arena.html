@@ -87,7 +87,7 @@ const people=[{name:'JANE',mode:'fast',color:'#7ae7ef',turns:0,watched:0,actions
 let active=0,ready=false,lastFrame=-1,lastTrials=0,turnStarted=0,handoffs=0,volume=40,muted=false,audioEnabled=false,speed=1,
     monitor=null,lifeLast=null,lifeStable=0,lifeCandidate=null,lifeHoldoff=0,entries=[],gameRoot='',seenScenes=new Set(),seenTrialIds=new Set();
 const limit=1500;
-const effectiveness=window.JaneAV081;const EVAL_KEY='jane.av081.teaching-effect.v1';let effectArmed=null,effectRows=[];
+const effectiveness=window.JaneAV081;const EVAL_KEY='jane.av081.teaching-effect.v1';let effectArmed=null,effectPending=null,effectRows=[];
 const coach=window.JaneTophCoach?.create();let coachEnabled=true;window.JANE_TOPH_COACH={recommend(ctx){if(active!==0||!coachEnabled)return null;return coach?.recommend(ctx)||null}};
 function status(s){$('status').textContent=s}
 function sessionId(){return 'session-'+(typeof crypto.randomUUID==='function'?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2))}
@@ -177,6 +177,7 @@ function sample(){
   people[active].actions+=Math.max(0,(Number(s.trials)||0)-lastTrials);
  }
  lastFrame=frame;lastTrials=Number(s.trials)||0;
+ if(effectPending&&active===0){const packets=w().JANE_PERCEPTION?.diagnostics?.().recentTrials||[];if(packets.some(t=>t.rom&&t.preHash))armEffect(effectPending)}
  try{
   const recent=w().JANE_PERCEPTION?.diagnostics?.().recentTrials||[];
   for(const t of recent){
@@ -253,7 +254,7 @@ async function load(file){
   d.files=dt.files;d.dispatchEvent(new (w().Event)('change',{bubbles:true}));
   active=0;lastFrame=-1;lastTrials=0;handoffs=0;lifeHoldoff=0;lifeLast=null;lifeCandidate=null;monitor=null;
   entries=[];seenTrialIds.clear();people.forEach(p=>{p.turns=0;p.watched=0;p.actions=0;p.observedTrials=0;p.observations=[]});
-  gameRoot=sessionId();effectArmed=null;coach?.reset('',gameRoot);coach?.setEnabled(coachEnabled);renderCoach();renderEffect();
+  gameRoot=sessionId();effectArmed=null;effectPending=null;coach?.reset('',gameRoot);coach?.setEnabled(coachEnabled);renderCoach();renderEffect();
   entriesPush({kind:'load',frame:0,actor:'JANE',reason:'single cartridge started; 3 observers share this game state',game_root:gameRoot});
   $('handoffs').textContent=0;$('sensorState').textContent='MANUAL';$('lifeRead').textContent='—';
   setProfile();status('Jane plays first; Toph and Patricia watch the same game.');
@@ -298,7 +299,7 @@ function renderEffect(){
  $('av081Delta').textContent=r.median_difference_frames===undefined?'—':(r.median_difference_frames>0?'+':'')+r.median_difference_frames;
  $('av081Report').textContent=[
   'AV-081 / '+r.state,
-  'ARMED '+(effectArmed?.arm||'NONE')+' / '+(effectArmed?.run_root||'—'),
+  'ARMED '+(effectArmed?.arm||effectPending||'NONE')+' / '+(effectArmed?.run_root||'—'),
   'CRITERION '+(effectArmed?.criterion||'coached median survival frames > baseline median'),
   'STARTING CONTEXT '+(effectArmed?.context||'not armed'),
   'BASELINE ATTEMPTS '+(r.baseline??0),
@@ -319,10 +320,10 @@ function armEffect(arm){
  const recent=w().JANE_PERCEPTION?.diagnostics?.().recentTrials||[];
  const sample=recent.findLast?.(x=>typeof x.rom==='string'&&x.rom&&typeof x.preHash==='string'&&x.preHash.length>0);
  const context=sample?.preHash;
- if(!context){status('No observed pre-action screen context yet; allow Jane to play briefly before arming.');return}
+ if(!context){effectPending=arm;coachEnabled=arm==='coached';$('teachOn').checked=coachEnabled;coach?.setEnabled(coachEnabled);status('AV-081 '+arm+' chosen; awaiting first observed screen context to arm automatically.');return}
  const planned=effectiveness?.plan({rom:sample.rom,context,run_root:gameRoot,start_frame:Number(stat.frame)||0,arm});
  if(planned?.state!=='ARMED'){status(planned?.reason||'Plan could not be armed');return}
- effectArmed=planned;coachEnabled=arm==='coached';$('teachOn').checked=coachEnabled;
+ effectPending=null;effectArmed=planned;coachEnabled=arm==='coached';$('teachOn').checked=coachEnabled;
  coach?.setEnabled(coachEnabled);renderEffect();renderCoach();
  entriesPush({kind:'experiment-armed',actor:'PATRICIA',frame:planned.start_frame,game_root:gameRoot,
    reason:'predeclared '+arm+' / context '+context+' / frames until human-confirmed life loss'});
@@ -330,7 +331,7 @@ function armEffect(arm){
 }
 $('av081Baseline').onclick=()=>armEffect('baseline');
 $('av081Coached').onclick=()=>armEffect('coached');
-$('av081Cancel').onclick=()=>{effectArmed=null;renderEffect();status('AV-081 attempt cancelled without recording an outcome.')};
+$('av081Cancel').onclick=()=>{effectArmed=null;effectPending=null;renderEffect();status('AV-081 attempt cancelled without recording an outcome.')};
 $('av081Reset').onclick=()=>{
  if(!confirm('Clear the local comparison history? Export it first if you want to preserve it.'))return;
  effectRows=[];effectArmed=null;try{localStorage.removeItem(EVAL_KEY)}catch(e){}
