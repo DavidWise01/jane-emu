@@ -96,3 +96,11 @@ The curator works without any model API credentials, publishing deterministic su
 AI-generated commentary is labeled `MODEL_SYNTHESIS_UNVERIFIED`. It is advisory text and cannot change sourced witness counts, provenance, or controller actions. Missing key or model failure falls back to deterministic curation. **GitHub Models was retired in July 2026 and is not used.**
 
 The current public memory pool may contain only release fingerprints. If it contains no independently labeled learning outcomes, the correct curator status is `INSUFFICIENT_LEARNING_EVIDENCE`, not a success claim. The curator will become more useful only after reviewed gameplay evidence is explicitly submitted to GitHub.
+
+## One-screen watch → learn → play rotation
+
+The Wizard Arena at `dashboard/arena.html` is **one continuous NES machine**, not three separate games. Jane, Toph and Patricia take turns controlling **the single real NES Player 1 port** through the emulator's existing autonomous policy at FAST, CAREFUL and BALANCED reaction profiles. Everyone watches the same exact frame stream while one agent plays. Their observation counters represent shared observations, **not** separate independent source roots or separate trained model identities.
+
+Play order is **Jane → Toph → Patricia → Jane**. A handoff changes the active policy speed and records the event without resetting NES ROM, frame count, or memory. The user can confirm a death with the **Confirm life lost** button. Optional automatic loss detection requires an externally verified game-specific NES internal RAM lives address (`0000–07FF`) and a stable single-life decrement on three samples with a cooldown. No common RAM lives counter exists across cartridges; without a verified address, handoffs remain manual rather than speculatively detecting death from arbitrary pixels.
+
+The session export preserves the shared game-root identifier, controller history, and watcher measurements, with **one source ancestry for every shared frame**. It is a local download; no ROM content or credential is uploaded to GitHub. The arena includes one shared 0–100% volume slider and mute control. The main Play ↔ Learn dashboard links to the arena.
