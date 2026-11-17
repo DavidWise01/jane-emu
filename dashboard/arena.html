@@ -228,7 +228,7 @@ async function init(){
   html=html.replace(frameClock,'accum+=delta*(window.JANE_ARENA_SPEED||1);let steps=0;while(accum>=1000/60&&steps++<32)');
   const actionHook='function chooseAction(){';
   if(!html.includes(actionHook))throw Error('NES action-selection hook unavailable; Toph coaching disabled');
-  html=html.replace(actionHook,"function chooseAction(){const coaching=window.parent?.JANE_TOPH_COACH?.recommend?.({rom:romID,hash:perception?.hash||'',frame,title:titleLesson.stage});if(coaching&&ACTIONS.includes(coaching)&&!coaching.includes('+')&&!['START','SELECT'].includes(coaching))return coaching;");
+  html=html.replace(actionHook,"function chooseAction(){const nav=(window.__janeMenuNav??={rom:null,frame:-1,next:0,attempts:0,stage:''});const stage=String(titleLesson?.stage??'').toLowerCase();if(nav.rom!==romID||frame<nav.frame){nav.rom=romID;nav.next=0;nav.attempts=0;nav.stage=''}nav.frame=frame;const menu=/title|menu|intro|select|prefight|pre.fight|ready|matchup|between.round|waiting/.test(stage)&&!/fight.active|playing|combat|battle/.test(stage);if(menu&&stage!==nav.stage){nav.attempts=0;nav.next=frame}nav.stage=stage;const early=frame<900&&nav.attempts<4; if(ACTIONS.includes('START')&&(menu||early)&&frame>=nav.next&&nav.attempts<8){nav.next=frame+Math.min(360,120+30*nav.attempts);nav.attempts++;return 'START'}const coaching=window.parent?.JANE_TOPH_COACH?.recommend?.({rom:romID,hash:perception?.hash||'',frame,title:titleLesson.stage});if(coaching&&ACTIONS.includes(coaching)&&!coaching.includes('+')&&!['START','SELECT'].includes(coaching))return coaching;");
   html=html.replace('if(steps>=6)accum=0','if(steps>=32)accum=0');
   $('game').addEventListener('load',()=>{
    try{
