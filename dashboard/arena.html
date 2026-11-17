@@ -88,7 +88,7 @@ let active=0,ready=false,lastFrame=-1,lastTrials=0,turnStarted=0,handoffs=0,volu
     monitor=null,lifeLast=null,lifeStable=0,lifeCandidate=null,lifeHoldoff=0,entries=[],gameRoot='',seenScenes=new Set(),seenTrialIds=new Set();
 const limit=1500;
 const effectiveness=window.JaneAV081;const EVAL_KEY='jane.av081.teaching-effect.v1';let effectArmed=null,effectPending=null,effectRows=[];
-const coach=window.JaneTophCoach?.create();let coachEnabled=true;window.JANE_TOPH_COACH={recommend(ctx){if(active!==0||!coachEnabled)return null;return coach?.recommend(ctx)||null}};
+const coach=window.JaneTophCoach?.create();let coachEnabled=true;window.JANE_TOPH_COACH={recommend(ctx){if(active!==0||!coachEnabled)return null;try{const policy=window.parent!==window?window.parent.JANE_FLYBACK_POLICY:null;const result=policy?.recommend?.({...ctx,run_root:gameRoot});if(result?.handled)return result.button||null}catch(e){}return coach?.recommend(ctx)||null}};window.JANE_RUN_CONTEXT=()=>({root:gameRoot,actor:people[active].name,rom:safeRoot(),frame:Number(observer()?.frame)||0});
 function status(s){$('status').textContent=s}
 function sessionId(){return 'session-'+(typeof crypto.randomUUID==='function'?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2))}
 function w(){return $('game').contentWindow}
