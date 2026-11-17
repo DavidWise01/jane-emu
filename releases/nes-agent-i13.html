@@ -2213,8 +2213,28 @@ var api = {
   get perSize() { return i13PER.length; },
   get perTotal() { return i13PERTotal; },
   PER_MAX: I13_PER_MAX,
+  /* BUILD 24 FIX: expose PER manipulation so the main script can reach IIFE-local arrays */
+  flushPER: function() { i13PER = []; i13PERTotal = 0; },
+  pushPER: function(entry) {
+    if (i13PER.length < I13_PER_MAX) { i13PER.push(entry); i13PERTotal += entry.td; }
+    else { var ri = (Math.random() * I13_PER_MAX) | 0; i13PERTotal -= i13PER[ri].td; i13PER[ri] = entry; i13PERTotal += entry.td; }
+  },
+  samplePER: function() {
+    if (i13PER.length <= 1) return null;
+    var r = Math.random() * i13PERTotal, s = 0, pick = 0;
+    for (var j = 0; j < i13PER.length; j++) { s += i13PER[j].td; if (s >= r) { pick = j; break; } }
+    return { entry: i13PER[pick], minTD: (function(){ var m = i13PER[0].td; for (var k = 1; k < i13PER.length; k++) if (i13PER[k].td < m) m = i13PER[k].td; return m; })(), n: i13PER.length, total: i13PERTotal };
+  },
+  decayPER: function() {
+    if (i13PER.length === 0) return;
+    var t = 0;
+    for (var d = 0; d < i13PER.length; d++) { var o = i13PER[d].td; var n = Math.max(1, (o * I13_PD_FACTOR + 128) >> 8); i13PER[d].td = n; t += n; }
+    i13PERTotal = t;
+  },
   get isBeta() { return i13ISBeta; },
+  set isBeta(v) { i13ISBeta = v; },
   get isSteps() { return i13ISSteps; },
+  set isSteps(v) { i13ISSteps = v; },
   IS_BETA_START: I13_IS_BETA_START,
   IS_BETA_END: I13_IS_BETA_END,
   IS_BETA_STEPS: I13_IS_BETA_STEPS,
@@ -3153,7 +3173,7 @@ var frames=0;function one(){var pad=human;if(agentOn)pad=blind?agent.step(zeros,
     /* integration binding 2: counter hits → cubit positive replay */
     if(boxer.rewardEv&&boxer.counter>0){var crf=nnFeats(nes.ram,agent.view());if(nnRP.length<512)nnRP.push(crf);else nnRP[(Math.random()*512)|0]=crf;}
     if(agentOn&&!blind){bpad=boxer.act(frames);if(bpad>=0)pad=bpad;}if(boxer.flash){pop(boxer.flash,boxer.flash==="NEW FIGHT!"?"big":"bad");boxer.flash="";}
-    if(boxer.fights>prevFights){cnet.softReset();i13.softReset();nnRP=[];nnRN=[];i13PER=[];i13PERTotal=0;nnPos=0;nnNeg=0;nnPosN=0;nnNegN=0;qPrevAct=-1;i13.prevV=0;i13.tdError=0;  /* cubit forgets: zero momentum, flush replay, re-warm LR, reset critic */
+    if(boxer.fights>prevFights){cnet.softReset();i13.softReset();nnRP=[];nnRN=[];i13.flushPER();nnPos=0;nnNeg=0;nnPosN=0;nnNegN=0;qPrevAct=-1;i13.prevV=0;i13.tdError=0;  /* cubit forgets: zero momentum, flush replay, re-warm LR, reset critic */
       rsv.flush();if(rsv2)rsv2.flush();                                                        /* reservoir forgets: zero echo + rate estimates */
       if(Array.isArray(agent.log))agent.log.push("["+frames+"] NEW OPPONENT: rival health refilled from low. Clearing all "+gv.bt+" tells, cubit momentum zeroed, replay+reservoir flushed. Fight #"+(boxer.fights+1)+".");gv.bt=0;
       /* OPPONENT MEMORY BANK: compute new opponent key and restore if recognised */
@@ -3237,25 +3257,18 @@ var frames=0;function one(){var pad=human;if(agentOn)pad=blind?agent.step(zeros,
           var perTD=Math.abs(i13.tdError)+1; /* priority: |δ|+1 (never zero) */
           var perEntry={f:new Array(30),td:perTD,sign:qRew>0?-1:1}; /* store OPPOSITE sign for contrast replay */
           var _Xp=i13.X;for(var pi=0;pi<30;pi++)perEntry.f[pi]=_Xp[pi]/256; /* Q8→float for fillInput compat */
-          if(i13PER.length<I13_PER_MAX){i13PER.push(perEntry);i13PERTotal+=perTD;}
-          else{var repIdx=(Math.random()*I13_PER_MAX)|0;i13PERTotal-=i13PER[repIdx].td;i13PER[repIdx]=perEntry;i13PERTotal+=perTD;}
+          i13.pushPER(perEntry); /* BUILD 24 FIX: route through API */
           /* PER REPLAY + BUILD 12 IS CORRECTION: sample 1, weight by importance */
-          if(i13PER.length>1){
-            var perR=Math.random()*i13PERTotal,perSum=0,perPick=0;
-            for(var pj=0;pj<i13PER.length;pj++){perSum+=i13PER[pj].td;if(perSum>=perR){perPick=pj;break;}}
-            var rpE=i13PER[perPick];
+          var perSamp=i13.samplePER(); /* BUILD 24 FIX: route through API */
+          if(perSamp){
+            var rpE=perSamp.entry;
             /* ── IS weight: w = (total/(N*prio))^β, normalized by max_w ──
                max_w corresponds to min priority in buffer.
                β in Q8: pow approximated as exp(β·ln(x)) with Q8 fixed-point. */
-            var perN=i13PER.length,perMinTD=i13PER[0].td;
-            for(var pm=1;pm<perN;pm++){if(i13PER[pm].td<perMinTD)perMinTD=i13PER[pm].td;}
-            /* ratio = total/(N*prio), maxRatio = total/(N*minPrio) — both ≥1 */
-            var isRatio=i13PERTotal/(perN*rpE.td); /* sampled entry's raw ratio */
-            var isMaxRatio=i13PERTotal/(perN*perMinTD); /* max ratio (for normalization) */
             /* w_normalized = (ratio/maxRatio)^β = (minPrio/prio)^β ∈ (0,1] */
             /* For Q8 β: use Math.pow since this runs in JS game loop, not i13 */
-            var isBetaF=i13ISBeta/256; /* β as float */
-            var isW=Math.pow(perMinTD/rpE.td,isBetaF); /* normalized IS weight ∈ (0,1] */
+            var isBetaF=i13.isBeta/256; /* β as float */
+            var isW=Math.pow(perSamp.minTD/rpE.td,isBetaF); /* normalized IS weight ∈ (0,1] */
             isW=Math.max(0.05,Math.min(1.0,isW)); /* safety clamp */
             /* scale the replay reward by IS weight: reward_eff = sign * isW (Q8) */
             var isRewQ8=((rpE.sign*isW*256+0.5)|0); /* Q8 scaled reward */
@@ -3264,20 +3277,13 @@ var frames=0;function one(){var pad=human;if(agentOn)pad=blind?agent.step(zeros,
             i13.fillInput(rpE.f);i13.learn(isRewQ8); /* IS-corrected replay */
             for(var ri=0;ri<30;ri++)_X[ri]=rpSave[ri];
             /* anneal β toward 1.0 */
-            i13ISSteps++;
-            if(i13ISBeta<I13_IS_BETA_END){
-              i13ISBeta=I13_IS_BETA_START+(((I13_IS_BETA_END-I13_IS_BETA_START)*Math.min(i13ISSteps,I13_IS_BETA_STEPS)/I13_IS_BETA_STEPS)|0);
+            i13.isSteps=i13.isSteps+1;
+            if(i13.isBeta<i13.IS_BETA_END){
+              i13.isBeta=i13.IS_BETA_START+(((i13.IS_BETA_END-i13.IS_BETA_START)*Math.min(i13.isSteps,i13.IS_BETA_STEPS)/i13.IS_BETA_STEPS)|0);
             }
             /* ── BUILD 13: PRIORITY DECAY — stale surprises drain ── */
-            if(i13ISSteps%I13_PD_EVERY===0&&i13PER.length>0){
-              var pdNewTotal=0;
-              for(var pd=0;pd<i13PER.length;pd++){
-                var pdOld=i13PER[pd].td;
-                var pdNew=Math.max(1,(pdOld*I13_PD_FACTOR+128)>>8); /* round, floor 1 */
-                i13PER[pd].td=pdNew;
-                pdNewTotal+=pdNew;
-              }
-              i13PERTotal=pdNewTotal;
+            if(i13.isSteps%i13.PD_EVERY===0&&i13.perSize>0){
+              i13.decayPER(); /* BUILD 24 FIX: route through API */
             }
           }
           /* also feed old cnet replay buffers (backward compat with opponent bank) */
