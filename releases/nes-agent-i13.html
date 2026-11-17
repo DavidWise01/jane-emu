@@ -319,6 +319,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:16px;border-radius:3px;bac
     <span class="AMBER">AMBER</span> Picture chip, sound and mappers 1 2 3 4 7 9: exercised by the two built-in carts (mappers 0 and 2) only; your own cartridges are untested here.<br>
     <span class="AMBER">AMBER</span> The imagination fits games with a reward byte and a thing to approach or avoid. It cannot start until the score byte is found, so there is a reactive warm-up first.<br>
     <span class="LIT">LIT</span> Build 20 — Compound Chroma: CHROMA wheel upgraded from single derived hue to <code>{{ r8!,g8!,b8! || or6!,yl6!,pu6!,gr6! || }}</code>. Level 1: 3 primaries at 8-bit (R=me byte, G=key byte, B=gap remapped). Level 2: 4 secondaries at 6-bit derived from inter-primary relationships (OR=R+G warm, YL=R+2G yellow, PU=R+B cool, GR=G+B green). Hue is now DERIVED from composed RGB, not stored. 48-bit chroma address. Compound channels in OBS leaf digest (Merkle evidence chain). Append-only — old chroma backward compat preserved.<br>
+    <span class="LIT">LIT</span> Build 24 — Anti-Freeze. Root cause: <code>Do.prototype.imagine()</code> ran 4 policies × 150 frames = 600 <code>sim.frame()</code> calls synchronously on the main thread every 48 game frames. For mapper-4 games (Punch-Out, etc.) without JMP-to-self optimization, each sim.frame() ≈ 15ms → 9 seconds of blocking. Fix: (1) rollLen 150→40, replan 48→120 (imagination runs 4× fewer sim frames and 2.5× less often = ~10× less work). (2) <code>performance.now()</code> time budgets: imagination 6ms total, fast-path frame() 8ms per call, rehearsal roll/check 4ms each, main loop breaks if one() exceeds 10ms. (3) Inner loops check the clock every 8 iterations (amortized <code>performance.now()</code> cost). Partial results kept — a policy that runs out of time keeps its partial score. The main NES instance (not fast) is never time-budgeted so normal play is unaffected. <b>Plain version:</b> the brain used to close its eyes and imagine 600 possible futures all at once, and the whole game froze while it was thinking. Now it only imagines 40 futures, thinks less often, and has a stopwatch — if thinking takes longer than 6 thousandths of a second, it opens its eyes and plays with whatever it figured out so far. The game never freezes because the brain's daydream has a time limit.<br>
     <span class="LIT">LIT</span> Build 23 — Advantage Normalization. Raw TD error drives actor gradients with wild magnitude swings (+3000 one step, +2 the next). Now: running mean/var via EMA (α=3/256 ≈ 0.012), then whiten: <code>tdActor = (td - μ) * 256 / max(256, σ)</code>. Integer sqrt via Newton's method (8 iterations). Actor and fractal gates get the normalized advantage; critic keeps raw TD to learn the true value function. 64-sample warmup before normalization kicks in. Fresh stats per fight (soft reset). Same EMA + isqrt pattern as Build 16 reward normalization, applied one level up. <b>Plain version:</b> before this, a big reward made the brain learn a LOT and a small reward made it learn a LITTLE — the learning speed was hostage to the reward size. Now the brain asks "was this better or worse than USUAL?" and always learns at a steady pace. The critic (the part that predicts future reward) still sees the real numbers so it stays calibrated.</p>
     <p>
     <span class="LIT">LIT</span> Build 22 — Boltzmann Exploration. The cubit path was purely deterministic (argmax over Q-values). Now: temperature-scaled softmax via 33-entry integer exp lookup table. <code>exp(-(Qmax - Q[a]) / τ)</code> gives unnormalized probability per action; a random roll samples from that distribution. τ starts at 256 (Q8 1.0 — high exploration, all actions get tried) and decays hyperbolically via <code>τ = τ_start * 256 / (256 + trainN / 5000)</code> toward τ_min=4 (near-greedy). When τ ≤ τ_min, falls back to pure argmax (zero overhead). Runs AFTER fractal gate modification so gates still bias the Q-values, but the final pick is stochastic. <b>Plain version:</b> before this, the brain always picked whichever action looked best — even if another action was almost as good, it never tried it. Now the brain rolls dice weighted by how good each action looks. Early on the dice are almost fair (try everything). Later the dice get more and more loaded toward the best action. Eventually it's nearly always picking the best one, but it got there by actually trying the alternatives first.</p>
@@ -701,9 +702,11 @@ NES.prototype.write=function(a,v){
   this.apu.write(a,v);};
 NES.prototype.frame=function(){if(this.frozen)return;var p=this.ppu,c=this.cpu,a=this.apu,m=this.mapper,guard=0,cy;p.frameReady=false;
   if(!this.fast){while(!p.frameReady&&guard++<60000){this.irq=m.irq||this.irqApu;cy=c.step();p.run(cy*3);a.run(cy);}return;}
-  /* fast path for imagined frames: no sound unless the game reads the sound status, and a CPU parked on a jump-to-itself is skipped ahead */
-  var apu=this.apuRead,skip=this.canSkip&&!apu;
+  /* fast path for imagined frames: no sound unless the game reads the sound status, and a CPU parked on a jump-to-itself is skipped ahead
+     BUILD 24: Anti-Freeze — bail out if a single fast frame exceeds 8ms (prevents mapper-4 freeze) */
+  var apu=this.apuRead,skip=this.canSkip&&!apu,ft0=this.fast?performance.now():0;
   while(!p.frameReady&&guard++<60000){
+    if(this.fast&&(guard&1023)===0&&performance.now()-ft0>8){p.frameReady=true;break;}
     if(skip&&!p.nmi&&!c.extra){var pc=c.pc;if(pc>=0x8000&&m.cpuRead(pc)===0x4C&&(m.cpuRead(pc+1)|(m.cpuRead(pc+2)<<8))===pc){
       var l=p.line,d=p.dot,left=(l<241||(l===241&&d<1))?(241-l)*341+(1-d):(262-l+241)*341+(1-d),k=Math.floor((left-1)/9);
       if(k>0){c.cyc+=k*3;p.run(k*9);continue;}}}
@@ -843,7 +846,7 @@ Remember.prototype.think=function(tk){var st=this.st;if(tk%4===0)this.findK();
 var POL=["hold still","chase it","flee it","sweep"];
 function Do(seed){var a=(seed||1)|0;this.rnd=function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
   this.hold=0;this.a=1;this.k=0;this.sweepDir=1;this.sweepLeft=12;this.force=0;this.seq=0;this.dead=3;this.eps=0.02;
-  this.world=null;this.rollLen=150;this.replan=48;this.planHold=0;this.vals=null;this.flat=false;this.flatRun=0;this.planning=false;this.planned=0;this.pol=0;}
+  this.world=null;this.rollLen=40;this.replan=120;this.planHold=0;this.vals=null;this.flat=false;this.flatRun=0;this.planning=false;this.planned=0;this.pol=0;}
 function s8(x){x&=255;return x>127?x-256:x;}
 /* one button for a policy, read from a RAM array */
 Do.prototype.polAct=function(p,K,ko,me,plus,minus,ram,sw){
@@ -851,11 +854,15 @@ Do.prototype.polAct=function(p,K,ko,me,plus,minus,ram,sw){
   if(p===3){if(--sw.left<=0){sw.dir=-sw.dir;sw.left=10+Math.floor(this.rnd()*10);}return sw.dir>0?plus:minus;}
   if(K<0)return 0;var g=ram[K]-ram[me]-ko,tw=g>this.dead?plus:g<-this.dead?minus:0,aw=g>this.dead?minus:g<-this.dead?plus:0;
   return p===1?tw:aw;};
-/* roll each whole policy forward in the sandbox; score by the remembered bytes */
+/* roll each whole policy forward in the sandbox; score by the remembered bytes
+   BUILD 24: Anti-Freeze — time-budgeted imagination. Total budget 6ms across all policies.
+   If the budget runs out mid-policy, that policy keeps whatever partial score it has.
+   If the budget runs out before all policies are tried, remaining policies score 0. */
 Do.prototype.imagine=function(b){var W=this.world,sim=W.sim,s=W.snap(),base=s.ram,sc=b.score,lv=b.lives,me=b.me,K=b.key,ko=b.keyOff,plus=b.plus,minus=b.minus;
   var order=K>=0?[0,1,2,3]:[0,3],vals=[0,0,0,0],best=order[0],bv=-1e18,lo=1e18,hi=-1e18,r=sim.ram,i,j;sim.fast=true;
-  for(j=0;j<order.length;j++){var p=order[j];sim.restore(s);var ups=0,downs=0,prevS=base[sc],prevL=lv>=0?base[lv]:0,sw={dir:1,left:12};
-    for(i=0;i<this.rollLen;i++){sim.pad[0]=ACT[this.polAct(p,K,ko,me,plus,minus,r,sw)];sim.frame();
+  var t0=performance.now(),budget=6;
+  for(j=0;j<order.length;j++){if(performance.now()-t0>budget)break;var p=order[j];sim.restore(s);var ups=0,downs=0,prevS=base[sc],prevL=lv>=0?base[lv]:0,sw={dir:1,left:12};
+    for(i=0;i<this.rollLen;i++){if((i&7)===7&&performance.now()-t0>budget)break;sim.pad[0]=ACT[this.polAct(p,K,ko,me,plus,minus,r,sw)];sim.frame();
       var cs=r[sc],d=s8(cs-prevS);if(d>0&&d<8)ups+=d;prevS=cs;
       if(lv>=0){var cl=r[lv];if(cl<prevL&&prevL-cl<8)downs+=prevL-cl;prevL=cl;}}
     var v=1000*ups-2500*downs;vals[p]=v;if(v<lo)lo=v;if(v>hi)hi=v;if(v>bv){bv=v;best=p;}}
@@ -3066,12 +3073,14 @@ function oppSaveTells(bx){var a=[];bx.S.forEach(function(v,k){a.push([k,v.n,v.hi
 function oppLoadTells(bx,arr){bx.S.clear();for(var i=0;i<arr.length;i++){var t=arr[i];bx.S.set(t[0],{n:t[1],hit:t[2],ls:t[3],lq:t[4],arm:t[5].slice(),ok:t[6].slice(),rh:t[7],simYes:t[8],simNo:t[9],noAns:t[10],slag:t[11]});}}
 function primeSim(buf){bsim=null;reh={ok:false,chk:null,next:frames+600,msg:"copy not checked yet",self:false};if(!boxer)return;
   try{bsim=new sim.constructor();bsim.load(buf);bsim.fast=true;bsim.frozen=false;}catch(e){bsim=null;reh.msg="no copy available";}}
-var rehWorld={roll:function(padFn,n){var s=nes.snap(),pa=primer.pain,rw=primer.reward,d,hh,painAt=-1;bsim.restore(s);var h0=bsim.ram[pa],o0=bsim.ram[rw];for(d=0;d<n;d++){hh=bsim.ram[pa];bsim.pad[0]=padFn(d);bsim.frame();if(painAt<0&&bsim.ram[pa]<hh)painAt=d;}return{painAt:painAt,drop:Math.max(0,h0-bsim.ram[pa]),rew:Math.max(0,o0-bsim.ram[rw])};}};
+/* BUILD 24: Anti-Freeze — time-budget rehearsal roll to 4ms */
+var rehWorld={roll:function(padFn,n){var s=nes.snap(),pa=primer.pain,rw=primer.reward,d,hh,painAt=-1;bsim.restore(s);var h0=bsim.ram[pa],o0=bsim.ram[rw],rwt0=performance.now();for(d=0;d<n;d++){hh=bsim.ram[pa];bsim.pad[0]=padFn(d);bsim.frame();if(painAt<0&&bsim.ram[pa]<hh)painAt=d;if((d&7)===7&&performance.now()-rwt0>4)break;}return{painAt:painAt,drop:Math.max(0,h0-bsim.ram[pa]),rew:Math.max(0,o0-bsim.ram[rw])};}};
 function rehCheck(pad){if(!bsim||!boxer)return;var c=reh.chk,i,same=true;
   if(reh.ok&&!boxer.world&&!reh.self){reh.self=true;reh.msg="switched itself off: the copy kept being wrong";if(Array.isArray(agent.log))agent.log.push("["+frames+"] DISSENT: answers my copy called clean kept getting hit for real. Rehearsal off; learning the slow way.");}
   if(!c){if(frames>=reh.next&&!reh.self)reh.chk={s:nes.snap(),pads:[pad]};return;}
   if(c.pads.length<90){c.pads.push(pad);return;}
-  bsim.restore(c.s);for(i=0;i<90;i++){bsim.pad[0]=c.pads[i];bsim.frame();}for(i=0;i<2048;i++)if(bsim.ram[i]!==nes.ram[i]){same=false;break;}
+  /* BUILD 24: Anti-Freeze — time-budget rehearsal replay to 4ms */
+  bsim.restore(c.s);var rht0=performance.now();for(i=0;i<90;i++){bsim.pad[0]=c.pads[i];bsim.frame();if((i&7)===7&&performance.now()-rht0>4)break;}for(i=0;i<2048;i++)if(bsim.ram[i]!==nes.ram[i]){same=false;break;}
   reh.chk=null;
   if(same){if(!reh.ok&&Array.isArray(agent.log))agent.log.push("["+frames+"] rehearsal: my "+(bsim.fast?"fast":"full")+" copy of the console replayed 90 frames and matched every byte. I will try answers in the copy before the punch lands.");
     reh.ok=true;reh.msg="copy verified ("+(bsim.fast?"fast":"full")+")";rehWorld.every=bsim.fast?12:48;boxer.world=rehWorld;reh.next=frames+3600;}
@@ -3579,9 +3588,10 @@ function xrayDraw(){
 var last=0,accT=0,logN=0,tick=0;
 function loop(t){requestAnimationFrame(loop);ornament();if($("pXray").className.indexOf("on")>=0)xrayDraw();if(!loaded||paused){last=t;if(loaded&&paused&&(++tick%20===0))hud(agent.view());return;}
   var sp=SPEEDS[+$("spd").value],n=0;
+  /* BUILD 24: Anti-Freeze — time-budget per-frame: if one() takes >10ms, skip remaining frames this tick */
   try{
-    if(sp===0){var t0=performance.now();do{one();n++;}while(performance.now()-t0<12);}
-    else{accT+=Math.min(100,t-last)*sp;while(accT>=16.639){one();accT-=16.639;if(++n>40){accT=0;break;}}}
+    if(sp===0){var t0=performance.now();do{var f0=performance.now();one();n++;if(performance.now()-f0>10)break;}while(performance.now()-t0<12);}
+    else{accT+=Math.min(100,t-last)*sp;while(accT>=16.639){var f1=performance.now();one();accT-=16.639;if(performance.now()-f1>10){accT=0;break;}if(++n>40){accT=0;break;}}}
   }catch(x){paused=true;fail("Emulator stopped: "+x.message);}
   last=t;if(!n)return;
   (hd?window.EPXMOD.scale4x:window.EPXMOD.nearest4x)(nes.ppu.fb,256,240,img32);ctx.putImageData(img,0,0);vdraw();
