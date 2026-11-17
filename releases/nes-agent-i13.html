@@ -319,6 +319,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:16px;border-radius:3px;bac
     <span class="AMBER">AMBER</span> Picture chip, sound and mappers 1 2 3 4 7 9: exercised by the two built-in carts (mappers 0 and 2) only; your own cartridges are untested here.<br>
     <span class="AMBER">AMBER</span> The imagination fits games with a reward byte and a thing to approach or avoid. It cannot start until the score byte is found, so there is a reactive warm-up first.<br>
     <span class="LIT">LIT</span> Build 20 — Compound Chroma: CHROMA wheel upgraded from single derived hue to <code>{{ r8!,g8!,b8! || or6!,yl6!,pu6!,gr6! || }}</code>. Level 1: 3 primaries at 8-bit (R=me byte, G=key byte, B=gap remapped). Level 2: 4 secondaries at 6-bit derived from inter-primary relationships (OR=R+G warm, YL=R+2G yellow, PU=R+B cool, GR=G+B green). Hue is now DERIVED from composed RGB, not stored. 48-bit chroma address. Compound channels in OBS leaf digest (Merkle evidence chain). Append-only — old chroma backward compat preserved.<br>
+    <span class="LIT">LIT</span> Build 34 — Memsistor Drift Velocity. Build 33 detects where the substrate IS (position — mean absolute drift). Build 34 adds the derivative: how FAST it&#39;s drifting (velocity). Each learn step, <code>i13DivVelocity = i13DivMeanDrift - i13DivPrevDrift</code> — the signed change in mean drift between consecutive steps. Positive velocity means the substrate is diverging from its memsistor shadow; negative means it&#39;s converging back. Two new mechanisms: <b>(1) Acceleration alarm:</b> when velocity exceeds <code>I13_DIV_ACCEL_THRESH (48 Q8 = 0.1875 float)</code>, an instant emergency adaptation fires — the same 12.5% bulk pull as Build 33&#39;s sustained alarm, but in a single step instead of waiting for 3 consecutive alarms. A sudden velocity spike means something just broke (bad training batch, reward spike, gate flip) — waiting 3 steps loses the substrate. Shares the 10-adaptation lifetime cap with Build 33. <b>(2) Preemptive LR damping:</b> when velocity exceeds <code>I13_DIV_VEL_LR_THRESH (32 Q8 = 0.125 float)</code>, the effective learning rate is multiplied by <code>I13_DIV_VEL_LR_DAMP (192/256 = 75%)</code> on the NEXT learn step — slowing the brain before the position alarm even fires. When velocity drops to zero or negative (converging), the damp releases. Between 0 and threshold, hysteresis: the damp stays wherever it was, preventing oscillation. Diagnostic state: <code>i13DivVelocity</code> (current velocity), <code>i13DivAccelAlarms</code> (lifetime instant alarms), <code>i13DivLRDamp</code> (current LR multiplier, 256=full), <code>i13DivLRDamps</code> (lifetime LR dampings). All visible in X-RAY and stats panel. <code>i13DivAccelAlarms</code> and <code>i13DivLRDamps</code> persist through soft reset (lifetime stats); <code>i13DivPrevDrift</code>, <code>i13DivVelocity</code>, and <code>i13DivLRDamp</code> reset per fight. Both saved/loaded with brain state. <b>Plain version:</b> Build 33 put a GPS on the bridge to check if it&#39;s drifting. Build 34 adds a speedometer. The GPS says &#34;the bridge is 2 feet off-center.&#34; The speedometer says &#34;and it moved 1 foot in the last second.&#34; If the speedometer suddenly spikes — the bridge was barely moving and now it&#39;s racing sideways — something just broke. Don&#39;t wait for 3 GPS readings. Hit the emergency brakes NOW. And even before the emergency, if the speedometer shows the bridge picking up speed, slow down the trucks crossing it (reduce the learning rate) so they don&#39;t make it worse. When the bridge stops moving, let the trucks go full speed again.<br>
     <span class="LIT">LIT</span> Build 33 — Memsistor Divergence Alarm. The gravity well (Build 31) corrects per-weight drift silently — it's a local mechanic that pulls individual weights back toward their memsistor shadow. But it cannot detect when the ENTIRE substrate is drifting together, because every weight still looks individually close to its shadow while the whole formation slides. Build 33 adds a macro-level divergence detector that computes the mean absolute drift across all 744 Lead-208 weights vs their memsistor shadow, in the same loop iteration as the gravity well (zero additional loop overhead). <code>_divSum += |W[i] - M[i]|</code> accumulates inside the existing Lead-208 partition loop; after the loop, <code>i13DivMeanDrift = _divSum / 744</code>. When mean drift exceeds <code>I13_DIV_ALARM_THRESH (96 Q8 = 0.375 float)</code>, the alarm fires: <code>i13DivAlarmCount++</code> and <code>i13DivStreak++</code>. When drift falls below threshold, <code>i13DivStreak</code> resets to 0. If <code>i13DivStreak</code> reaches <code>I13_DIV_SUSTAIN (3 consecutive alarms)</code>, a meta-adaptation fires: an emergency 12.5% bulk pull of all 744 Lead-208 weights toward their memsistor shadow (<code>(drift × 32) >> 8</code> per weight), capped at 10 adaptations per brain lifetime to prevent oscillation. This surfaces catastrophic forgetting as an observable event — not buried in per-weight statistics but visible as a single number (mean drift) that can be tracked, logged, and acted upon. Diagnostic state: <code>i13DivMeanDrift</code> (current drift), <code>i13DivAlarmCount</code> (lifetime alarms), <code>i13DivStreak</code> (consecutive alarms), <code>i13DivAdapts</code> (meta-adaptations triggered). All visible in X-RAY and stats panel. <code>i13DivAlarmCount</code> and <code>i13DivAdapts</code> persist through soft reset (lifetime stats); <code>i13DivStreak</code> and <code>i13DivMeanDrift</code> reset per fight. Both saved/loaded with brain state. <b>Plain version:</b> the gravity well (Build 31) is like guardrails on individual bridge lanes — each lane has its own rail. But what if the entire bridge is sliding sideways? Each lane's rail looks fine relative to its own section, but the whole thing is drifting off the cliff. The divergence alarm is a GPS on the bridge. It doesn't check individual lanes — it checks "has the average position of ALL lanes moved too far from where the blueprint says they should be?" If the GPS shows the bridge drifting for 3 readings in a row, it fires an emergency anchor: pulls the whole bridge 12.5% back toward the blueprint. One reading could be noise. Three in a row means the foundation is actually moving.<br>
     <span class="LIT">LIT</span> Build 32 — PRE-SIST Rollback Selection. The self-healing system (Build 26) had one checkpoint: the brain state saved at the peak score EMA. When a plateau triggered a rollback, it was always to that single peak snapshot — no alternatives. PRE-SIST (Build 30) was already storing 9 brain snapshots in a ring buffer every 3 seconds, but they sat unused during healing. Build 32 connects the two: when <code>healTick()</code> triggers a rollback, it now scans the <code>preSistRing</code> for the snapshot with the highest <code>_score</code> proxy. If any ring snapshot's score exceeds the heal checkpoint's <code>healBestEMA</code>, that ring snapshot is used for the rollback instead. This gives the healing system <b>9 candidate states from the last 27 seconds</b> instead of 1 peak moment, making recovery more precise. The ring snapshot may capture a moment where the brain was doing well on THIS fight (high immediate score) even if the overall EMA hadn't peaked. Diagnostic tracking: <code>healFromRing</code> counts how many rollbacks chose a ring candidate over the peak checkpoint; <code>healRingScore</code> stores the score of the last ring-selected snapshot. Both visible in X-RAY and stats panel. FREEZE-AT-V0 compliant: the original healBest checkpoint logic is unmodified — the ring scan is inserted BEFORE the <code>loadBrain</code> call to select the better candidate, then the same loadBrain executes with whichever won. The log message now reports the rollback source ("checkpoint" vs "ring[N]"). <b>Plain version:</b> before, the brain had one baby photo of itself at its smartest moment. When it got confused, it looked at that one photo and rebuilt itself. Now it also has a stack of 9 recent Polaroids (taken every 3 seconds). When it gets confused, it flips through ALL the photos — the baby photo AND the 9 Polaroids — and picks the one where it looks smartest. Sometimes the best photo is from 6 seconds ago, not from 2 minutes ago when the peak was recorded. More photos = better recovery.<br>
     <span class="LIT">LIT</span> Build 31 — Memsistor Gravity Well. The memsistor (Build 30's slow EMA shadow of Lead-208) was a passive observer — a photograph of the persistent substrate that never influenced it back. Now it becomes a rubber band. Per-weight check inside the Lead-208 partition loop: for each of the 744 hidden weights, after the memsistor EMA update, the drift <code>d = W[i] - mem[i]</code> is computed. If <code>|d| > I13_GRAV_THRESH (128 Q8 = 0.5 float)</code>, the weight is pulled back toward the memsistor shadow by <code>(d × I13_GRAV_PULL) >> 8</code> where <code>I13_GRAV_PULL = 16/256 ≈ 6.25%</code> of the drift. The ±1 integer clamp pattern applies: when the pull truncates to 0 but drift exceeds threshold, force step to ±1. This creates a gravity well around stable representations — the brain can explore freely near the well floor (within ±128 Q8 of its shadow), but catastrophic drift triggers a gentle restoring force proportional to the overshoot. The well is self-tightening: larger drift → stronger pull. Diagnostic counters track how many of the 744 weights were pulled each learn step (<code>i13GravPulls</code>, visible in X-RAY) and cumulative lifetime pulls (<code>i13GravTotal</code>, saved/loaded with brain). The gravity well runs INSIDE the existing Build 30 Lead-208 loop — same iteration, no extra pass — so it costs zero additional loop overhead. <code>i13GravPulls</code> resets on soft reset; <code>i13GravTotal</code> persists through soft reset (lifetime metric) but resets on ROM load. <b>Plain version:</b> in Build 30 we said the memsistor was a photograph of the stone tablet. Now that photograph has a rubber band attached to the stone. If someone tries to chisel the stone too far from what the photograph shows, the rubber band tugs it back — gently, just 6% of the stretch each time. The stone can still change and learn new things (the photograph slowly updates too), but it can't suddenly lose everything it carved. If a weight wanders more than 128 Q8-units from its shadow, the rubber band activates. If it stays close, the band is slack and does nothing. It's like guardrails on a bridge — you don't notice them when you're driving straight, but they catch you if you swerve.<br>
@@ -1643,6 +1644,19 @@ var i13DivStreak = 0;            // consecutive alarm steps (resets when drift f
 var i13DivAdapts = 0;            // total meta-adaptations triggered by sustained divergence
 var i13DivLastAlarm = 0;         // frame of last alarm (set by main script, stored here for save/load)
 
+// BUILD 34: Memsistor Drift Velocity — the derivative of Build 33's position alarm
+// Tracks how FAST the substrate is drifting, not just how FAR it has drifted.
+// Sudden acceleration (velocity spike) → instant alarm (1-step, no sustain needed).
+// Rising velocity → preemptive LR reduction before the position alarm even fires.
+var I13_DIV_ACCEL_THRESH = 48;   // velocity threshold for instant alarm (Q8 = 0.1875 float)
+var I13_DIV_VEL_LR_THRESH = 32;  // velocity threshold for preemptive LR damping (Q8 = 0.125)
+var I13_DIV_VEL_LR_DAMP = 192;   // LR multiplier when velocity exceeds threshold (192/256 = 75%)
+var i13DivPrevDrift = 0;          // previous step's mean drift (for computing velocity)
+var i13DivVelocity = 0;           // current drift velocity (signed: + = diverging, - = converging)
+var i13DivAccelAlarms = 0;        // lifetime count of acceleration-triggered instant alarms
+var i13DivLRDamp = 256;           // current LR damping multiplier (Q8: 256 = 1.0 = no damp)
+var i13DivLRDamps = 0;            // lifetime count of velocity-triggered LR dampings
+
 // BUILD 23: Advantage Normalization — whiten TD error before actor update
 // Raw TD error swings wildly (e.g. +3000 one step, +2 the next).
 // Running mean/var via EMA, then: tdNorm = (td - mean) * 256 / max(256, σ)
@@ -1834,6 +1848,8 @@ function i13Learn(reward) {
   i13T[33] = rewQ8;
   // Hyperbolic decay: effectiveLR = baseLR * 256 / (256 + trainN)
   var effectiveLR = Math.max(1, (i13LR * 256 / (256 + i13TrainN)) | 0);
+  // BUILD 34: preemptive LR damping from drift velocity — applied before any learning
+  if (i13DivLRDamp < 256) effectiveLR = Math.max(1, (effectiveLR * i13DivLRDamp) >> 8);
   // BUILD 14: critic gets CRITIC_MULT × actor LR (faster baseline learning)
   var criticLR = Math.min(effectiveLR * I13_LR_CRITIC_MULT, 127);  // cap at 127 Q8 (~0.5)
   var curV = i13T[34];  // live V (saved for next step's prevV)
@@ -1984,6 +2000,32 @@ function i13Learn(reward) {
   // BUILD 33: MEMSISTOR DIVERGENCE ALARM — macro-level drift detector
   // mean absolute drift across all 744 Lead-208 weights vs memsistor shadow
   i13DivMeanDrift = (_divSum / 744) | 0;
+  // BUILD 34: DRIFT VELOCITY — the derivative of mean drift (position → velocity)
+  i13DivVelocity = i13DivMeanDrift - i13DivPrevDrift;
+  i13DivPrevDrift = i13DivMeanDrift;
+  // BUILD 34: sudden acceleration check — velocity spike triggers instant alarm (no sustain)
+  if (i13DivVelocity > I13_DIV_ACCEL_THRESH && i13DivAdapts < 10) {
+    i13DivAccelAlarms++;
+    i13DivAdapts++;
+    // same emergency 12.5% bulk pull as Build 33 sustained alarm — but fires in 1 step
+    for (var _ar = 0; _ar < I13_AR_START; _ar++) {
+      var _arD = i13W[_ar] - i13Memsistor[_ar];
+      var _arP = (_arD * 32) >> 8;
+      if (_arP === 0 && _arD !== 0) _arP = _arD > 0 ? 1 : -1;
+      i13W[_ar] -= _arP;
+      if (i13W[_ar] > 32000) i13W[_ar] = 32000;
+      if (i13W[_ar] < -32000) i13W[_ar] = -32000;
+    }
+    i13DivStreak = 0; // reset position streak after accel-triggered adaptation
+  }
+  // BUILD 34: preemptive LR damping — rising velocity reduces LR for NEXT step
+  if (i13DivVelocity > I13_DIV_VEL_LR_THRESH) {
+    i13DivLRDamp = I13_DIV_VEL_LR_DAMP; // 75% LR
+    i13DivLRDamps++;
+  } else if (i13DivVelocity <= 0) {
+    i13DivLRDamp = 256; // velocity zero or negative (converging) — release damp
+  }
+  // (velocity between 0 and VEL_LR_THRESH: damp stays wherever it was — hysteresis)
   if (i13DivMeanDrift > I13_DIV_ALARM_THRESH) {
     i13DivStreak++;
     i13DivAlarmCount++;
@@ -2195,7 +2237,9 @@ function i13SaveBrain() {
     pullCount: i13PullCount,
     gravTotal: i13GravTotal,
     divAlarmCount: i13DivAlarmCount,
-    divAdapts: i13DivAdapts
+    divAdapts: i13DivAdapts,
+    divAccelAlarms: i13DivAccelAlarms,
+    divLRDamps: i13DivLRDamps
   };
 }
 
@@ -2292,6 +2336,8 @@ function i13LoadBrain(b) {
     i13GravTotal = b.gravTotal || 0; // BUILD 31
     i13DivAlarmCount = b.divAlarmCount || 0; // BUILD 33
     i13DivAdapts = b.divAdapts || 0; // BUILD 33
+    i13DivAccelAlarms = b.divAccelAlarms || 0; // BUILD 34
+    i13DivLRDamps = b.divLRDamps || 0; // BUILD 34
   } else {
     // best approximation: init memsistor from current Lead-208 weights
     for (var _mli2 = 0; _mli2 < 744; _mli2++) i13Memsistor[_mli2] = i13W[_mli2];
@@ -2299,6 +2345,8 @@ function i13LoadBrain(b) {
     i13GravTotal = 0; // BUILD 31
     i13DivAlarmCount = 0; // BUILD 33
     i13DivAdapts = 0; // BUILD 33
+    i13DivAccelAlarms = 0; // BUILD 34
+    i13DivLRDamps = 0; // BUILD 34
   }
 }
 
@@ -2334,6 +2382,10 @@ function i13SoftReset() {
   // BUILD 33: divergence alarm — streak resets per fight, counts persist (lifetime stats)
   i13DivStreak = 0;
   i13DivMeanDrift = 0;
+  // BUILD 34: drift velocity — transient state resets per fight, counters persist (lifetime)
+  i13DivPrevDrift = 0;
+  i13DivVelocity = 0;
+  i13DivLRDamp = 256; // release any active LR damping
   // weights survive — this IS root strength
 }
 
@@ -2506,6 +2558,17 @@ var api = {
   set divAdapts(v) { i13DivAdapts = v; },
   DIV_ALARM_THRESH: I13_DIV_ALARM_THRESH,
   DIV_SUSTAIN: I13_DIV_SUSTAIN,
+  // BUILD 34: Drift velocity
+  get divVelocity() { return i13DivVelocity; },
+  get divPrevDrift() { return i13DivPrevDrift; },
+  get divAccelAlarms() { return i13DivAccelAlarms; },
+  set divAccelAlarms(v) { i13DivAccelAlarms = v; },
+  get divLRDamp() { return i13DivLRDamp; },
+  get divLRDamps() { return i13DivLRDamps; },
+  set divLRDamps(v) { i13DivLRDamps = v; },
+  DIV_ACCEL_THRESH: I13_DIV_ACCEL_THRESH,
+  DIV_VEL_LR_THRESH: I13_DIV_VEL_LR_THRESH,
+  DIV_VEL_LR_DAMP: I13_DIV_VEL_LR_DAMP,
   BOLTZ_TAU_START: I13_BOLTZ_TAU_START,
   BOLTZ_TAU_MIN: I13_BOLTZ_TAU_MIN,
   BOLTZ_TAU_DECAY: I13_BOLTZ_TAU_DECAY,
@@ -3360,7 +3423,7 @@ function b64(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;
 function fail(msg){var e=$("err");e.textContent=msg;e.style.display=msg?"block":"none";}
 function load(buf,name,builtIn){try{var c=nes.load(buf);nes.rom=buf;loaded=true;agent.reset();logN=0;$("log").innerHTML="";fail("");frames=0;
   eck=new window.ECKMOD.ECK(KC.sha256);eckPrev={r:0,p:0,logN:0};eckTamper=false;eckBackup=null;eckCkpt=null;
-  cnet=new window.NNMOD.NN(30,(Math.random()*65535)|1);var rs=(Math.random()*65535)|1;rsv=new window.NNMOD.Reservoir(24,rs);rsv2=new window.NNMOD.Reservoir(24,rs);rsv.drain=rsv2.drain=rDrain;echo.on=false;echo.last=-1;nnBuf=[];nnPos=0;nnNeg=0;nnPosN=0;nnNegN=0;nnLastRew=0;nnRP=[];nnRN=[];qPrevAct=-1;qPrevQ=0;qEps=1.0;qTrainN=0;qLoss=0;qDriving=false;gPained=false;tim=new window.NNMOD.Timing(256);wd=new window.NNMOD.Watchdog();gv.iv=[];gv.lastEv=0;gv.sus=false;gv.hmax=1;gv.omax=1;gv.bt=0;gv.ps=-1;gv.pl=-1;gv.sa=-1;gv.la=-1;gv.pp=0;gv.streak=0;gv.mixed=false;metaScoreEMA=0;metaPainEMA=0;metaPrevRewards=0;metaPrevPains=0;metaFlatStreak=0;metaPrevRate=0;metaAdapts=0;metaLastAdapt=0;metaState="observe";healBest=null;healBestEMA=0;healBestFrame=0;healSaves=0;healRolls=0;healLastRoll=0;healPrevAdapts=0;refreshCount=0;refreshEntries=0;i13.momApplied=0;preSistRing=[];preSistIdx=0;preSistFrame=0;preSistSaves=0;i13.pullCount=0;i13.gravTotal=0;i13.divAlarmCount=0;i13.divAdapts=0;healFromRing=0;healRingScore=0;
+  cnet=new window.NNMOD.NN(30,(Math.random()*65535)|1);var rs=(Math.random()*65535)|1;rsv=new window.NNMOD.Reservoir(24,rs);rsv2=new window.NNMOD.Reservoir(24,rs);rsv.drain=rsv2.drain=rDrain;echo.on=false;echo.last=-1;nnBuf=[];nnPos=0;nnNeg=0;nnPosN=0;nnNegN=0;nnLastRew=0;nnRP=[];nnRN=[];qPrevAct=-1;qPrevQ=0;qEps=1.0;qTrainN=0;qLoss=0;qDriving=false;gPained=false;tim=new window.NNMOD.Timing(256);wd=new window.NNMOD.Watchdog();gv.iv=[];gv.lastEv=0;gv.sus=false;gv.hmax=1;gv.omax=1;gv.bt=0;gv.ps=-1;gv.pl=-1;gv.sa=-1;gv.la=-1;gv.pp=0;gv.streak=0;gv.mixed=false;metaScoreEMA=0;metaPainEMA=0;metaPrevRewards=0;metaPrevPains=0;metaFlatStreak=0;metaPrevRate=0;metaAdapts=0;metaLastAdapt=0;metaState="observe";healBest=null;healBestEMA=0;healBestFrame=0;healSaves=0;healRolls=0;healLastRoll=0;healPrevAdapts=0;refreshCount=0;refreshEntries=0;i13.momApplied=0;preSistRing=[];preSistIdx=0;preSistFrame=0;preSistSaves=0;i13.pullCount=0;i13.gravTotal=0;i13.divAlarmCount=0;i13.divAdapts=0;i13.divAccelAlarms=0;i13.divLRDamps=0;healFromRing=0;healRingScore=0;
   if(builtIn){try{sim.load(buf);sim.fast=true;sim.frozen=false;agent.attachWorld(sim,function(){return nes.snap();});}catch(e){}}
   primer=(c.mapper===9)?{pain:0x391,reward:0x398}:null;boxer=primer?new window.BOXMOD.Boxer({pain:primer.pain,reward:primer.reward,seed:(Math.random()*65535)|1}):null;if(boxer&&window.INFMOD)boxer.inf=new window.INFMOD.Inference();
     if(boxer&&primer){curOppKey=oppHash(nes.ram,primer.reward);boxer.beforeNewFight=function(bx,frame){
@@ -3976,7 +4039,7 @@ function xrayDraw(){
     txt(660,315,"tgt="+(i13.tgtAge||0)+"/256",S.dim);
     txt(760,255,"n-step="+(i13.nStepFill||0)+"/4",S.dim);
     txt(760,270,"decay="+(i13.decayCount||0)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0)+" eb="+(i13.ebEffectiveBeta||0)+" F"+(i13.fractalLabel||"Aa"),S.dim);
-    txt(760,285,"train="+i13.trainN+" meta="+metaState+(metaAdapts?" #"+metaAdapts:"")+" heal="+healSaves+"s"+healRolls+"r"+(healFromRing?"("+healFromRing+"ring)":"")+" ref="+refreshCount+"c mom="+i13.momApplied+" ar/pb="+i13.pullCount+"p ps="+preSistSaves+"s gw="+i13.gravPulls+"/"+i13.gravTotal+" da="+i13.divMeanDrift+"/"+(i13.divAlarmCount||0)+(i13.divStreak?"!"+i13.divStreak:""),S.dim);
+    txt(760,285,"train="+i13.trainN+" meta="+metaState+(metaAdapts?" #"+metaAdapts:"")+" heal="+healSaves+"s"+healRolls+"r"+(healFromRing?"("+healFromRing+"ring)":"")+" ref="+refreshCount+"c mom="+i13.momApplied+" ar/pb="+i13.pullCount+"p ps="+preSistSaves+"s gw="+i13.gravPulls+"/"+i13.gravTotal+" da="+i13.divMeanDrift+"/"+(i13.divAlarmCount||0)+(i13.divStreak?"!"+i13.divStreak:"")+" dv="+i13.divVelocity+(i13.divAccelAlarms?"⚡"+i13.divAccelAlarms:"")+(i13.divLRDamp<256?"🔻"+i13.divLRDamp:""),S.dim);
     txt(760,300,"W[1215]",S.brain);
   } else { txt(410,200,"(brain offline)",S.dim); }
 
@@ -4120,7 +4183,8 @@ function ui(){var v=agent.view(),r=nes.ram,st=v.st,i;hud(v);
     "<tr><td>momentum</td><td>steps="+i13.momApplied+" · β="+i13.MOM_BETA+"/256 · boost="+i13.MOM_BOOST+"/256</td></tr>"+
     "<tr><td>argon/lead</td><td>pulls="+i13.pullCount+" · Pb-damp="+i13.PB_DAMP+"/256 · mem-τ="+i13.MEM_TAU+"/256 · Ar@W["+i13.AR_START+"..968] · preSist="+preSistSaves+"/"+I13_PRESIST_SLOTS+"ring</td></tr>"+
     "<tr><td>gravity well</td><td>last-step="+i13.gravPulls+"/744 · total="+i13.gravTotal+" · thresh="+i13.GRAV_THRESH+" · pull="+i13.GRAV_PULL+"/256</td></tr>"+
-    "<tr><td>div-alarm</td><td>drift="+i13.divMeanDrift+"/"+i13.DIV_ALARM_THRESH+" · alarms="+i13.divAlarmCount+" · streak="+i13.divStreak+"/"+i13.DIV_SUSTAIN+" · adapts="+i13.divAdapts+"</td></tr>";
+    "<tr><td>div-alarm</td><td>drift="+i13.divMeanDrift+"/"+i13.DIV_ALARM_THRESH+" · alarms="+i13.divAlarmCount+" · streak="+i13.divStreak+"/"+i13.DIV_SUSTAIN+" · adapts="+i13.divAdapts+"</td></tr>"+
+    "<tr><td>drift-vel</td><td>v="+i13.divVelocity+" · accel-alarms="+i13.divAccelAlarms+" · lr-damp="+(i13.divLRDamp<256?i13.divLRDamp+"/256":"off")+" · lr-damps="+i13.divLRDamps+" · thresh="+i13.DIV_ACCEL_THRESH+"/"+i13.DIV_VEL_LR_THRESH+"</td></tr>";
   var L=agent.log,box=$("log");if(L.length<logN){logN=0;box.innerHTML="";}
   for(;logN<L.length;logN++){var d=document.createElement("div"),s=L[logN];d.textContent=s;if(/DISSENT|ALARM/.test(s))d.className="d";else if(/found|idea|holds/.test(s))d.className="i";box.appendChild(d);box.scrollTop=box.scrollHeight;}
   if($("pRam").className.indexOf("on")>=0){
