@@ -1,0 +1,7 @@
+/* AV-096: opponent cue / response evidence, no automatic semantic recognition. */
+(function(root){'use strict';const cues=['WINDUP','ATTACK','RECOVERY','VULNERABLE','UNKNOWN'],valid=['UP','DOWN','LEFT','RIGHT','A','B','SELECT','START','NONE'];
+function create(){let pending=null,rows=[],seen=new Set(),rootId=null;function reset(r){rootId=r;pending=null;rows=[];seen.clear()}function mark(x){if(pending||!x?.root||!Number.isSafeInteger(x.frame)||!cues.includes(x.cue))return false;if(rootId!==x.root)reset(x.root);pending={...x,response:null};return true}
+function observe(x){if(!pending||x.root!==rootId||pending.response||!Number.isSafeInteger(x.frame)||x.frame<pending.frame||x.frame-pending.frame>180||!x.hash)return false;const buttons=String(x.button||'').split('+');if(!buttons.every(b=>valid.includes(b)))return false;pending.response={frame:x.frame,button:x.button,hash:x.hash,lag:x.frame-pending.frame};return true}
+function finish(label){if(!pending?.response||!['EFFECTIVE','INEFFECTIVE','UNKNOWN'].includes(label))return false;const row={...pending,label,source:'human-labeled',id:rootId+'|'+pending.frame};if(seen.has(row.id))return false;seen.add(row.id);rows.push(row);pending=null;return true}
+return {reset,mark,observe,finish,cancel:()=>{pending=null},status:()=>({pending:pending?JSON.parse(JSON.stringify(pending)):null,n:rows.length,effective:rows.filter(r=>r.label==='EFFECTIVE').length,rows:JSON.parse(JSON.stringify(rows))})}}
+root.JaneOpponent={create,cues};})(typeof window==='undefined'?globalThis:window);
