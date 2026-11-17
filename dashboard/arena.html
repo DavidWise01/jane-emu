@@ -27,8 +27,10 @@ pre{border:1px solid var(--edge);background:#031523;padding:10px;border-radius:8
 .note{border-left:3px solid var(--gold);background:#123145;padding:9px;color:#b4d2df;font-size:11px;margin:12px 0}
 #status{min-height:20px;color:#acd0df}
 @media(max-width:900px){.grid{grid-template-columns:1fr}.game{height:480px}}
+/* AV-096 standalone advanced emulator / gold */
+:root{--bg:#0d0c09;--panel:#19160e;--edge:#66532a;--ink:#f3e6c2;--teal:#f7c948;--gold:#ffdc72}body{background:var(--bg);color:var(--ink);font:12px/1.4 monospace}header,main{max-width:none;padding:6px}header{min-height:40px}h1{font-size:17px}h2{font-size:11px;color:var(--gold)}.toolbar,.panel,.meter,.player,pre,.note{background:var(--panel);border-color:var(--edge);border-radius:3px}button,input,select{background:#282214;color:var(--ink);border-color:var(--edge);border-radius:3px;padding:4px 6px}.toolbar{gap:6px;margin-bottom:4px;padding:5px}.grid{grid-template-columns:minmax(0,1fr) 300px;gap:4px}.panel{padding:5px}.game{height:calc(100dvh - 155px);min-height:340px;border:1px solid var(--edge);border-radius:0}.grid>.panel:nth-child(2){max-height:calc(100dvh - 105px);overflow:auto}.player{padding:5px}.player b{font-size:13px}.note{font-size:10px}.meters{margin:5px 0}.meter{padding:4px}.meter strong{font-size:14px}img{max-width:100%;max-height:90px;object-fit:contain}.av096pad{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;text-align:center}.av096pad>div{border:1px solid var(--edge);padding:5px;min-width:0;overflow-wrap:anywhere}.av096pad b{color:var(--gold)}@media(max-width:900px){.grid{grid-template-columns:1fr}.grid>.panel:nth-child(2){max-height:none}.game{height:70dvh}}
 </style></head><body>
-<header><div><span class="pill">ONE NES · THREE OBSERVERS · ONE CONTROLLER</span><h1>WATCH → LEARN → PLAY → REPEAT</h1><div>JANE → TOPH → PATRICIA → JANE</div></div><a href="./">Back to Jane's Git learning dashboard</a></header>
+<header><div><span class="pill">ONE NES · THREE OBSERVERS · ONE CONTROLLER</span><h1>AV-096 · ADVANCED NES CUBIT</h1><div>JANE → TOPH → PATRICIA → JANE</div></div><a href="./">Back to Jane's Git learning dashboard</a></header>
 <main>
 <div class="toolbar">
 <label>Load your NES ROM <input id="romAll" type="file" accept=".nes"></label>
@@ -50,7 +52,7 @@ pre{border:1px solid var(--edge);background:#031523;padding:10px;border-radius:8
 </div>
 <div class="note">One game, one controller. Two watch while one plays; life loss passes control without restarting. Observations share one source ancestry.</div>
 </section>
-<section class="panel"><h2>TURN ORDER · WATCH / PLAY</h2>
+<section class="panel"><h2>AV-096 · OPPONENT CUBIT</h2><div class="av096pad"><div>LEFT<br>▲<br>◀ ▼ ▶<br><b id="av096L">—</b></div><div>CENTER<br>OPPONENT<br><b id="av096C">—</b></div><div>RIGHT<br>A B<br>SEL START<br><b id="av096R">—</b></div></div><p id="av096Z">0 / 184 unique observations</p><div class="row"><select id="av096Cue"><option>WINDUP</option><option>ATTACK</option><option>RECOVERY</option><option>VULNERABLE</option><option>UNKNOWN</option></select><button id="av096Mark">Mark cue</button><button id="av096Cancel">Cancel</button></div><div class="row"><button id="av096Good">Effective</button><button id="av096Bad">Ineffective</button><button id="av096Unknown">Unknown</button></div><pre id="av096Report">Load ROM to begin.</pre><button id="av096Export">Export cue evidence</button><p class="note">Cue labels are manual. Responses use observed action telemetry; no automatic opponent recognition or reward claim.</p><h2>TURN ORDER · WATCH / PLAY</h2>
 <div class="players" id="players"></div>
 <details id="advancedSensor" style="margin-top:14px"><summary style="cursor:pointer;color:var(--gold);font-weight:800">Automatic life detection · advanced</summary><div style="padding-top:10px"><h2>Game-specific death sensor</h2>
 <div class="row"><label for="lifeAddr">Optional lives RAM address (hex)</label><input id="lifeAddr" type="text" size="7" maxlength="4" placeholder="e.g. 075A"></div>
@@ -77,7 +79,7 @@ pre{border:1px solid var(--edge);background:#031523;padding:10px;border-radius:8
 <button id="export" type="button">Export turn/observer evidence JSON</button>
 </section></div>
 </main>
-<script src="./av080_coach.js"></script>
+<script src="./nes_cubit.js"></script><script src="./av096_opponent.js"></script><script src="./av080_coach.js"></script>
 <script src="./av081_effect.js"></script>
 <script>
 (()=>{
@@ -352,4 +354,4 @@ renderEffect();
 
 setInterval(sample,500);renderPlayers();init();
 })();
-</script></body></html>
+</script><script>(()=>{'use strict';const $=id=>document.getElementById(id),c=NESCubit.create(),o=JaneOpponent.create();let currentRoot=null;function context(){try{return window.JANE_RUN_CONTEXT()}catch(e){return null}}function render(){const t=c.status(),r=t.latest,p=o.status();$('av096L').textContent=r?.left.join('+')||'—';$('av096R').textContent=r?.right.join('+')||'—';$('av096C').textContent=p.pending?.cue||'UNLABELED';$('av096Z').textContent=t.n+' / 184 unique observations · '+(t.coverage_met?'coverage met':'collecting');$('av096Report').textContent=JSON.stringify({pending:p.pending,completed:p.n,effective:p.effective,stability:'UNVERIFIED'},null,2)}function poll(){const ctx=context();if(!ctx?.root)return;if(ctx.root!==currentRoot){currentRoot=ctx.root;o.reset(currentRoot)}try{const p=$('game').contentWindow.JANE_PERCEPTION;if(!p.status().running)return;for(const t of p.diagnostics().recentTrials||[]){const x={root:ctx.root,frame:t.startFrame??t.started??t.frame,hash:t.preHash??t.pre_hash,button:t.button,opponent:'UNVERIFIED'};if(c.observe(x))o.observe(x)}render()}catch(e){$('av096Report').textContent='Telemetry error: '+e.message}}$('av096Mark').onclick=()=>{poll();const ctx=context();if(!ctx?.root)return;const ok=o.mark({root:ctx.root,frame:ctx.frame,cue:$('av096Cue').value,actor:ctx.actor});render();if(!ok)$('av096Report').textContent='Finish or cancel the pending cue first.'};$('av096Cancel').onclick=()=>{o.cancel();render()};for(const [id,label] of [['av096Good','EFFECTIVE'],['av096Bad','INEFFECTIVE'],['av096Unknown','UNKNOWN']])$(id).onclick=()=>{const ok=o.finish(label);render();if(!ok)$('av096Report').textContent='Await an observed response before labeling.'};$('av096Export').onclick=()=>{const u=URL.createObjectURL(new Blob([JSON.stringify({schema:'jane.av096',cubit:c.status(),controller:c.records(),cue:o.status()},null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=u;a.download='jane-av096-cues.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};setInterval(poll,200)})();</script></body></html>
