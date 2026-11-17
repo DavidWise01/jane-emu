@@ -29,8 +29,36 @@ pre{border:1px solid var(--edge);background:#031523;padding:10px;border-radius:8
 @media(max-width:900px){.grid{grid-template-columns:1fr}.game{height:480px}}
 /* AV-096 standalone advanced emulator / gold */
 :root{--bg:#0d0c09;--panel:#19160e;--edge:#66532a;--ink:#f3e6c2;--teal:#f7c948;--gold:#ffdc72}body{background:var(--bg);color:var(--ink);font:12px/1.4 monospace}header,main{max-width:none;padding:6px}header{min-height:40px}h1{font-size:17px}h2{font-size:11px;color:var(--gold)}.toolbar,.panel,.meter,.player,pre,.note{background:var(--panel);border-color:var(--edge);border-radius:3px}button,input,select{background:#282214;color:var(--ink);border-color:var(--edge);border-radius:3px;padding:4px 6px}.toolbar{gap:6px;margin-bottom:4px;padding:5px}.grid{grid-template-columns:minmax(0,1fr) 300px;gap:4px}.panel{padding:5px}.game{height:calc(100dvh - 155px);min-height:340px;border:1px solid var(--edge);border-radius:0}.grid>.panel:nth-child(2){max-height:calc(100dvh - 105px);overflow:auto}.player{padding:5px}.player b{font-size:13px}.note{font-size:10px}.meters{margin:5px 0}.meter{padding:4px}.meter strong{font-size:14px}img{max-width:100%;max-height:90px;object-fit:contain}.av096pad{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;text-align:center}.av096pad>div{border:1px solid var(--edge);padding:5px;min-width:0;overflow-wrap:anywhere}.av096pad b{color:var(--gold)}@media(max-width:900px){.grid{grid-template-columns:1fr}.grid>.panel:nth-child(2){max-height:none}.game{height:70dvh}}
+
+/* AV-096.1 neon skin: static glow, no flashing, no pixel filters */
+:root{--bg:#06070e;--panel:#0c111c;--edge:#35535a;--ink:#e9faff;--teal:#25ffe3;--gold:#ffcf32;--violet:#bd72ff}
+body{background:radial-gradient(ellipse at 0 0,#102d35 0,transparent 48%),radial-gradient(ellipse at 100% 0,#21113c 0,transparent 42%),#06070e;color:var(--ink)}
+header{border-color:#25ffe37a;background:#080c14;box-shadow:0 2px 14px #25ffe322}
+h1{color:var(--gold);text-shadow:0 0 8px #ffcf3280,0 0 23px #ff9f1c45;letter-spacing:.08em}
+h2{color:var(--teal);text-shadow:0 0 8px #25ffe35c;letter-spacing:.08em}
+.toolbar,.panel{background:linear-gradient(150deg,#0d1721,#0c0e19 75%);border-color:#25ffe344}
+.toolbar{box-shadow:inset 0 0 12px #25ffe30c}
+.game{background:#000;border:1px solid #25ffe3;box-shadow:0 0 10px #25ffe35c,inset 0 0 8px #25ffe330}
+.game iframe{display:block;background:#000}
+button{background:#111f29;color:#e4fff8;border-color:#25ffe36b;box-shadow:inset 0 0 8px #25ffe311}
+button:hover{background:#193c42;box-shadow:0 0 9px #25ffe36b;filter:none}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #ffcf32;outline-offset:2px}
+#av096Mark,#av096Good{background:#2b240b;color:#ffe36b;border-color:#ffcf32;box-shadow:0 0 8px #ffcf3240}
+#av096Bad,#confirmDeath{border-color:#ff855e;color:#ffc2a5;background:#2e1719}
+input,select{background:#0b111d;border-color:#7661a2;color:#e9faff}
+.pill{color:#ffcf32;border-color:#ffcf3290;background:#1b190d}
+.meter,pre,.note,.player{background:#0a101a;border-color:#374e62;color:#b9d2e0}
+.meter strong{color:#ffcf32;text-shadow:0 0 6px #ffcf3255}
+.meter small,.player small{color:#a4c5d0}
+.player.active{background:#10252b;border-color:#25ffe3;box-shadow:0 0 9px #25ffe33d}
+.av096pad>div{background:#0b1720;border-color:#25ffe3;color:#25ffe3;box-shadow:inset 0 0 10px #25ffe320}
+.av096pad>div:nth-child(2){background:#191129;border-color:#bd72ff;color:#d4a4ff;box-shadow:inset 0 0 12px #bd72ff30,0 0 8px #bd72ff28}
+.av096pad>div:nth-child(3){background:#251c0c;border-color:#ffcf32;color:#ffcf32;box-shadow:inset 0 0 10px #ffcf3220}
+.av096pad b{color:inherit;text-shadow:0 0 6px currentColor}
+#av096Z{color:#ffcf32;font-weight:700}#status{color:#b9f9ec}a{color:#25ffe3}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style></head><body>
-<header><div><span class="pill">ONE NES · THREE OBSERVERS · ONE CONTROLLER</span><h1>AV-096 · ADVANCED NES CUBIT</h1><div>JANE → TOPH → PATRICIA → JANE</div></div><a href="./">Back to Jane's Git learning dashboard</a></header>
+<header><div><span class="pill">ONE NES · THREE OBSERVERS · ONE CONTROLLER</span><h1>AV-096.1 · NEON NES CUBIT</h1><div>JANE → TOPH → PATRICIA → JANE</div></div><a href="./">Back to Jane's Git learning dashboard</a></header>
 <main>
 <div class="toolbar">
 <label>Load your NES ROM <input id="romAll" type="file" accept=".nes"></label>
