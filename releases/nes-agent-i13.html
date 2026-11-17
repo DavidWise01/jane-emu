@@ -319,6 +319,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:16px;border-radius:3px;bac
     <span class="AMBER">AMBER</span> Picture chip, sound and mappers 1 2 3 4 7 9: exercised by the two built-in carts (mappers 0 and 2) only; your own cartridges are untested here.<br>
     <span class="AMBER">AMBER</span> The imagination fits games with a reward byte and a thing to approach or avoid. It cannot start until the score byte is found, so there is a reactive warm-up first.<br>
     <span class="LIT">LIT</span> Build 20 — Compound Chroma: CHROMA wheel upgraded from single derived hue to <code>{{ r8!,g8!,b8! || or6!,yl6!,pu6!,gr6! || }}</code>. Level 1: 3 primaries at 8-bit (R=me byte, G=key byte, B=gap remapped). Level 2: 4 secondaries at 6-bit derived from inter-primary relationships (OR=R+G warm, YL=R+2G yellow, PU=R+B cool, GR=G+B green). Hue is now DERIVED from composed RGB, not stored. 48-bit chroma address. Compound channels in OBS leaf digest (Merkle evidence chain). Append-only — old chroma backward compat preserved.<br>
+    <span class="LIT">LIT</span> Build 38 — Confidence-Gated PRE-SIST Rollback. Build 37 introduced a single confidence score (0-256) that collapses all memsistor subsystem states. Build 38 makes it operational: when confidence drops below <code>I13_CONF_ROLLBACK_THRESH (64)</code> for <code>I13_CONF_ROLLBACK_SUSTAIN (3)</code> consecutive learn steps, the system triggers an <b>automatic PRE-SIST rollback</b> — restoring the brain from the best available snapshot. The rollback first scans the PRE-SIST ring buffer (Build 32&#39;s 9-slot ring of recent brain snapshots) for the highest-scoring candidate, then falls back to the healBest checkpoint (Build 26). After rollback: confidence resets to 256 (restored brain was stable when saved), divergence streak resets, and per-fight confidence stats clear. Lifetime counter <code>i13ConfRollbacks</code> persists through save/load and tracks total emergency rewinds. Capped at <code>I13_CONF_ROLLBACK_MAX (3)</code> lifetime to prevent rollback loops — if 3 rollbacks haven&#39;t fixed it, the problem is structural and rewinding won&#39;t help. The critical streak (<code>i13ConfCritStreak</code>) resets per fight and on successful rollback. Logged to agent.log with source, score, and confidence at time of trigger. This completes the memsistor governance stack: B33-35 fight individual symptoms (drift/velocity/acceleration), B36 prevents overcorrection, B37 summarizes health, B38 pulls the emergency brake when nothing else is working. <b>Plain version:</b> Build 37 put a traffic light on the dashboard — green/yellow/red. Build 38 connects that traffic light to an EMERGENCY SYSTEM. If the light stays RED for 3 seconds straight, the system says &#34;nothing we&#39;re doing is working — go back to the last checkpoint.&#34; It rewinds the brain to a saved copy from when things were good. It picks the best saved copy it can find (checking the recent snapshots first, then the peak checkpoint). After rewinding, the traffic light goes back to green (the saved brain was healthy). But it can only do this 3 times total — if rewinding 3 times doesn&#39;t fix it, the problem is bigger than any saved copy can solve, and doing it again would just be going in circles.<br>
     <span class="LIT">LIT</span> Build 37 — Memsistor Confidence Score. Builds 30-36 built a complete closed-loop control system for Lead-208 stability: position monitoring (B33), velocity tracking (B34), acceleration sensing (B35), snap-back detection (B36), gravity well (B31), and emergency bulk pulls. But each subsystem reports independently — drift, velocity, acceleration, cooldown, LR damp, alarm counts — giving the operator six numbers to watch. The confidence score collapses them into ONE value on the Q8 scale: <code>i13MemConf</code>. Formula: start at 256 (perfect stability), subtract penalties — <code>min(64, meanDrift)</code> for position (B33), <code>min(48, |velocity|)</code> for speed (B34), <code>min(32, |acceleration|)</code> for jerk (B35), 64 flat penalty during snap-back cooldown (B36), 32 flat penalty when LR is damped (B34/B35). Clamp to [0, 256]. Computed every learn step, after all subsystem updates and before the position alarm. Display uses traffic light: 🟢 &gt;192 (healthy), 🟡 128-192 (stressed), 🔴 &lt;128 (critical). Tracks lifetime minimum (<code>i13MemConfMin</code>, persists through fights and save/load) and per-fight mean (<code>i13MemConfMean = sum/samples</code>, resets per fight). Visible in X-RAY brain chip as <code>C=🟢256</code> and in stats panel as a full row. Future builds can use the confidence threshold to trigger automatic PRE-SIST rollback or other drastic interventions. <b>Plain version:</b> Builds 30-36 put a GPS, a speedometer, a g-force meter, a shock absorber, and emergency brakes on the bridge. Each one has its own dashboard gauge. Build 37 adds a single traffic light at the top of the dashboard. Green means the bridge is fine. Yellow means something is off — check the gauges. Red means the bridge is in trouble — something needs to happen NOW. The traffic light looks at ALL the gauges at once and gives you one answer instead of making you read six dials. It also remembers the worst reading it ever saw (lifetime min) so you know how bad things got, even after they recovered.<br>
     <span class="LIT">LIT</span> Build 36 — Memsistor Snap-Back Detector. Builds 33-35 built a full position/velocity/acceleration monitoring stack that fires 12.5% emergency bulk pulls toward the memsistor. Build 31&#39;s gravity well also pulls continuously at 6.25%. But what happens when the PULL ITSELF overcorrects? The substrate snaps past the memsistor and oscillates like a pendulum. The snap-back detector watches for <b>sign reversals in velocity</b>: if previous velocity was strongly positive (diverging, &gt; <code>I13_SNAP_THRESH = 16 Q8</code>) and current velocity is strongly negative (converging, &lt; <code>-I13_SNAP_THRESH</code>), that&#39;s a snap-back — the correction overcorrected. When detected, the gravity well pull strength is <b>halved</b> (from <code>I13_GRAV_PULL = 16</code> to 8, i.e. 6.25% → 3.125%) for <code>I13_SNAP_COOLDOWN = 8</code> learn steps, letting the substrate settle instead of bouncing. The halving is done inside the existing gravity well loop iteration (append-only: <code>_gPull = (_gPull >> 1)</code> with ±1 preservation when cooldown is active). The cooldown counter decrements each learn step and resets to 0 on soft reset; the lifetime detection count (<code>i13SnapBacks</code>) persists. This completes the control loop: B33-35 detect and correct divergence; B36 detects and corrects the correction itself. Without it, aggressive pulls can create a feedback loop where the substrate ping-pongs across the memsistor faster than any derivative detector can respond, because each correction creates the velocity spike that triggers the next correction. <b>Plain version:</b> Builds 33-35 put sensors on the bridge and emergency anchors that pull it back when it drifts. But what if the anchors yank TOO hard? The bridge flies past center and ends up drifting the other way. Then the anchors fire AGAIN, yanking it back the other way. Now the bridge is swinging like a pendulum — the safety system is causing the problem. Build 36 is a shock absorber. It watches the speedometer (velocity). If the speed was +40 (drifting right) and suddenly flips to -30 (now racing left), that&#39;s a snap-back — the anchors overcorrected. The shock absorber loosens the rubber bands (halves the gravity well pull) for 8 steps, letting the bridge glide to a stop instead of bouncing. Once it settles, the rubber bands tighten back to normal.<br>
     <span class="LIT">LIT</span> Build 35 — Memsistor Drift Acceleration (Jerk Sensor). Build 33 = position (how far). Build 34 = velocity (how fast). Build 35 completes the triad: acceleration — the rate of change of velocity. <code>i13DivAccel = i13DivVelocity - i13DivPrevVelocity</code>. This is the jerk sensor: it detects the MOMENT something breaks, not the drift that follows. A velocity that was steady at +20 and suddenly jumps to +60 has acceleration +40 — that&#39;s a phase transition in the substrate. <b>(1) Jerk alarm:</b> when acceleration exceeds <code>I13_DIV_JERK_THRESH (32 Q8)</code>, an instant intervention fires — same 12.5% bulk pull as Builds 33/34, but triggered by the second derivative. Shares the 10-adaptation lifetime cap. <b>(2) Proportional LR damp:</b> replaces Build 34&#39;s binary 75%-or-100% with a smooth curve: <code>damp = 256 - min(64, max(0, accel))</code>, giving a range from 192/256 (75%) to 256/256 (100%). Positive acceleration = things getting worse faster → proportional damping. Negative acceleration with positive velocity = still drifting but decelerating (gravity well and damp are working) → damp holds. Both decelerating and converging → full release. The acceleration fires BEFORE the velocity alarm (Build 34), so a sudden jerk is caught at the earliest possible moment. Diagnostic state: <code>i13DivAccel</code> (current acceleration), <code>i13DivPrevVelocity</code> (previous velocity), <code>i13DivJerkAlarms</code> (lifetime jerk alarms). All visible in X-RAY and stats panel. <code>i13DivJerkAlarms</code> persists through soft reset (lifetime stat); <code>i13DivPrevVelocity</code> and <code>i13DivAccel</code> reset per fight. Saved/loaded with brain state. <b>Plain version:</b> Build 33 put a GPS on the bridge (position). Build 34 added a speedometer (velocity). Build 35 adds a g-force meter (acceleration). The GPS says &#34;the bridge is 2 feet off-center.&#34; The speedometer says &#34;it&#39;s moving at 1 foot per second.&#34; The g-force meter says &#34;and it&#39;s SPEEDING UP — it was moving at 0.5 last second and now 1.0.&#34; That acceleration means something just broke — a cable snapped, a support cracked. The g-force meter catches the snap the instant it happens, before the speedometer even sees much change. And instead of slamming the brakes to exactly 75% every time (Build 34&#39;s binary damp), the g-force meter controls a proportional brake — light acceleration gets light braking, heavy acceleration gets heavy braking. Smooth, like a real brake pedal instead of an on/off switch.<br>
@@ -1685,6 +1686,13 @@ var i13MemConfMin = 256;         // lifetime minimum confidence observed
 var i13MemConfSamples = 0;       // number of confidence samples taken (for averaging)
 var i13MemConfSum = 0;           // running sum for mean confidence (reset per fight)
 
+// BUILD 38: Confidence-Gated PRE-SIST Rollback — when confidence stays critical, rewind
+var I13_CONF_ROLLBACK_THRESH = 64;   // confidence below this = critical (Q8 scale)
+var I13_CONF_ROLLBACK_SUSTAIN = 3;   // consecutive critical steps before rollback fires
+var I13_CONF_ROLLBACK_MAX = 3;       // lifetime cap to prevent rollback loops
+var i13ConfCritStreak = 0;           // consecutive steps below threshold
+var i13ConfRollbacks = 0;            // lifetime count of confidence-gated rollbacks
+
 // BUILD 23: Advantage Normalization — whiten TD error before actor update
 // Raw TD error swings wildly (e.g. +3000 one step, +2 the next).
 // Running mean/var via EMA, then: tdNorm = (td - mean) * 256 / max(256, σ)
@@ -2108,6 +2116,50 @@ function i13Learn(reward) {
   if (_conf < i13MemConfMin) i13MemConfMin = _conf;
   i13MemConfSamples++;
   i13MemConfSum += _conf;
+  // BUILD 38: CONFIDENCE-GATED PRE-SIST ROLLBACK — total collapse detection
+  // If confidence stays below critical threshold for SUSTAIN consecutive steps, roll back.
+  // This is the nuclear option — fires only when ALL subsystems are stressed at once.
+  if (_conf < I13_CONF_ROLLBACK_THRESH) {
+    i13ConfCritStreak++;
+    if (i13ConfCritStreak >= I13_CONF_ROLLBACK_SUSTAIN && i13ConfRollbacks < I13_CONF_ROLLBACK_MAX) {
+      // scan PRE-SIST ring for best candidate (reuse B32 logic pattern)
+      var _crSnap = null;
+      var _crSource = "none";
+      var _crScore = -1;
+      if (typeof preSistRing !== "undefined" && preSistRing.length > 0) {
+        for (var _ci = 0; _ci < preSistRing.length; _ci++) {
+          var _cs = preSistRing[_ci];
+          if (_cs && typeof _cs._score === "number" && _cs._score > _crScore) {
+            _crScore = _cs._score;
+            _crSnap = _cs;
+            _crSource = "ring[" + _ci + "]";
+          }
+        }
+      }
+      // fall back to healBest if ring has nothing better
+      if (!_crSnap && typeof healBest !== "undefined" && healBest) {
+        _crSnap = healBest;
+        _crSource = "healBest";
+        _crScore = healBestEMA || 0;
+      }
+      if (_crSnap) {
+        i13.loadBrain(_crSnap);
+        i13ConfRollbacks++;
+        i13ConfCritStreak = 0;
+        i13MemConf = 256;
+        i13MemConfSamples = 0;
+        i13MemConfSum = 0;
+        i13DivStreak = 0;
+        if (Array.isArray(agent.log)) {
+          agent.log.push("[" + frames + "] CONF-ROLLBACK #" + i13ConfRollbacks +
+            " from " + _crSource + " (score=" + _crScore + " conf=" + _conf +
+            ") — substrate in total collapse, rewinding");
+        }
+      }
+    }
+  } else {
+    i13ConfCritStreak = 0;
+  }
   if (i13DivMeanDrift > I13_DIV_ALARM_THRESH) {
     i13DivStreak++;
     i13DivAlarmCount++;
@@ -2324,7 +2376,8 @@ function i13SaveBrain() {
     divLRDamps: i13DivLRDamps,
     divJerkAlarms: i13DivJerkAlarms,
     snapBacks: i13SnapBacks,
-    memConfMin: i13MemConfMin             // BUILD 37
+    memConfMin: i13MemConfMin,            // BUILD 37
+    confRollbacks: i13ConfRollbacks       // BUILD 38
   };
 }
 
@@ -2426,6 +2479,7 @@ function i13LoadBrain(b) {
     i13DivJerkAlarms = b.divJerkAlarms || 0; // BUILD 35
     i13SnapBacks = b.snapBacks || 0; // BUILD 36
     i13MemConfMin = b.memConfMin !== undefined ? b.memConfMin : 256; // BUILD 37
+    i13ConfRollbacks = b.confRollbacks || 0; // BUILD 38
   } else {
     // best approximation: init memsistor from current Lead-208 weights
     for (var _mli2 = 0; _mli2 < 744; _mli2++) i13Memsistor[_mli2] = i13W[_mli2];
@@ -2438,6 +2492,7 @@ function i13LoadBrain(b) {
     i13DivJerkAlarms = 0; // BUILD 35
     i13SnapBacks = 0; // BUILD 36
     i13MemConfMin = 256; // BUILD 37
+    i13ConfRollbacks = 0; // BUILD 38
   }
 }
 
@@ -2486,6 +2541,8 @@ function i13SoftReset() {
   i13MemConf = 256;
   i13MemConfSamples = 0;
   i13MemConfSum = 0;
+  // BUILD 38: confidence-gated rollback — streak resets per fight, lifetime count persists
+  i13ConfCritStreak = 0;
   // weights survive — this IS root strength
 }
 
@@ -2687,6 +2744,13 @@ var api = {
   set memConfMin(v) { i13MemConfMin = v; },
   get memConfSamples() { return i13MemConfSamples; },
   get memConfMean() { return i13MemConfSamples > 0 ? Math.round(i13MemConfSum / i13MemConfSamples) : 256; },
+  // BUILD 38: Confidence-gated PRE-SIST rollback
+  get confCritStreak() { return i13ConfCritStreak; },
+  get confRollbacks() { return i13ConfRollbacks; },
+  set confRollbacks(v) { i13ConfRollbacks = v; },
+  CONF_ROLLBACK_THRESH: I13_CONF_ROLLBACK_THRESH,
+  CONF_ROLLBACK_SUSTAIN: I13_CONF_ROLLBACK_SUSTAIN,
+  CONF_ROLLBACK_MAX: I13_CONF_ROLLBACK_MAX,
   BOLTZ_TAU_START: I13_BOLTZ_TAU_START,
   BOLTZ_TAU_MIN: I13_BOLTZ_TAU_MIN,
   BOLTZ_TAU_DECAY: I13_BOLTZ_TAU_DECAY,
@@ -3541,7 +3605,7 @@ function b64(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;
 function fail(msg){var e=$("err");e.textContent=msg;e.style.display=msg?"block":"none";}
 function load(buf,name,builtIn){try{var c=nes.load(buf);nes.rom=buf;loaded=true;agent.reset();logN=0;$("log").innerHTML="";fail("");frames=0;
   eck=new window.ECKMOD.ECK(KC.sha256);eckPrev={r:0,p:0,logN:0};eckTamper=false;eckBackup=null;eckCkpt=null;
-  cnet=new window.NNMOD.NN(30,(Math.random()*65535)|1);var rs=(Math.random()*65535)|1;rsv=new window.NNMOD.Reservoir(24,rs);rsv2=new window.NNMOD.Reservoir(24,rs);rsv.drain=rsv2.drain=rDrain;echo.on=false;echo.last=-1;nnBuf=[];nnPos=0;nnNeg=0;nnPosN=0;nnNegN=0;nnLastRew=0;nnRP=[];nnRN=[];qPrevAct=-1;qPrevQ=0;qEps=1.0;qTrainN=0;qLoss=0;qDriving=false;gPained=false;tim=new window.NNMOD.Timing(256);wd=new window.NNMOD.Watchdog();gv.iv=[];gv.lastEv=0;gv.sus=false;gv.hmax=1;gv.omax=1;gv.bt=0;gv.ps=-1;gv.pl=-1;gv.sa=-1;gv.la=-1;gv.pp=0;gv.streak=0;gv.mixed=false;metaScoreEMA=0;metaPainEMA=0;metaPrevRewards=0;metaPrevPains=0;metaFlatStreak=0;metaPrevRate=0;metaAdapts=0;metaLastAdapt=0;metaState="observe";healBest=null;healBestEMA=0;healBestFrame=0;healSaves=0;healRolls=0;healLastRoll=0;healPrevAdapts=0;refreshCount=0;refreshEntries=0;i13.momApplied=0;preSistRing=[];preSistIdx=0;preSistFrame=0;preSistSaves=0;i13.pullCount=0;i13.gravTotal=0;i13.divAlarmCount=0;i13.divAdapts=0;i13.divAccelAlarms=0;i13.divLRDamps=0;i13.divJerkAlarms=0;i13.snapBacks=0;i13.memConfMin=256;healFromRing=0;healRingScore=0;
+  cnet=new window.NNMOD.NN(30,(Math.random()*65535)|1);var rs=(Math.random()*65535)|1;rsv=new window.NNMOD.Reservoir(24,rs);rsv2=new window.NNMOD.Reservoir(24,rs);rsv.drain=rsv2.drain=rDrain;echo.on=false;echo.last=-1;nnBuf=[];nnPos=0;nnNeg=0;nnPosN=0;nnNegN=0;nnLastRew=0;nnRP=[];nnRN=[];qPrevAct=-1;qPrevQ=0;qEps=1.0;qTrainN=0;qLoss=0;qDriving=false;gPained=false;tim=new window.NNMOD.Timing(256);wd=new window.NNMOD.Watchdog();gv.iv=[];gv.lastEv=0;gv.sus=false;gv.hmax=1;gv.omax=1;gv.bt=0;gv.ps=-1;gv.pl=-1;gv.sa=-1;gv.la=-1;gv.pp=0;gv.streak=0;gv.mixed=false;metaScoreEMA=0;metaPainEMA=0;metaPrevRewards=0;metaPrevPains=0;metaFlatStreak=0;metaPrevRate=0;metaAdapts=0;metaLastAdapt=0;metaState="observe";healBest=null;healBestEMA=0;healBestFrame=0;healSaves=0;healRolls=0;healLastRoll=0;healPrevAdapts=0;refreshCount=0;refreshEntries=0;i13.momApplied=0;preSistRing=[];preSistIdx=0;preSistFrame=0;preSistSaves=0;i13.pullCount=0;i13.gravTotal=0;i13.divAlarmCount=0;i13.divAdapts=0;i13.divAccelAlarms=0;i13.divLRDamps=0;i13.divJerkAlarms=0;i13.snapBacks=0;i13.memConfMin=256;i13.confRollbacks=0;healFromRing=0;healRingScore=0;
   if(builtIn){try{sim.load(buf);sim.fast=true;sim.frozen=false;agent.attachWorld(sim,function(){return nes.snap();});}catch(e){}}
   primer=(c.mapper===9)?{pain:0x391,reward:0x398}:null;boxer=primer?new window.BOXMOD.Boxer({pain:primer.pain,reward:primer.reward,seed:(Math.random()*65535)|1}):null;if(boxer&&window.INFMOD)boxer.inf=new window.INFMOD.Inference();
     if(boxer&&primer){curOppKey=oppHash(nes.ram,primer.reward);boxer.beforeNewFight=function(bx,frame){
@@ -4157,7 +4221,7 @@ function xrayDraw(){
     txt(660,315,"tgt="+(i13.tgtAge||0)+"/256",S.dim);
     txt(760,255,"n-step="+(i13.nStepFill||0)+"/4",S.dim);
     txt(760,270,"decay="+(i13.decayCount||0)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0)+" eb="+(i13.ebEffectiveBeta||0)+" F"+(i13.fractalLabel||"Aa"),S.dim);
-    txt(760,285,"train="+i13.trainN+" meta="+metaState+(metaAdapts?" #"+metaAdapts:"")+" heal="+healSaves+"s"+healRolls+"r"+(healFromRing?"("+healFromRing+"ring)":"")+" ref="+refreshCount+"c mom="+i13.momApplied+" ar/pb="+i13.pullCount+"p ps="+preSistSaves+"s gw="+i13.gravPulls+"/"+i13.gravTotal+" da="+i13.divMeanDrift+"/"+(i13.divAlarmCount||0)+(i13.divStreak?"!"+i13.divStreak:"")+" dv="+i13.divVelocity+(i13.divAccelAlarms?"⚡"+i13.divAccelAlarms:"")+(i13.divLRDamp<256?"🔻"+i13.divLRDamp:"")+" jk="+i13.divAccel+(i13.divJerkAlarms?"💥"+i13.divJerkAlarms:"")+(i13.snapCooldown?"🔄"+i13.snapCooldown:"")+(i13.snapBacks?"↩"+i13.snapBacks:"")+" C="+(i13.memConf>192?"🟢":i13.memConf>128?"🟡":"🔴")+i13.memConf,S.dim);
+    txt(760,285,"train="+i13.trainN+" meta="+metaState+(metaAdapts?" #"+metaAdapts:"")+" heal="+healSaves+"s"+healRolls+"r"+(healFromRing?"("+healFromRing+"ring)":"")+" ref="+refreshCount+"c mom="+i13.momApplied+" ar/pb="+i13.pullCount+"p ps="+preSistSaves+"s gw="+i13.gravPulls+"/"+i13.gravTotal+" da="+i13.divMeanDrift+"/"+(i13.divAlarmCount||0)+(i13.divStreak?"!"+i13.divStreak:"")+" dv="+i13.divVelocity+(i13.divAccelAlarms?"⚡"+i13.divAccelAlarms:"")+(i13.divLRDamp<256?"🔻"+i13.divLRDamp:"")+" jk="+i13.divAccel+(i13.divJerkAlarms?"💥"+i13.divJerkAlarms:"")+(i13.snapCooldown?"🔄"+i13.snapCooldown:"")+(i13.snapBacks?"↩"+i13.snapBacks:"")+" C="+(i13.memConf>192?"🟢":i13.memConf>128?"🟡":"🔴")+i13.memConf+(i13.confCritStreak?"⏳"+i13.confCritStreak:"")+(i13.confRollbacks?"🔙"+i13.confRollbacks:""),S.dim);
     txt(760,300,"W[1215]",S.brain);
   } else { txt(410,200,"(brain offline)",S.dim); }
 
@@ -4305,7 +4369,8 @@ function ui(){var v=agent.view(),r=nes.ram,st=v.st,i;hud(v);
     "<tr><td>drift-vel</td><td>v="+i13.divVelocity+" · accel-alarms="+i13.divAccelAlarms+" · lr-damp="+(i13.divLRDamp<256?i13.divLRDamp+"/256":"off")+" · lr-damps="+i13.divLRDamps+" · thresh="+i13.DIV_ACCEL_THRESH+"/"+i13.DIV_VEL_LR_THRESH+"</td></tr>"+
     "<tr><td>drift-accel</td><td>a="+i13.divAccel+" · jerk-alarms="+i13.divJerkAlarms+" · jerk-thresh="+i13.DIV_JERK_THRESH+" · damp="+(i13.divLRDamp<256?"proportional "+i13.divLRDamp+"/256":"off")+"</td></tr>"+
     "<tr><td>snap-back</td><td>cooldown="+i13.snapCooldown+"/"+i13.SNAP_COOLDOWN+" · detections="+i13.snapBacks+" · thresh=±"+i13.SNAP_THRESH+" · grav-pull="+(i13.snapCooldown>0?"HALVED 8/256":"normal "+i13.GRAV_PULL+"/256")+"</td></tr>"+
-    "<tr><td>confidence</td><td>"+(i13.memConf>192?"🟢":i13.memConf>128?"🟡":"🔴")+" now="+i13.memConf+"/256 · min="+i13.memConfMin+" · mean="+i13.memConfMean+" · samples="+i13.memConfSamples+"</td></tr>";
+    "<tr><td>confidence</td><td>"+(i13.memConf>192?"🟢":i13.memConf>128?"🟡":"🔴")+" now="+i13.memConf+"/256 · min="+i13.memConfMin+" · mean="+i13.memConfMean+" · samples="+i13.memConfSamples+"</td></tr>"+
+    "<tr><td>conf-rollback</td><td>streak="+i13.confCritStreak+"/"+i13.CONF_ROLLBACK_SUSTAIN+" · rollbacks="+i13.confRollbacks+"/"+i13.CONF_ROLLBACK_MAX+" · thresh=<"+i13.CONF_ROLLBACK_THRESH+"</td></tr>";
   var L=agent.log,box=$("log");if(L.length<logN){logN=0;box.innerHTML="";}
   for(;logN<L.length;logN++){var d=document.createElement("div"),s=L[logN];d.textContent=s;if(/DISSENT|ALARM/.test(s))d.className="d";else if(/found|idea|holds/.test(s))d.className="i";box.appendChild(d);box.scrollTop=box.scrollHeight;}
   if($("pRam").className.indexOf("on")>=0){
