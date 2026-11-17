@@ -319,6 +319,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:16px;border-radius:3px;bac
     <span class="AMBER">AMBER</span> Picture chip, sound and mappers 1 2 3 4 7 9: exercised by the two built-in carts (mappers 0 and 2) only; your own cartridges are untested here.<br>
     <span class="AMBER">AMBER</span> The imagination fits games with a reward byte and a thing to approach or avoid. It cannot start until the score byte is found, so there is a reactive warm-up first.<br>
     <span class="LIT">LIT</span> Build 20 — Compound Chroma: CHROMA wheel upgraded from single derived hue to <code>{{ r8!,g8!,b8! || or6!,yl6!,pu6!,gr6! || }}</code>. Level 1: 3 primaries at 8-bit (R=me byte, G=key byte, B=gap remapped). Level 2: 4 secondaries at 6-bit derived from inter-primary relationships (OR=R+G warm, YL=R+2G yellow, PU=R+B cool, GR=G+B green). Hue is now DERIVED from composed RGB, not stored. 48-bit chroma address. Compound channels in OBS leaf digest (Merkle evidence chain). Append-only — old chroma backward compat preserved.<br>
+    <span class="LIT">LIT</span> Build 27 — PER Priority Refresh. The PER buffer stores experiences with priority based on TD-error at insertion time. As the network learns, those priorities go stale: an entry that was surprising when stored may be fully predicted now (inflated priority), or an entry that seemed boring may now contradict the network's beliefs (deflated priority). <code>perRefreshTick()</code> runs every 900 frames (~15 seconds), re-forwarding 64 stored feature vectors through the current network. For each entry it compares the new V(state) with the V stored at insertion time; the new priority becomes <code>|ΔV| + 1</code>. A round-robin cursor ensures the entire buffer (up to 2048 entries) is swept over multiple refresh cycles. The <code>refreshPER()</code> method lives inside the i13 IIFE and saves/restores the X input array so the current game state is not corrupted. PER total is recalculated after each batch. Minimum buffer size of 32 before refresh activates. Logs every 5th cycle. Stats panel shows cycles, total entries refreshed, and buffer fill. X-RAY brain chip shows refresh cycle count. <b>Plain version:</b> the brain keeps a box of flashcards (old experiences). Each flashcard has a number on the back saying how important it is. But those numbers were written when the flashcard was first made — by now the brain may have already learned that lesson, so the number is wrong. Every 15 seconds the brain pulls out 64 random flashcards, re-reads them with its current knowledge, and re-scores them. Cards it already knows get lower scores (less replay). Cards that now surprise it get higher scores (more replay). It's like a student going through their study pile and moving the easy cards to the bottom and the hard cards to the top.<br>
     <span class="LIT">LIT</span> Build 26 — Self-Healing Weight Checkpoints. The meta-controller (Build 25) can wiggle hyperparameters but cannot undo catastrophic forgetting — when the neural net's weights decay past the point of no return, no amount of epsilon or tau adjustment recovers what was learned. Now: <code>healTick()</code> runs every 600 frames (~10 seconds) after metaTick, using the existing <code>saveBrain()/loadBrain()</code> API. <b>Checkpoint:</b> when the EMA score rate exceeds the previous best by a threshold (20 Q8 ≈ 0.08), the full brain state (969 weights + gates + PER + normalization state) is snapshot. <b>Rollback:</b> when the meta-controller fires a plateau AND the current score rate has fallen below 50% of the peak checkpoint, the brain is restored to the checkpoint weights. Rollback has a 1-minute cooldown (3600 frames) and a cap of 5 per ROM load to prevent oscillation. The checkpoint is not cleared on rollback — the peak stays the peak, and the agent rebuilds from the last known-good state. Minimum 200 training steps required before first checkpoint (the brain must have learned something worth saving). State resets on ROM load. Visible in stats panel and X-RAY brain chip (heal=Ns Nr where N=saves/rollbacks). <b>Plain version:</b> the brain now keeps a photo album of itself at its smartest moments. When it notices it's gotten dumber — it used to score well and now it can't — it looks at the photo and rebuilds itself the way it was. It's like a student who took good notes: when they forget what they learned, they go back to the notes instead of starting from scratch. It can only do this 5 times per game, so it doesn't get stuck in a loop of forgetting-and-restoring.<br>
     <span class="LIT">LIT</span> Build 25 — Self-Improving Meta-Controller. The agent now watches its own performance and tunes itself. A meta-controller runs every 300 frames (~5 seconds), computing an EMA of score rate and pain rate. <b>Plateau detection:</b> when score rate stops improving for 4 consecutive windows (~20 seconds), the meta-controller fires: it bumps epsilon (explore more random actions), re-heats Boltzmann tau (make action probabilities more uniform), and adjusts imagination parameters — if imagination is flat (all strategies score the same), it shortens rollLen and spaces out replan; if imagination works but play plateaus, it imagines more often. If pain dominates scoring, it shifts toward faster reactions (shorter rollLen, less frequent imagination). <b>On improvement:</b> epsilon decays (exploit what works), and if imagination is productive, rollLen grows to look further ahead. All arithmetic is integer-safe. The meta-controller logs every adaptation to the agent log. State resets on ROM load. Visible in the stats panel and X-RAY brain chip. <b>Hyperparameter ranges:</b> eps [0.01, 0.30], rollLen [20, 80], replan [60, 240], tau ceiling 384 (Q8 ~1.5). <b>Plain version:</b> the brain used to have fixed knobs — how much to explore, how far to imagine, how often to daydream. Now it watches its own scoreboard. When it stops improving, it wiggles the knobs: tries more random things, re-opens its mind to unlikely moves, and adjusts how much it daydreams. When things are going well, it settles down and sticks with what works. It's like a student who notices they're stuck on a problem and decides to try a different approach, then goes back to the successful method once they find one that works.<br>
     <span class="LIT">LIT</span> Build 24 — Anti-Freeze. Root cause: <code>Do.prototype.imagine()</code> ran 4 policies × 150 frames = 600 <code>sim.frame()</code> calls synchronously on the main thread every 48 game frames. For mapper-4 games (Punch-Out, etc.) without JMP-to-self optimization, each sim.frame() ≈ 15ms → 9 seconds of blocking. Fix: (1) rollLen 150→40, replan 48→120 (imagination runs 4× fewer sim frames and 2.5× less often = ~10× less work). (2) <code>performance.now()</code> time budgets: imagination 6ms total, fast-path frame() 8ms per call, rehearsal roll/check 4ms each, main loop breaks if one() exceeds 10ms. (3) Inner loops check the clock every 8 iterations (amortized <code>performance.now()</code> cost). Partial results kept — a policy that runs out of time keeps its partial score. The main NES instance (not fast) is never time-budgeted so normal play is unaffected. <b>Plain version:</b> the brain used to close its eyes and imagine 600 possible futures all at once, and the whole game froze while it was thinking. Now it only imagines 40 futures, thinks less often, and has a stopwatch — if thinking takes longer than 6 thousandths of a second, it opens its eyes and plays with whatever it figured out so far. The game never freezes because the brain's daydream has a time limit.<br>
@@ -2233,6 +2234,40 @@ var api = {
     for (var d = 0; d < i13PER.length; d++) { var o = i13PER[d].td; var n = Math.max(1, (o * I13_PD_FACTOR + 128) >> 8); i13PER[d].td = n; t += n; }
     i13PERTotal = t;
   },
+  /* BUILD 27: PER PRIORITY REFRESH — re-evaluate stored entries through current net */
+  refreshPER: function(maxN) {
+    var n = i13PER.length; if (n === 0) return 0;
+    var count = Math.min(maxN || 64, n);
+    /* save current X so we can restore after */
+    var xSave = new Array(30); for (var s = 0; s < 30; s++) xSave[s] = i13X[s];
+    var refreshed = 0;
+    /* round-robin from a cursor so we cover the whole buffer over multiple calls */
+    if (typeof i13PER._refreshCur !== 'number' || i13PER._refreshCur >= n) i13PER._refreshCur = 0;
+    var cur = i13PER._refreshCur;
+    for (var j = 0; j < count; j++) {
+      var idx = (cur + j) % n;
+      var e = i13PER[idx];
+      /* load stored features into X */
+      i13FillInput(e.f);
+      /* forward pass (no learning — just evaluate) */
+      i13Forward();
+      var vNew = i13T[34]; /* new V(state) */
+      var vOld = e.v || 0; /* V at insertion time */
+      /* new priority: how much the network's value estimate shifted + 1 */
+      var diff = vNew - vOld; if (diff < 0) diff = -diff;
+      var newTD = Math.max(1, diff + 1);
+      e.td = newTD;
+      e.v = vNew; /* update stored V for next refresh */
+      refreshed++;
+    }
+    i13PER._refreshCur = (cur + count) % n;
+    /* recalculate total */
+    var t = 0; for (var k = 0; k < n; k++) t += i13PER[k].td;
+    i13PERTotal = t;
+    /* restore X */
+    for (var r = 0; r < 30; r++) i13X[r] = xSave[r];
+    return refreshed;
+  },
   get isBeta() { return i13ISBeta; },
   set isBeta(v) { i13ISBeta = v; },
   get isSteps() { return i13ISSteps; },
@@ -3125,7 +3160,7 @@ function b64(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;
 function fail(msg){var e=$("err");e.textContent=msg;e.style.display=msg?"block":"none";}
 function load(buf,name,builtIn){try{var c=nes.load(buf);nes.rom=buf;loaded=true;agent.reset();logN=0;$("log").innerHTML="";fail("");frames=0;
   eck=new window.ECKMOD.ECK(KC.sha256);eckPrev={r:0,p:0,logN:0};eckTamper=false;eckBackup=null;eckCkpt=null;
-  cnet=new window.NNMOD.NN(30,(Math.random()*65535)|1);var rs=(Math.random()*65535)|1;rsv=new window.NNMOD.Reservoir(24,rs);rsv2=new window.NNMOD.Reservoir(24,rs);rsv.drain=rsv2.drain=rDrain;echo.on=false;echo.last=-1;nnBuf=[];nnPos=0;nnNeg=0;nnPosN=0;nnNegN=0;nnLastRew=0;nnRP=[];nnRN=[];qPrevAct=-1;qPrevQ=0;qEps=1.0;qTrainN=0;qLoss=0;qDriving=false;gPained=false;tim=new window.NNMOD.Timing(256);wd=new window.NNMOD.Watchdog();gv.iv=[];gv.lastEv=0;gv.sus=false;gv.hmax=1;gv.omax=1;gv.bt=0;gv.ps=-1;gv.pl=-1;gv.sa=-1;gv.la=-1;gv.pp=0;gv.streak=0;gv.mixed=false;metaScoreEMA=0;metaPainEMA=0;metaPrevRewards=0;metaPrevPains=0;metaFlatStreak=0;metaPrevRate=0;metaAdapts=0;metaLastAdapt=0;metaState="observe";healBest=null;healBestEMA=0;healBestFrame=0;healSaves=0;healRolls=0;healLastRoll=0;healPrevAdapts=0;
+  cnet=new window.NNMOD.NN(30,(Math.random()*65535)|1);var rs=(Math.random()*65535)|1;rsv=new window.NNMOD.Reservoir(24,rs);rsv2=new window.NNMOD.Reservoir(24,rs);rsv.drain=rsv2.drain=rDrain;echo.on=false;echo.last=-1;nnBuf=[];nnPos=0;nnNeg=0;nnPosN=0;nnNegN=0;nnLastRew=0;nnRP=[];nnRN=[];qPrevAct=-1;qPrevQ=0;qEps=1.0;qTrainN=0;qLoss=0;qDriving=false;gPained=false;tim=new window.NNMOD.Timing(256);wd=new window.NNMOD.Watchdog();gv.iv=[];gv.lastEv=0;gv.sus=false;gv.hmax=1;gv.omax=1;gv.bt=0;gv.ps=-1;gv.pl=-1;gv.sa=-1;gv.la=-1;gv.pp=0;gv.streak=0;gv.mixed=false;metaScoreEMA=0;metaPainEMA=0;metaPrevRewards=0;metaPrevPains=0;metaFlatStreak=0;metaPrevRate=0;metaAdapts=0;metaLastAdapt=0;metaState="observe";healBest=null;healBestEMA=0;healBestFrame=0;healSaves=0;healRolls=0;healLastRoll=0;healPrevAdapts=0;refreshCount=0;refreshEntries=0;
   if(builtIn){try{sim.load(buf);sim.fast=true;sim.frozen=false;agent.attachWorld(sim,function(){return nes.snap();});}catch(e){}}
   primer=(c.mapper===9)?{pain:0x391,reward:0x398}:null;boxer=primer?new window.BOXMOD.Boxer({pain:primer.pain,reward:primer.reward,seed:(Math.random()*65535)|1}):null;if(boxer&&window.INFMOD)boxer.inf=new window.INFMOD.Inference();
     if(boxer&&primer){curOppKey=oppHash(nes.ram,primer.reward);boxer.beforeNewFight=function(bx,frame){
@@ -3258,7 +3293,7 @@ var frames=0;function one(){var pad=human;if(agentOn)pad=blind?agent.step(zeros,
              Sample replay proportional to |td|+1 — surprises replay harder.
              Replaces uniform random from nnRP/nnRN for the i13 brain path. */
           var perTD=Math.abs(i13.tdError)+1; /* priority: |δ|+1 (never zero) */
-          var perEntry={f:new Array(30),td:perTD,sign:qRew>0?-1:1}; /* store OPPOSITE sign for contrast replay */
+          var perEntry={f:new Array(30),td:perTD,sign:qRew>0?-1:1,v:i13.valueV||0}; /* store OPPOSITE sign for contrast replay; BUILD 27: store V for refresh */
           var _Xp=i13.X;for(var pi=0;pi<30;pi++)perEntry.f[pi]=_Xp[pi]/256; /* Q8→float for fillInput compat */
           i13.pushPER(perEntry); /* BUILD 24 FIX: route through API */
           /* PER REPLAY + BUILD 12 IS CORRECTION: sample 1, weight by importance */
@@ -3309,7 +3344,7 @@ var frames=0;function one(){var pad=human;if(agentOn)pad=blind?agent.step(zeros,
           if(pick2){var rewind2=frames-pickFrame2;
             if(Array.isArray(agent.log))agent.log.push("["+frames+"] CYCLE (no boxer): lives-down #"+cycleKOs+" — reverting to frame "+pickFrame2+" ("+(rewind2/60).toFixed(1)+"s ago). Attempt "+cycleAttempt);
             restoreAll(pick2);cycleRing=[];pop("RETRY "+cycleAttempt,"big");sfx("start");}}}
-  if(agentOn&&!blind){i13.primerScan(nes.ram);var wb=wd.step(nes.ram,pad,boxer?-1:agent.view().me);if(wb){pad|=wb;if(wd.tap===7){pop(wb===8?"PUSH START":"PUSH A","big");sfx("start");}}}rehCheck(pad);padSeen|=pad;nes.pad[0]=pad;chainUpdate(agentOn?"jane":"human",pad,{seen:i13.seen||0,act:i13.T?i13.T[24]:0});nes.frame();frames++;vfeed();eckTick();gameTick();nnTick();metaTick();healTick();}
+  if(agentOn&&!blind){i13.primerScan(nes.ram);var wb=wd.step(nes.ram,pad,boxer?-1:agent.view().me);if(wb){pad|=wb;if(wd.tap===7){pop(wb===8?"PUSH START":"PUSH A","big");sfx("start");}}}rehCheck(pad);padSeen|=pad;nes.pad[0]=pad;chainUpdate(agentOn?"jane":"human",pad,{seen:i13.seen||0,act:i13.T?i13.T[24]:0});nes.frame();frames++;vfeed();eckTick();gameTick();nnTick();metaTick();healTick();perRefreshTick();}
 /* ── BUILD 25: SELF-IMPROVING META-CONTROLLER ──
    Tracks the agent's own score rate via EMA, detects plateaus, and adapts
    hyperparameters (eps, rollLen, replan, boltzTau) to escape local optima.
@@ -3464,6 +3499,34 @@ function healTick() {
     /* don't reset healBestEMA — the peak is still the peak */
   } else {
     healPrevAdapts = metaAdapts; /* track even when no rollback */
+  }
+}
+/* ── BUILD 27: PER PRIORITY REFRESH ──
+   Re-evaluate PER entries through the current network. Stale priorities
+   drift as the net learns — an entry that was surprising at insertion may
+   be fully predicted now (priority too high) or vice versa. Every 900
+   frames, refresh 64 entries: re-forward their features, compare new V(s)
+   with stored V, update priority = |ΔV| + 1. Round-robin cursor ensures
+   full buffer coverage over time. Anti-Freeze compliant: 64 forwards max.
+   Append-only — does not modify any existing code paths. */
+var REFRESH_WINDOW = 900,       /* check every 900 frames (~15 sec) */
+    REFRESH_BATCH = 64,          /* entries per refresh call */
+    REFRESH_MIN_SIZE = 32;       /* don't bother if buffer is tiny */
+var refreshCount = 0,            /* total refresh cycles completed */
+    refreshEntries = 0;          /* total entries refreshed across all cycles */
+function perRefreshTick() {
+  if (!agentOn || blind || frames < 1800) return; /* late warmup: buffer needs filling */
+  if (frames % REFRESH_WINDOW !== 0) return;
+  if (i13.perSize < REFRESH_MIN_SIZE) return; /* buffer too small for meaningful refresh */
+  var n = i13.refreshPER(REFRESH_BATCH);
+  if (n > 0) {
+    refreshCount++;
+    refreshEntries += n;
+    if (Array.isArray(agent.log) && refreshCount % 5 === 1) {
+      agent.log.push("[" + frames + "] REFRESH: cycle #" + refreshCount +
+        " — " + n + " entries re-evaluated, total=" + refreshEntries +
+        " bufSize=" + i13.perSize);
+    }
   }
 }
 /* ECK memory controller: durable agent memories become hash-chained leaves */
@@ -3650,7 +3713,7 @@ function xrayDraw(){
     txt(660,315,"tgt="+(i13.tgtAge||0)+"/256",S.dim);
     txt(760,255,"n-step="+(i13.nStepFill||0)+"/4",S.dim);
     txt(760,270,"decay="+(i13.decayCount||0)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0)+" eb="+(i13.ebEffectiveBeta||0)+" F"+(i13.fractalLabel||"Aa"),S.dim);
-    txt(760,285,"train="+i13.trainN+" meta="+metaState+(metaAdapts?" #"+metaAdapts:"")+" heal="+healSaves+"s"+healRolls+"r",S.dim);
+    txt(760,285,"train="+i13.trainN+" meta="+metaState+(metaAdapts?" #"+metaAdapts:"")+" heal="+healSaves+"s"+healRolls+"r ref="+refreshCount+"c",S.dim);
     txt(760,300,"W[1215]",S.brain);
   } else { txt(410,200,"(brain offline)",S.dim); }
 
@@ -3789,7 +3852,8 @@ function ui(){var v=agent.view(),r=nes.ram,st=v.st,i;hud(v);
   $("bel").innerHTML=row("itself",v.me,"var(--c)")+row("the score",v.score,"#3a7acc")+row("lives",v.lives,"var(--r)")+row("key byte (what it chases/flees)",v.key,"var(--b)")+
     "<tr><td>scores / lives lost seen</td><td>"+st.rewards+" / "+st.pains+"</td></tr>"+
     "<tr><td>meta-controller</td><td>"+metaState+" · eps="+agent.act.eps.toFixed(3)+" · tau="+i13.boltzTau+" · roll="+agent.act.rollLen+" · replan="+agent.act.replan+(metaAdapts?" · adapted "+metaAdapts+"×":"")+"</td></tr>"+
-    "<tr><td>self-healing</td><td>"+(healBest?"checkpoint at f"+healBestFrame+" (peak="+healBestEMA+")":"no checkpoint yet")+" · saves="+healSaves+" · rollbacks="+healRolls+"/"+HEAL_MAX_ROLLS+"</td></tr>";
+    "<tr><td>self-healing</td><td>"+(healBest?"checkpoint at f"+healBestFrame+" (peak="+healBestEMA+")":"no checkpoint yet")+" · saves="+healSaves+" · rollbacks="+healRolls+"/"+HEAL_MAX_ROLLS+"</td></tr>"+
+    "<tr><td>per-refresh</td><td>cycles="+refreshCount+" · entries="+refreshEntries+" · buf="+i13.perSize+"/"+i13.PER_MAX+"</td></tr>";
   var L=agent.log,box=$("log");if(L.length<logN){logN=0;box.innerHTML="";}
   for(;logN<L.length;logN++){var d=document.createElement("div"),s=L[logN];d.textContent=s;if(/DISSENT|ALARM/.test(s))d.className="d";else if(/found|idea|holds/.test(s))d.className="i";box.appendChild(d);box.scrollTop=box.scrollHeight;}
   if($("pRam").className.indexOf("on")>=0){
