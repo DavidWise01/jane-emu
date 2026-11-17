@@ -319,6 +319,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:16px;border-radius:3px;bac
     <span class="AMBER">AMBER</span> Picture chip, sound and mappers 1 2 3 4 7 9: exercised by the two built-in carts (mappers 0 and 2) only; your own cartridges are untested here.<br>
     <span class="AMBER">AMBER</span> The imagination fits games with a reward byte and a thing to approach or avoid. It cannot start until the score byte is found, so there is a reactive warm-up first.<br>
     <span class="LIT">LIT</span> Build 20 — Compound Chroma: CHROMA wheel upgraded from single derived hue to <code>{{ r8!,g8!,b8! || or6!,yl6!,pu6!,gr6! || }}</code>. Level 1: 3 primaries at 8-bit (R=me byte, G=key byte, B=gap remapped). Level 2: 4 secondaries at 6-bit derived from inter-primary relationships (OR=R+G warm, YL=R+2G yellow, PU=R+B cool, GR=G+B green). Hue is now DERIVED from composed RGB, not stored. 48-bit chroma address. Compound channels in OBS leaf digest (Merkle evidence chain). Append-only — old chroma backward compat preserved.<br>
+    <span class="LIT">LIT</span> Build 41 — Warmup-Aware Memsistor Seeding. Build 40 suppressed governance during the first 512 learn steps (warmup), but the memsistor EMA (τ=8/256≈0.03) was still running — tracking weights through the entire warmup via its slow exponential average. By step 512, the memsistor shadow has absorbed 512 steps of noise-contaminated EMA updates. It is dragging stale noise into post-warmup governance: the gravity well pulls toward a noise-smeared reference, and the divergence alarm measures drift from a contaminated baseline. Build 41: at the exact moment warmup completes (trainN crosses <code>I13_WARMUP_STEPS</code>), one-time hard copy the current weights into the memsistor: <code>memsistor[i] = W[i]</code> for all 744 Lead-208 weights. This overwrites the noise-contaminated EMA with the actual trained state at warmup-end. New mutable state: <code>i13WarmupSeeded</code> (0/1 lifetime flag) — checked once per learn step, fires exactly once. After seeding, the gravity well and divergence alarm start measuring from a clean baseline — the real trained substrate, not a ghost of 512 steps of bootstrapping noise. Persists through save/load. Resets on ROM load (new game = new training). Does NOT reset on soft reset (it is a lifetime training milestone, not per-fight state). <b>Plain version:</b> Build 40 told the alarm system to stay quiet while the engine warms up. Good — no false alarms. But there is a hidden problem. The memsistor shadow is like a running average of where the engine has been. During warmup, the engine is wild — revving, stalling, sputtering. The shadow was averaging ALL of that noise into its memory. When warmup ends and the alarms come online, they compare the engine to the shadow — but the shadow remembers the noise, not the trained engine. Build 41: when warmup finishes, take a fresh photograph of the engine RIGHT NOW and replace the blurry old photograph. From this moment on, every measurement starts from the real thing, not from a smeared memory of chaos.<br>
     <span class="LIT">LIT</span> Build 40 — Memsistor Warmup Ramp. When a ROM loads, Lead-208 starts with random weights and memsistor starts as a copy of them. The memsistor EMA (τ=8/256≈0.03) is designed for stability tracking of a TRAINED substrate. During the first ~500 learn steps, weights are churning wildly as the brain bootstraps from noise — the memsistor is tracking noise, gravity well pulls toward noise, and divergence alarm can false-fire on healthy exploration. Build 40 adds a warmup ramp: for the first <code>I13_WARMUP_STEPS (512)</code> learn steps, the governance stack runs at reduced authority. Gravity pull strength scales linearly from 0% to 100% via Q8 factor <code>_warmup40 = (trainN * 256) / 512</code>. All alarm effects are suppressed: divergence streak zeroed, LR damping released, confidence pinned at 256, rollback streak cleared. After warmup completes (trainN ≥ 512), all systems engage at full authority — the governor UNDERSTANDS cold start. No new state variables — reads existing <code>i13TrainN</code>. CUBIT manifest updated with <code>memsistor.warmup</code> sub-object: steps, progress, factor (0-256 Q8), active (boolean). Visible on X-RAY as a WARMUP progress bar during active warmup, and in stats as a warmup row showing ACTIVE/COMPLETE. FREEZE-AT-V0 compliant: existing governance code unchanged. Gravity pull constant saved before the Lead-208 loop, scaled by warmup factor, restored after. All suppressions are APPENDED after the existing alarm sections. <b>Plain version:</b> Imagine you just installed all those gauges and sensors on a brand-new engine that hasn&#39;t been started yet. When you first turn the key, the engine is SUPPOSED to rev wildly — it&#39;s warming up. But the alarm system doesn&#39;t know that — it sees wild numbers and panics. &#34;Engine unstable! Brakes overheating! Steering drifting!&#34; None of that is real — it&#39;s just cold-start noise. Build 40 tells the alarm system: &#34;for the first 512 learning steps, ease into it. Start with the rubber bands at zero tension and slowly tighten them. Don&#39;t sound any alarms. The traffic light stays green. Once the engine is warm, THEN you can start watching for real trouble.&#34; The difference between a good governor and a panicky one is knowing what cold start looks like.<br>
     <span class="LIT">LIT</span> Build 39 — CUBIT Consolidation. Through 38 builds, the CUBIT MLP brain accumulated subsystems scattered across the IIFE: weight arrays, momentum, memsistor shadow, gravity well, divergence alarm, velocity/acceleration tracking, snap-back detector, confidence score, and confidence-gated rollback — each with its own API getters, its own stats row, and its own X-RAY annotations. Build 39 adds <code>i13.cubitManifest()</code>: ONE function that returns the entire brain state as a structured object tree. Architecture (30→24→8+1, 969 weights + 246 gates = 1215 total, Q8 scale). Weight norms (mean absolute value, computed live): Lead-208 (Pb‖), Argon (Ar‖), memsistor shadow (M‖), momentum accumulator (mom‖), and memsistor divergence (Δ = mean |W[i] - mem[i]| across Lead-208). Training state (seen, trainN, effective LR, TD error). Every subsystem in the memsistor governance stack (B31 gravity, B33 alarm, B34 velocity, B35 acceleration, B36 snap-back, B37 confidence, B38 rollback), each as a named sub-object. Element split (Lead-208 W[0..743] vs Argon W[744..968]). The manifest is a computed view — no new state variables, no save/load changes, no soft-reset changes. It costs one scan of the weight arrays (1488 additions) per call, negligible vs a forward pass. Visible in X-RAY as a one-line CUBIT digest (norms + confidence zone) and in stats as a consolidated <code>cubit</code> row summarizing the whole brain on one line. The manifest gives future builds (and the operator) a single function to snapshot the brain&#39;s complete health, compare states, or export diagnostics. <b>Plain version:</b> Imagine you have a car with 38 different gauges, warning lights, and sensors — each added one at a time over months. Some measure the engine, some measure the brakes, some measure the steering. If you wanted to know &#34;how is the whole car doing?&#34; you&#39;d have to look at ALL of them and add it up in your head. Build 39 adds a SINGLE REPORT CARD button. Press it, and you get one page that says: here are your engine numbers, here are your brake numbers, here are your steering numbers, here is your overall health. Same data as before — it doesn&#39;t measure anything new — it just puts everything in one place so you (or a future system) can see the whole picture at a glance. The norms (Pb‖, Ar‖, etc.) are like asking &#34;how big are the numbers in this part of the brain, on average?&#34; Big norms = strong signals. The divergence (Δ) is &#34;how far has the brain drifted from its stable shadow copy?&#34;<br>
     <span class="LIT">LIT</span> Build 38 — Confidence-Gated PRE-SIST Rollback. Build 37 introduced a single confidence score (0-256) that collapses all memsistor subsystem states. Build 38 makes it operational: when confidence drops below <code>I13_CONF_ROLLBACK_THRESH (64)</code> for <code>I13_CONF_ROLLBACK_SUSTAIN (3)</code> consecutive learn steps, the system triggers an <b>automatic PRE-SIST rollback</b> — restoring the brain from the best available snapshot. The rollback first scans the PRE-SIST ring buffer (Build 32&#39;s 9-slot ring of recent brain snapshots) for the highest-scoring candidate, then falls back to the healBest checkpoint (Build 26). After rollback: confidence resets to 256 (restored brain was stable when saved), divergence streak resets, and per-fight confidence stats clear. Lifetime counter <code>i13ConfRollbacks</code> persists through save/load and tracks total emergency rewinds. Capped at <code>I13_CONF_ROLLBACK_MAX (3)</code> lifetime to prevent rollback loops — if 3 rollbacks haven&#39;t fixed it, the problem is structural and rewinding won&#39;t help. The critical streak (<code>i13ConfCritStreak</code>) resets per fight and on successful rollback. Logged to agent.log with source, score, and confidence at time of trigger. This completes the memsistor governance stack: B33-35 fight individual symptoms (drift/velocity/acceleration), B36 prevents overcorrection, B37 summarizes health, B38 pulls the emergency brake when nothing else is working. <b>Plain version:</b> Build 37 put a traffic light on the dashboard — green/yellow/red. Build 38 connects that traffic light to an EMERGENCY SYSTEM. If the light stays RED for 3 seconds straight, the system says &#34;nothing we&#39;re doing is working — go back to the last checkpoint.&#34; It rewinds the brain to a saved copy from when things were good. It picks the best saved copy it can find (checking the recent snapshots first, then the peak checkpoint). After rewinding, the traffic light goes back to green (the saved brain was healthy). But it can only do this 3 times total — if rewinding 3 times doesn&#39;t fix it, the problem is bigger than any saved copy can solve, and doing it again would just be going in circles.<br>
@@ -1696,12 +1697,17 @@ var i13ConfCritStreak = 0;           // consecutive steps below threshold
 var i13ConfRollbacks = 0;            // lifetime count of confidence-gated rollbacks
 
 // BUILD 39: CUBIT Consolidation — unified manifest of the entire brain state
-var I13_CUBIT_BUILD = 40;            // manifest version tracks the build that last changed it
+var I13_CUBIT_BUILD = 41;            // manifest version tracks the build that last changed it
 
 // BUILD 40: Memsistor Warmup Ramp — governance at reduced authority during cold start
 // During first I13_WARMUP_STEPS learn steps, gravity pull scales 0→full,
 // alarms suppressed, confidence pinned at 256. The brain gets a runway.
 var I13_WARMUP_STEPS = 512;          // learn steps before full governance authority
+
+// BUILD 41: Warmup-Aware Memsistor Seeding — hard copy weights→memsistor at warmup end
+// The EMA tracked noise for 512 steps. At the moment warmup completes,
+// overwrite memsistor with the actual trained weights — clean baseline.
+var i13WarmupSeeded = 0;             // 0 = not yet seeded, 1 = seeded (lifetime flag)
 
 // BUILD 23: Advantage Normalization — whiten TD error before actor update
 // Raw TD error swings wildly (e.g. +3000 one step, +2 the next).
@@ -2204,6 +2210,14 @@ function i13Learn(reward) {
     i13MemConf = 256;        // pin confidence (can't be critical during warmup)
     i13ConfCritStreak = 0;   // no rollback streak can build
   }
+  // BUILD 41: Warmup-Aware Memsistor Seeding — at the moment warmup completes,
+  // hard copy current weights into memsistor, replacing the noise-contaminated EMA.
+  // Fires exactly once (i13WarmupSeeded goes 0→1). All governance now measures
+  // from the actual trained state at warmup-end, not from 512 steps of noise-tracking.
+  if (_warmup40 >= 256 && !i13WarmupSeeded) {
+    for (var _s41 = 0; _s41 < 744; _s41++) i13Memsistor[_s41] = i13W[_s41];
+    i13WarmupSeeded = 1;
+  }
   // Argon (W[744..968]): full speed — fast, agile prediction (no damping)
   i13PullCount++;
   // ── BUILD 15: GRADIENT NOISE INJECTION ──
@@ -2400,7 +2414,8 @@ function i13SaveBrain() {
     divJerkAlarms: i13DivJerkAlarms,
     snapBacks: i13SnapBacks,
     memConfMin: i13MemConfMin,            // BUILD 37
-    confRollbacks: i13ConfRollbacks       // BUILD 38
+    confRollbacks: i13ConfRollbacks,      // BUILD 38
+    warmupSeeded: i13WarmupSeeded         // BUILD 41
   };
 }
 
@@ -2503,6 +2518,7 @@ function i13LoadBrain(b) {
     i13SnapBacks = b.snapBacks || 0; // BUILD 36
     i13MemConfMin = b.memConfMin !== undefined ? b.memConfMin : 256; // BUILD 37
     i13ConfRollbacks = b.confRollbacks || 0; // BUILD 38
+    i13WarmupSeeded = b.warmupSeeded || 0; // BUILD 41
   } else {
     // best approximation: init memsistor from current Lead-208 weights
     for (var _mli2 = 0; _mli2 < 744; _mli2++) i13Memsistor[_mli2] = i13W[_mli2];
@@ -2516,6 +2532,7 @@ function i13LoadBrain(b) {
     i13SnapBacks = 0; // BUILD 36
     i13MemConfMin = 256; // BUILD 37
     i13ConfRollbacks = 0; // BUILD 38
+    i13WarmupSeeded = 0; // BUILD 41
   }
 }
 
@@ -2634,7 +2651,7 @@ function i13CubitManifest() {
       // B38: confidence-gated rollback
       rollback: { critStreak: i13ConfCritStreak, rollbacks: i13ConfRollbacks, thresh: I13_CONF_ROLLBACK_THRESH, sustain: I13_CONF_ROLLBACK_SUSTAIN, max: I13_CONF_ROLLBACK_MAX },
       // B40: warmup ramp
-      warmup: { steps: I13_WARMUP_STEPS, progress: Math.min(i13TrainN, I13_WARMUP_STEPS), factor: i13TrainN >= I13_WARMUP_STEPS ? 256 : ((i13TrainN * 256) / I13_WARMUP_STEPS) | 0, active: i13TrainN < I13_WARMUP_STEPS }
+      warmup: { steps: I13_WARMUP_STEPS, progress: Math.min(i13TrainN, I13_WARMUP_STEPS), factor: i13TrainN >= I13_WARMUP_STEPS ? 256 : ((i13TrainN * 256) / I13_WARMUP_STEPS) | 0, active: i13TrainN < I13_WARMUP_STEPS, seeded: i13WarmupSeeded }
     },
     // ── ELEMENT SPLIT ──
     elements: { lead208: { start: 0, end: 743, count: 744, damp: I13_PB_DAMP, norm: _pbNorm },
@@ -2854,6 +2871,9 @@ var api = {
   WARMUP_STEPS: I13_WARMUP_STEPS,
   get warmupActive() { return i13TrainN < I13_WARMUP_STEPS; },
   get warmupFactor() { return i13TrainN >= I13_WARMUP_STEPS ? 256 : ((i13TrainN * 256) / I13_WARMUP_STEPS) | 0; },
+  // BUILD 41: Warmup-Aware Memsistor Seeding
+  get warmupSeeded() { return i13WarmupSeeded; },
+  set warmupSeeded(v) { i13WarmupSeeded = v; },
   BOLTZ_TAU_START: I13_BOLTZ_TAU_START,
   BOLTZ_TAU_MIN: I13_BOLTZ_TAU_MIN,
   BOLTZ_TAU_DECAY: I13_BOLTZ_TAU_DECAY,
@@ -3708,7 +3728,7 @@ function b64(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;
 function fail(msg){var e=$("err");e.textContent=msg;e.style.display=msg?"block":"none";}
 function load(buf,name,builtIn){try{var c=nes.load(buf);nes.rom=buf;loaded=true;agent.reset();logN=0;$("log").innerHTML="";fail("");frames=0;
   eck=new window.ECKMOD.ECK(KC.sha256);eckPrev={r:0,p:0,logN:0};eckTamper=false;eckBackup=null;eckCkpt=null;
-  cnet=new window.NNMOD.NN(30,(Math.random()*65535)|1);var rs=(Math.random()*65535)|1;rsv=new window.NNMOD.Reservoir(24,rs);rsv2=new window.NNMOD.Reservoir(24,rs);rsv.drain=rsv2.drain=rDrain;echo.on=false;echo.last=-1;nnBuf=[];nnPos=0;nnNeg=0;nnPosN=0;nnNegN=0;nnLastRew=0;nnRP=[];nnRN=[];qPrevAct=-1;qPrevQ=0;qEps=1.0;qTrainN=0;qLoss=0;qDriving=false;gPained=false;tim=new window.NNMOD.Timing(256);wd=new window.NNMOD.Watchdog();gv.iv=[];gv.lastEv=0;gv.sus=false;gv.hmax=1;gv.omax=1;gv.bt=0;gv.ps=-1;gv.pl=-1;gv.sa=-1;gv.la=-1;gv.pp=0;gv.streak=0;gv.mixed=false;metaScoreEMA=0;metaPainEMA=0;metaPrevRewards=0;metaPrevPains=0;metaFlatStreak=0;metaPrevRate=0;metaAdapts=0;metaLastAdapt=0;metaState="observe";healBest=null;healBestEMA=0;healBestFrame=0;healSaves=0;healRolls=0;healLastRoll=0;healPrevAdapts=0;refreshCount=0;refreshEntries=0;i13.momApplied=0;preSistRing=[];preSistIdx=0;preSistFrame=0;preSistSaves=0;i13.pullCount=0;i13.gravTotal=0;i13.divAlarmCount=0;i13.divAdapts=0;i13.divAccelAlarms=0;i13.divLRDamps=0;i13.divJerkAlarms=0;i13.snapBacks=0;i13.memConfMin=256;i13.confRollbacks=0;healFromRing=0;healRingScore=0;
+  cnet=new window.NNMOD.NN(30,(Math.random()*65535)|1);var rs=(Math.random()*65535)|1;rsv=new window.NNMOD.Reservoir(24,rs);rsv2=new window.NNMOD.Reservoir(24,rs);rsv.drain=rsv2.drain=rDrain;echo.on=false;echo.last=-1;nnBuf=[];nnPos=0;nnNeg=0;nnPosN=0;nnNegN=0;nnLastRew=0;nnRP=[];nnRN=[];qPrevAct=-1;qPrevQ=0;qEps=1.0;qTrainN=0;qLoss=0;qDriving=false;gPained=false;tim=new window.NNMOD.Timing(256);wd=new window.NNMOD.Watchdog();gv.iv=[];gv.lastEv=0;gv.sus=false;gv.hmax=1;gv.omax=1;gv.bt=0;gv.ps=-1;gv.pl=-1;gv.sa=-1;gv.la=-1;gv.pp=0;gv.streak=0;gv.mixed=false;metaScoreEMA=0;metaPainEMA=0;metaPrevRewards=0;metaPrevPains=0;metaFlatStreak=0;metaPrevRate=0;metaAdapts=0;metaLastAdapt=0;metaState="observe";healBest=null;healBestEMA=0;healBestFrame=0;healSaves=0;healRolls=0;healLastRoll=0;healPrevAdapts=0;refreshCount=0;refreshEntries=0;i13.momApplied=0;preSistRing=[];preSistIdx=0;preSistFrame=0;preSistSaves=0;i13.pullCount=0;i13.gravTotal=0;i13.divAlarmCount=0;i13.divAdapts=0;i13.divAccelAlarms=0;i13.divLRDamps=0;i13.divJerkAlarms=0;i13.snapBacks=0;i13.memConfMin=256;i13.confRollbacks=0;i13.warmupSeeded=0;healFromRing=0;healRingScore=0;
   if(builtIn){try{sim.load(buf);sim.fast=true;sim.frozen=false;agent.attachWorld(sim,function(){return nes.snap();});}catch(e){}}
   primer=(c.mapper===9)?{pain:0x391,reward:0x398}:null;boxer=primer?new window.BOXMOD.Boxer({pain:primer.pain,reward:primer.reward,seed:(Math.random()*65535)|1}):null;if(boxer&&window.INFMOD)boxer.inf=new window.INFMOD.Inference();
     if(boxer&&primer){curOppKey=oppHash(nes.ram,primer.reward);boxer.beforeNewFight=function(bx,frame){
@@ -4331,6 +4351,8 @@ function xrayDraw(){
     txt(760,315,"CUBIT Pb="+_cm.norms.lead208+" Ar="+_cm.norms.argon+" M="+_cm.norms.memsistor+" Δ="+_cm.norms.divergence+" mom="+_cm.norms.momentum+" "+_cm.memsistor.confidence.zone[0].toUpperCase(),S.dim);
     // BUILD 40: warmup ramp indicator on X-RAY
     if (_cm.memsistor.warmup.active) txt(760,330,"WARMUP "+_cm.memsistor.warmup.progress+"/"+_cm.memsistor.warmup.steps+" ("+Math.round(_cm.memsistor.warmup.factor*100/256)+"%)",S.warn);
+    // BUILD 41: seeding indicator — shows once memsistor has been hard-copied from trained weights
+    if (_cm.memsistor.warmup.seeded) txt(760,345,"MEMSISTOR SEEDED",S.ok);
   } else { txt(410,200,"(brain offline)",S.dim); }
 
   /* ── 6. CONTROLLER ── */
@@ -4487,7 +4509,7 @@ function ui(){var v=agent.view(),r=nes.ram,st=v.st,i;hud(v);
     // BUILD 40: warmup ramp stats row
     (function(){var _w=i13.cubitManifest().memsistor.warmup;return "<tr><td>warmup</td><td>"+
       (_w.active ? "ACTIVE "+_w.progress+"/"+_w.steps+" ("+Math.round(_w.factor*100/256)+"%) — governance ramping" :
-       "COMPLETE — full authority")+"</td></tr>";})();
+       "COMPLETE — full authority")+(_w.seeded ? " · memsistor SEEDED" : "")+"</td></tr>";})();
   var L=agent.log,box=$("log");if(L.length<logN){logN=0;box.innerHTML="";}
   for(;logN<L.length;logN++){var d=document.createElement("div"),s=L[logN];d.textContent=s;if(/DISSENT|ALARM/.test(s))d.className="d";else if(/found|idea|holds/.test(s))d.className="i";box.appendChild(d);box.scrollTop=box.scrollHeight;}
   if($("pRam").className.indexOf("on")>=0){
