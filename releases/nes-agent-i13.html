@@ -319,6 +319,8 @@ input[type=range]::-moz-range-thumb{width:14px;height:16px;border-radius:3px;bac
     <span class="AMBER">AMBER</span> Picture chip, sound and mappers 1 2 3 4 7 9: exercised by the two built-in carts (mappers 0 and 2) only; your own cartridges are untested here.<br>
     <span class="AMBER">AMBER</span> The imagination fits games with a reward byte and a thing to approach or avoid. It cannot start until the score byte is found, so there is a reactive warm-up first.<br>
     <span class="LIT">LIT</span> Build 20 — Compound Chroma: CHROMA wheel upgraded from single derived hue to <code>{{ r8!,g8!,b8! || or6!,yl6!,pu6!,gr6! || }}</code>. Level 1: 3 primaries at 8-bit (R=me byte, G=key byte, B=gap remapped). Level 2: 4 secondaries at 6-bit derived from inter-primary relationships (OR=R+G warm, YL=R+2G yellow, PU=R+B cool, GR=G+B green). Hue is now DERIVED from composed RGB, not stored. 48-bit chroma address. Compound channels in OBS leaf digest (Merkle evidence chain). Append-only — old chroma backward compat preserved.<br>
+    <span class="LIT">LIT</span> Build 23 — Advantage Normalization. Raw TD error drives actor gradients with wild magnitude swings (+3000 one step, +2 the next). Now: running mean/var via EMA (α=3/256 ≈ 0.012), then whiten: <code>tdActor = (td - μ) * 256 / max(256, σ)</code>. Integer sqrt via Newton's method (8 iterations). Actor and fractal gates get the normalized advantage; critic keeps raw TD to learn the true value function. 64-sample warmup before normalization kicks in. Fresh stats per fight (soft reset). Same EMA + isqrt pattern as Build 16 reward normalization, applied one level up. <b>Plain version:</b> before this, a big reward made the brain learn a LOT and a small reward made it learn a LITTLE — the learning speed was hostage to the reward size. Now the brain asks "was this better or worse than USUAL?" and always learns at a steady pace. The critic (the part that predicts future reward) still sees the real numbers so it stays calibrated.</p>
+    <p>
     <span class="LIT">LIT</span> Build 22 — Boltzmann Exploration. The cubit path was purely deterministic (argmax over Q-values). Now: temperature-scaled softmax via 33-entry integer exp lookup table. <code>exp(-(Qmax - Q[a]) / τ)</code> gives unnormalized probability per action; a random roll samples from that distribution. τ starts at 256 (Q8 1.0 — high exploration, all actions get tried) and decays hyperbolically via <code>τ = τ_start * 256 / (256 + trainN / 5000)</code> toward τ_min=4 (near-greedy). When τ ≤ τ_min, falls back to pure argmax (zero overhead). Runs AFTER fractal gate modification so gates still bias the Q-values, but the final pick is stochastic. <b>Plain version:</b> before this, the brain always picked whichever action looked best — even if another action was almost as good, it never tried it. Now the brain rolls dice weighted by how good each action looks. Early on the dice are almost fair (try everything). Later the dice get more and more loaded toward the best action. Eventually it's nearly always picking the best one, but it got there by actually trying the alternatives first.</p>
     <p>
     <span class="LIT">LIT</span> Build 21 — Neon Blue Motif + Polyak Soft-Update. Visual: <code>--neon:#00ccff</code> CSS variable with glow/dim/hard variants applied to active tabs, active panels, phase badge, i13 badge, cycle strip live state, tube glow (toggles with agent on/off). Polyak: target network upgraded from hard copy every 256 steps to per-step integer-safe EMA — <code>step = diff &gt;&gt; 8</code> clamped to ±1 when truncation kills it (τ≈1/256 for large gaps, guaranteed ±1 creep for small). Smoother critic targets, no period to tune. Append-only — save/load compat preserved, tgtAge now counts total soft-update steps.</p>
@@ -1573,6 +1575,18 @@ var I13_BOLTZ_TAU_DECAY = 5000;  // τ halves every 5000 learn steps
 var i13BoltzTau = I13_BOLTZ_TAU_START;
 var I13_EXP_TAB = [256,199,155,121,94,73,57,44,35,27,21,16,13,10,8,6,5,4,3,2,2,1,1,1,1,1,1,1,1,1,1,1,1];
 
+// BUILD 23: Advantage Normalization — whiten TD error before actor update
+// Raw TD error swings wildly (e.g. +3000 one step, +2 the next).
+// Running mean/var via EMA, then: tdNorm = (td - mean) * 256 / max(256, σ)
+// Same EMA + isqrt pattern as Build 16 reward normalization.
+// Actor and gates get the normalized advantage; critic keeps raw TD
+// (it needs the true error magnitude to learn the value function).
+var I13_AN_ALPHA = 3;        // EMA coefficient (Q8, ~0.012) — matches reward normalization
+var I13_AN_WARMUP = 64;      // samples before normalization kicks in
+var i13ANMean = 0;           // running mean of TD error (Q8)
+var i13ANVar = 256;          // running variance of TD error (Q8)
+var i13ANCount = 0;          // samples seen
+
 // BUILD 18: Gate A,B,C — 3-mode hard gate on output layer
 // 3 gate neurons read 24 hidden activations → argmax selects mode
 // active mode's bias vector added to action values before selection
@@ -1784,29 +1798,54 @@ function i13Learn(reward) {
     td = Math.max(-64, Math.min(64, tdRaw));
   }
   i13TDError = td;
+  // ── BUILD 23: ADVANTAGE NORMALIZATION ──
+  // Update running stats of TD error
+  // Uses same integer-safe ±1 clamp as Polyak (Build 21) for mean tracking
+  var anDelta = td - i13ANMean;
+  var anStep = (anDelta * I13_AN_ALPHA + 128) >> 8;
+  if (anStep === 0 && anDelta !== 0) anStep = anDelta > 0 ? 1 : -1;
+  i13ANMean = i13ANMean + anStep;
+  var anDeltaSq = (anDelta * anDelta) >> 8;  // Q8 squared
+  var anVarStep = ((anDeltaSq - i13ANVar) * I13_AN_ALPHA + 128) >> 8;
+  if (anVarStep === 0 && anDeltaSq !== i13ANVar) anVarStep = anDeltaSq > i13ANVar ? 1 : -1;
+  i13ANVar = i13ANVar + anVarStep;
+  if (i13ANVar < 1) i13ANVar = 1;  // floor: no zero variance
+  i13ANCount++;
+  var tdActor = td;  // default: raw TD
+  if (i13ANCount > I13_AN_WARMUP) {
+    // integer sqrt via Newton's method
+    var anSigma = 16;  // initial guess
+    for (var anSqi = 0; anSqi < 8; anSqi++) { if (anSigma > 0) anSigma = (anSigma + (i13ANVar / anSigma)) >> 1; }
+    if (anSigma < 1) anSigma = 1;
+    // normalize: tdNorm = (td - μ) * 256 / max(256, σ)
+    var anDenom = anSigma > 256 ? anSigma : 256;
+    tdActor = (((td - i13ANMean) * 256) / anDenom) | 0;
+    // clamp to same range as raw TD
+    if (tdActor > 64) tdActor = 64; if (tdActor < -64) tdActor = -64;
+  }
   // BUILD 18+19: fractal gate learning — reinforce both gate levels
   var gateLR = Math.min(effectiveLR * 2, 127);  // gate learns 2× actor rate, cap 127
   if (gateLR < 1) gateLR = 1;
-  // ── LEVEL 1: coarse gate ──
+  // ── LEVEL 1: coarse gate ── (uses tdActor = normalized advantage)
   var gBase = i13GateMode * 25;
   for (var gh = 0; gh < 24; gh++) {
-    var gGrad = (i13T[gh] * td) >> 8;
+    var gGrad = (i13T[gh] * tdActor) >> 8;
     if (gGrad > 64) gGrad = 64; if (gGrad < -64) gGrad = -64;
     i13GateW[gBase + gh] += (gateLR * gGrad) >> 8;
   }
-  i13GateW[gBase + 24] += (gateLR * td) >> 8;  // coarse gate bias
+  i13GateW[gBase + 24] += (gateLR * tdActor) >> 8;  // coarse gate bias
   var mIdx = i13GateMode * 8 + i13T[32];
-  i13GateM[mIdx] += (gateLR * td) >> 8;         // coarse mode bias
+  i13GateM[mIdx] += (gateLR * tdActor) >> 8;         // coarse mode bias
   // ── LEVEL 2: fine sub-gate (same learning rule — self-similar) ──
   var sBase = i13SubGateMode * 25;
   for (var sh = 0; sh < 24; sh++) {
-    var sGrad = (i13T[sh] * td) >> 8;
+    var sGrad = (i13T[sh] * tdActor) >> 8;
     if (sGrad > 64) sGrad = 64; if (sGrad < -64) sGrad = -64;
     i13SubGateW[sBase + sh] += (gateLR * sGrad) >> 8;
   }
-  i13SubGateW[sBase + 24] += (gateLR * td) >> 8;  // fine gate bias
+  i13SubGateW[sBase + 24] += (gateLR * tdActor) >> 8;  // fine gate bias
   var fIdx = (i13GateMode * 3 + i13SubGateMode) * 8 + i13T[32];
-  i13SubGateM[fIdx] += (gateLR * td) >> 8;         // fine mode bias
+  i13SubGateM[fIdx] += (gateLR * tdActor) >> 8;         // fine mode bias
   // ── CLAMP both levels ──
   for (var gc = 0; gc < 75; gc++) {
     if (i13GateW[gc] > 32000) i13GateW[gc] = 32000;
@@ -1822,9 +1861,9 @@ function i13Learn(reward) {
     if (i13SubGateM[fc] > 1024) i13SubGateM[fc] = 1024;
     if (i13SubGateM[fc] < -1024) i13SubGateM[fc] = -1024;
   }
-  // actor learns from TD error (not raw reward)
-  i13Eval.call('agent_learn', [i13W, i13X, i13T, td, effectiveLR]);
-  // critic learns to reduce TD error
+  // actor learns from NORMALIZED advantage (BUILD 23: tdActor)
+  i13Eval.call('agent_learn', [i13W, i13X, i13T, tdActor, effectiveLR]);
+  // critic learns to reduce RAW TD error (needs true magnitude)
   i13Eval.call('value_learn', [i13W, i13T, td, criticLR]);
   // ── BUILD 15: GRADIENT NOISE INJECTION ──
   // Every GN_EVERY steps, perturb non-bias weights by ±1 Q8 with decaying probability
@@ -2004,7 +2043,10 @@ function i13SaveBrain() {
     subGateW: Array.from(i13SubGateW),
     subGateM: Array.from(i13SubGateM),
     subGateMode: i13SubGateMode,
-    boltzTau: i13BoltzTau
+    boltzTau: i13BoltzTau,
+    anMean: i13ANMean,
+    anVar: i13ANVar,
+    anCount: i13ANCount
   };
 }
 
@@ -2082,6 +2124,10 @@ function i13LoadBrain(b) {
   // BUILD 22: Boltzmann tau (backward compat: missing → start fresh)
   if (b.boltzTau != null) i13BoltzTau = b.boltzTau;
   else i13BoltzTau = I13_BOLTZ_TAU_START;
+  // BUILD 23: advantage normalization (backward compat: missing → defaults)
+  if (b.anMean != null) i13ANMean = b.anMean;
+  if (b.anVar != null) i13ANVar = b.anVar;
+  if (b.anCount != null) i13ANCount = b.anCount;
 }
 
 // Soft reset: zero trainer state but keep weights (Root Strength)
@@ -2100,6 +2146,8 @@ function i13SoftReset() {
   i13ISBeta = I13_IS_BETA_START; i13ISSteps = 0;
   // BUILD 16: reward normalization — fresh stats per fight
   i13RNMean = 0; i13RNVar = 256; i13RNCount = 0;
+  // BUILD 23: advantage normalization — fresh stats per fight
+  i13ANMean = 0; i13ANVar = 256; i13ANCount = 0;
   // BUILD 18+19: gate mode reset (gate weights survive — root strength)
   i13GateMode = 0;
   i13SubGateMode = 0;
@@ -2195,7 +2243,13 @@ var api = {
   get boltzTau() { return i13BoltzTau; },
   BOLTZ_TAU_START: I13_BOLTZ_TAU_START,
   BOLTZ_TAU_MIN: I13_BOLTZ_TAU_MIN,
-  BOLTZ_TAU_DECAY: I13_BOLTZ_TAU_DECAY
+  BOLTZ_TAU_DECAY: I13_BOLTZ_TAU_DECAY,
+  // BUILD 23: advantage normalization
+  get anMean() { return i13ANMean; },
+  get anVar() { return i13ANVar; },
+  get anCount() { return i13ANCount; },
+  AN_ALPHA: I13_AN_ALPHA,
+  AN_WARMUP: I13_AN_WARMUP
 };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.I13BRAIN = api;
