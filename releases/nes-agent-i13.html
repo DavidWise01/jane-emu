@@ -319,6 +319,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:16px;border-radius:3px;bac
     <span class="AMBER">AMBER</span> Picture chip, sound and mappers 1 2 3 4 7 9: exercised by the two built-in carts (mappers 0 and 2) only; your own cartridges are untested here.<br>
     <span class="AMBER">AMBER</span> The imagination fits games with a reward byte and a thing to approach or avoid. It cannot start until the score byte is found, so there is a reactive warm-up first.<br>
     <span class="LIT">LIT</span> Build 20 — Compound Chroma: CHROMA wheel upgraded from single derived hue to <code>{{ r8!,g8!,b8! || or6!,yl6!,pu6!,gr6! || }}</code>. Level 1: 3 primaries at 8-bit (R=me byte, G=key byte, B=gap remapped). Level 2: 4 secondaries at 6-bit derived from inter-primary relationships (OR=R+G warm, YL=R+2G yellow, PU=R+B cool, GR=G+B green). Hue is now DERIVED from composed RGB, not stored. 48-bit chroma address. Compound channels in OBS leaf digest (Merkle evidence chain). Append-only — old chroma backward compat preserved.<br>
+    <span class="LIT">LIT</span> Build 40 — Memsistor Warmup Ramp. When a ROM loads, Lead-208 starts with random weights and memsistor starts as a copy of them. The memsistor EMA (τ=8/256≈0.03) is designed for stability tracking of a TRAINED substrate. During the first ~500 learn steps, weights are churning wildly as the brain bootstraps from noise — the memsistor is tracking noise, gravity well pulls toward noise, and divergence alarm can false-fire on healthy exploration. Build 40 adds a warmup ramp: for the first <code>I13_WARMUP_STEPS (512)</code> learn steps, the governance stack runs at reduced authority. Gravity pull strength scales linearly from 0% to 100% via Q8 factor <code>_warmup40 = (trainN * 256) / 512</code>. All alarm effects are suppressed: divergence streak zeroed, LR damping released, confidence pinned at 256, rollback streak cleared. After warmup completes (trainN ≥ 512), all systems engage at full authority — the governor UNDERSTANDS cold start. No new state variables — reads existing <code>i13TrainN</code>. CUBIT manifest updated with <code>memsistor.warmup</code> sub-object: steps, progress, factor (0-256 Q8), active (boolean). Visible on X-RAY as a WARMUP progress bar during active warmup, and in stats as a warmup row showing ACTIVE/COMPLETE. FREEZE-AT-V0 compliant: existing governance code unchanged. Gravity pull constant saved before the Lead-208 loop, scaled by warmup factor, restored after. All suppressions are APPENDED after the existing alarm sections. <b>Plain version:</b> Imagine you just installed all those gauges and sensors on a brand-new engine that hasn&#39;t been started yet. When you first turn the key, the engine is SUPPOSED to rev wildly — it&#39;s warming up. But the alarm system doesn&#39;t know that — it sees wild numbers and panics. &#34;Engine unstable! Brakes overheating! Steering drifting!&#34; None of that is real — it&#39;s just cold-start noise. Build 40 tells the alarm system: &#34;for the first 512 learning steps, ease into it. Start with the rubber bands at zero tension and slowly tighten them. Don&#39;t sound any alarms. The traffic light stays green. Once the engine is warm, THEN you can start watching for real trouble.&#34; The difference between a good governor and a panicky one is knowing what cold start looks like.<br>
     <span class="LIT">LIT</span> Build 39 — CUBIT Consolidation. Through 38 builds, the CUBIT MLP brain accumulated subsystems scattered across the IIFE: weight arrays, momentum, memsistor shadow, gravity well, divergence alarm, velocity/acceleration tracking, snap-back detector, confidence score, and confidence-gated rollback — each with its own API getters, its own stats row, and its own X-RAY annotations. Build 39 adds <code>i13.cubitManifest()</code>: ONE function that returns the entire brain state as a structured object tree. Architecture (30→24→8+1, 969 weights + 246 gates = 1215 total, Q8 scale). Weight norms (mean absolute value, computed live): Lead-208 (Pb‖), Argon (Ar‖), memsistor shadow (M‖), momentum accumulator (mom‖), and memsistor divergence (Δ = mean |W[i] - mem[i]| across Lead-208). Training state (seen, trainN, effective LR, TD error). Every subsystem in the memsistor governance stack (B31 gravity, B33 alarm, B34 velocity, B35 acceleration, B36 snap-back, B37 confidence, B38 rollback), each as a named sub-object. Element split (Lead-208 W[0..743] vs Argon W[744..968]). The manifest is a computed view — no new state variables, no save/load changes, no soft-reset changes. It costs one scan of the weight arrays (1488 additions) per call, negligible vs a forward pass. Visible in X-RAY as a one-line CUBIT digest (norms + confidence zone) and in stats as a consolidated <code>cubit</code> row summarizing the whole brain on one line. The manifest gives future builds (and the operator) a single function to snapshot the brain&#39;s complete health, compare states, or export diagnostics. <b>Plain version:</b> Imagine you have a car with 38 different gauges, warning lights, and sensors — each added one at a time over months. Some measure the engine, some measure the brakes, some measure the steering. If you wanted to know &#34;how is the whole car doing?&#34; you&#39;d have to look at ALL of them and add it up in your head. Build 39 adds a SINGLE REPORT CARD button. Press it, and you get one page that says: here are your engine numbers, here are your brake numbers, here are your steering numbers, here is your overall health. Same data as before — it doesn&#39;t measure anything new — it just puts everything in one place so you (or a future system) can see the whole picture at a glance. The norms (Pb‖, Ar‖, etc.) are like asking &#34;how big are the numbers in this part of the brain, on average?&#34; Big norms = strong signals. The divergence (Δ) is &#34;how far has the brain drifted from its stable shadow copy?&#34;<br>
     <span class="LIT">LIT</span> Build 38 — Confidence-Gated PRE-SIST Rollback. Build 37 introduced a single confidence score (0-256) that collapses all memsistor subsystem states. Build 38 makes it operational: when confidence drops below <code>I13_CONF_ROLLBACK_THRESH (64)</code> for <code>I13_CONF_ROLLBACK_SUSTAIN (3)</code> consecutive learn steps, the system triggers an <b>automatic PRE-SIST rollback</b> — restoring the brain from the best available snapshot. The rollback first scans the PRE-SIST ring buffer (Build 32&#39;s 9-slot ring of recent brain snapshots) for the highest-scoring candidate, then falls back to the healBest checkpoint (Build 26). After rollback: confidence resets to 256 (restored brain was stable when saved), divergence streak resets, and per-fight confidence stats clear. Lifetime counter <code>i13ConfRollbacks</code> persists through save/load and tracks total emergency rewinds. Capped at <code>I13_CONF_ROLLBACK_MAX (3)</code> lifetime to prevent rollback loops — if 3 rollbacks haven&#39;t fixed it, the problem is structural and rewinding won&#39;t help. The critical streak (<code>i13ConfCritStreak</code>) resets per fight and on successful rollback. Logged to agent.log with source, score, and confidence at time of trigger. This completes the memsistor governance stack: B33-35 fight individual symptoms (drift/velocity/acceleration), B36 prevents overcorrection, B37 summarizes health, B38 pulls the emergency brake when nothing else is working. <b>Plain version:</b> Build 37 put a traffic light on the dashboard — green/yellow/red. Build 38 connects that traffic light to an EMERGENCY SYSTEM. If the light stays RED for 3 seconds straight, the system says &#34;nothing we&#39;re doing is working — go back to the last checkpoint.&#34; It rewinds the brain to a saved copy from when things were good. It picks the best saved copy it can find (checking the recent snapshots first, then the peak checkpoint). After rewinding, the traffic light goes back to green (the saved brain was healthy). But it can only do this 3 times total — if rewinding 3 times doesn&#39;t fix it, the problem is bigger than any saved copy can solve, and doing it again would just be going in circles.<br>
     <span class="LIT">LIT</span> Build 37 — Memsistor Confidence Score. Builds 30-36 built a complete closed-loop control system for Lead-208 stability: position monitoring (B33), velocity tracking (B34), acceleration sensing (B35), snap-back detection (B36), gravity well (B31), and emergency bulk pulls. But each subsystem reports independently — drift, velocity, acceleration, cooldown, LR damp, alarm counts — giving the operator six numbers to watch. The confidence score collapses them into ONE value on the Q8 scale: <code>i13MemConf</code>. Formula: start at 256 (perfect stability), subtract penalties — <code>min(64, meanDrift)</code> for position (B33), <code>min(48, |velocity|)</code> for speed (B34), <code>min(32, |acceleration|)</code> for jerk (B35), 64 flat penalty during snap-back cooldown (B36), 32 flat penalty when LR is damped (B34/B35). Clamp to [0, 256]. Computed every learn step, after all subsystem updates and before the position alarm. Display uses traffic light: 🟢 &gt;192 (healthy), 🟡 128-192 (stressed), 🔴 &lt;128 (critical). Tracks lifetime minimum (<code>i13MemConfMin</code>, persists through fights and save/load) and per-fight mean (<code>i13MemConfMean = sum/samples</code>, resets per fight). Visible in X-RAY brain chip as <code>C=🟢256</code> and in stats panel as a full row. Future builds can use the confidence threshold to trigger automatic PRE-SIST rollback or other drastic interventions. <b>Plain version:</b> Builds 30-36 put a GPS, a speedometer, a g-force meter, a shock absorber, and emergency brakes on the bridge. Each one has its own dashboard gauge. Build 37 adds a single traffic light at the top of the dashboard. Green means the bridge is fine. Yellow means something is off — check the gauges. Red means the bridge is in trouble — something needs to happen NOW. The traffic light looks at ALL the gauges at once and gives you one answer instead of making you read six dials. It also remembers the worst reading it ever saw (lifetime min) so you know how bad things got, even after they recovered.<br>
@@ -1695,7 +1696,12 @@ var i13ConfCritStreak = 0;           // consecutive steps below threshold
 var i13ConfRollbacks = 0;            // lifetime count of confidence-gated rollbacks
 
 // BUILD 39: CUBIT Consolidation — unified manifest of the entire brain state
-var I13_CUBIT_BUILD = 39;            // manifest version tracks the build that last changed it
+var I13_CUBIT_BUILD = 40;            // manifest version tracks the build that last changed it
+
+// BUILD 40: Memsistor Warmup Ramp — governance at reduced authority during cold start
+// During first I13_WARMUP_STEPS learn steps, gravity pull scales 0→full,
+// alarms suppressed, confidence pinned at 256. The brain gets a runway.
+var I13_WARMUP_STEPS = 512;          // learn steps before full governance authority
 
 // BUILD 23: Advantage Normalization — whiten TD error before actor update
 // Raw TD error swings wildly (e.g. +3000 one step, +2 the next).
@@ -2012,6 +2018,10 @@ function i13Learn(reward) {
   // Total delta includes both learn calls + momentum boost
   i13GravPulls = 0; // BUILD 31: reset per-step gravity counter
   var _divSum = 0;  // BUILD 33: accumulate |drift| for divergence alarm
+  // BUILD 40: Warmup ramp — scale gravity pull 0→full over I13_WARMUP_STEPS learn steps
+  var _warmup40 = i13TrainN >= I13_WARMUP_STEPS ? 256 : ((i13TrainN * 256) / I13_WARMUP_STEPS) | 0;
+  var _origGravPull40 = I13_GRAV_PULL;
+  if (_warmup40 < 256) I13_GRAV_PULL = (_origGravPull40 * _warmup40) >> 8;
   for (var _pb = 0; _pb < I13_AR_START; _pb++) {
     var _totalD = i13W[_pb] - i13MomSnap[_pb]; // full change from learn + momentum
     var _dampD = (_totalD * I13_PB_DAMP) >> 8;  // keep only 75%
@@ -2039,6 +2049,8 @@ function i13Learn(reward) {
     _divSum += _gAbs;
   }
   i13GravTotal += i13GravPulls;
+  // BUILD 40: Restore gravity pull constant after scaled application
+  I13_GRAV_PULL = _origGravPull40;
   // BUILD 33: MEMSISTOR DIVERGENCE ALARM — macro-level drift detector
   // mean absolute drift across all 744 Lead-208 weights vs memsistor shadow
   i13DivMeanDrift = (_divSum / 744) | 0;
@@ -2184,6 +2196,13 @@ function i13Learn(reward) {
     }
   } else {
     i13DivStreak = 0; // below threshold — reset consecutive counter
+  }
+  // BUILD 40: Suppress governance effects during warmup — brain is bootstrapping from noise
+  if (_warmup40 < 256) {
+    i13DivStreak = 0;        // suppress position alarm streak
+    i13DivLRDamp = 256;      // release any LR damping
+    i13MemConf = 256;        // pin confidence (can't be critical during warmup)
+    i13ConfCritStreak = 0;   // no rollback streak can build
   }
   // Argon (W[744..968]): full speed — fast, agile prediction (no damping)
   i13PullCount++;
@@ -2613,7 +2632,9 @@ function i13CubitManifest() {
       confidence: { now: i13MemConf, min: i13MemConfMin, samples: i13MemConfSamples, mean: i13MemConfSamples > 0 ? Math.round(i13MemConfSum / i13MemConfSamples) : 256,
         zone: i13MemConf > 192 ? "green" : i13MemConf > 128 ? "yellow" : "red" },
       // B38: confidence-gated rollback
-      rollback: { critStreak: i13ConfCritStreak, rollbacks: i13ConfRollbacks, thresh: I13_CONF_ROLLBACK_THRESH, sustain: I13_CONF_ROLLBACK_SUSTAIN, max: I13_CONF_ROLLBACK_MAX }
+      rollback: { critStreak: i13ConfCritStreak, rollbacks: i13ConfRollbacks, thresh: I13_CONF_ROLLBACK_THRESH, sustain: I13_CONF_ROLLBACK_SUSTAIN, max: I13_CONF_ROLLBACK_MAX },
+      // B40: warmup ramp
+      warmup: { steps: I13_WARMUP_STEPS, progress: Math.min(i13TrainN, I13_WARMUP_STEPS), factor: i13TrainN >= I13_WARMUP_STEPS ? 256 : ((i13TrainN * 256) / I13_WARMUP_STEPS) | 0, active: i13TrainN < I13_WARMUP_STEPS }
     },
     // ── ELEMENT SPLIT ──
     elements: { lead208: { start: 0, end: 743, count: 744, damp: I13_PB_DAMP, norm: _pbNorm },
@@ -2829,6 +2850,10 @@ var api = {
   // BUILD 39: CUBIT Consolidation
   cubitManifest: i13CubitManifest,
   CUBIT_BUILD: I13_CUBIT_BUILD,
+  // BUILD 40: Warmup Ramp
+  WARMUP_STEPS: I13_WARMUP_STEPS,
+  get warmupActive() { return i13TrainN < I13_WARMUP_STEPS; },
+  get warmupFactor() { return i13TrainN >= I13_WARMUP_STEPS ? 256 : ((i13TrainN * 256) / I13_WARMUP_STEPS) | 0; },
   BOLTZ_TAU_START: I13_BOLTZ_TAU_START,
   BOLTZ_TAU_MIN: I13_BOLTZ_TAU_MIN,
   BOLTZ_TAU_DECAY: I13_BOLTZ_TAU_DECAY,
@@ -4304,6 +4329,8 @@ function xrayDraw(){
     // BUILD 39: CUBIT manifest digest on X-RAY
     var _cm = i13.cubitManifest();
     txt(760,315,"CUBIT Pb="+_cm.norms.lead208+" Ar="+_cm.norms.argon+" M="+_cm.norms.memsistor+" Δ="+_cm.norms.divergence+" mom="+_cm.norms.momentum+" "+_cm.memsistor.confidence.zone[0].toUpperCase(),S.dim);
+    // BUILD 40: warmup ramp indicator on X-RAY
+    if (_cm.memsistor.warmup.active) txt(760,330,"WARMUP "+_cm.memsistor.warmup.progress+"/"+_cm.memsistor.warmup.steps+" ("+Math.round(_cm.memsistor.warmup.factor*100/256)+"%)",S.warn);
   } else { txt(410,200,"(brain offline)",S.dim); }
 
   /* ── 6. CONTROLLER ── */
@@ -4456,7 +4483,11 @@ function ui(){var v=agent.view(),r=nes.ram,st=v.st,i;hud(v);
     (function(){var _m=i13.cubitManifest();return "<tr><td>cubit</td><td>"+
       "b"+_m.build+" 30→24→8+1 Q8 | Pb‖="+_m.norms.lead208+" Ar‖="+_m.norms.argon+" M‖="+_m.norms.memsistor+" Δ="+_m.norms.divergence+" mom‖="+_m.norms.momentum+
       " | lr="+_m.training.effectiveLR+" n="+_m.training.trainN+" "+_m.gates.label+
-      " | "+_m.memsistor.confidence.zone+"</td></tr>";})();
+      " | "+_m.memsistor.confidence.zone+"</td></tr>";})() +
+    // BUILD 40: warmup ramp stats row
+    (function(){var _w=i13.cubitManifest().memsistor.warmup;return "<tr><td>warmup</td><td>"+
+      (_w.active ? "ACTIVE "+_w.progress+"/"+_w.steps+" ("+Math.round(_w.factor*100/256)+"%) — governance ramping" :
+       "COMPLETE — full authority")+"</td></tr>";})();
   var L=agent.log,box=$("log");if(L.length<logN){logN=0;box.innerHTML="";}
   for(;logN<L.length;logN++){var d=document.createElement("div"),s=L[logN];d.textContent=s;if(/DISSENT|ALARM/.test(s))d.className="d";else if(/found|idea|holds/.test(s))d.className="i";box.appendChild(d);box.scrollTop=box.scrollHeight;}
   if($("pRam").className.indexOf("on")>=0){
