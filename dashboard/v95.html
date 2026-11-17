@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JANE / Punch-Out!! · Golden Arcade</title><style>:root{color-scheme:dark;--bg:#080e16;--surface:#101a27;--surface2:#152230;--line:#2d4151;--ink:#e8eef2;--muted:#91a5b3;--cyan:#69e1dc;--amber:#eebc78;--red:#ee8188}
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{background:var(--bg);color:var(--ink);font:12px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+button,input,select{font:inherit}button{border:1px solid #3b5262;color:#dcebf1;background:#1b2b39;padding:7px 11px;border-radius:5px;cursor:pointer;font-weight:650;white-space:nowrap}button:hover{background:#284353;border-color:#5b9b9b}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}button:disabled{opacity:.45;cursor:default}
+button.primary{background:#1d5659;border-color:#378d90;color:#e8ffff}button.alert{border-color:#805257;color:#ffc4c4;background:#412930}button.positive{border-color:#497c64;background:#223e35}
+select,input[type=file]{max-width:100%;background:#0a1721;border:1px solid #3b5363;color:var(--ink);padding:7px;border-radius:5px}input[type=checkbox]{accent-color:var(--cyan)}
+a{color:var(--cyan);text-decoration:none}a:hover{text-decoration:underline}h1,h2,h3,p{margin-top:0}h1{font:750 18px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.03em;margin:0}h2{font:750 12px ui-monospace,monospace;letter-spacing:.09em;text-transform:uppercase;color:#becbd5;margin:0 0 12px}
+kbd,.mono,pre,.tag,.pill{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.app{height:100dvh;min-height:610px;display:flex;flex-direction:column;overflow:hidden}
+.topbar{min-height:58px;padding:10px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;gap:13px;align-items:center}.emblem{height:32px;width:32px;display:grid;place-items:center;border:1px solid #467477;color:var(--cyan);background:#183236;font:900 13px monospace;border-radius:5px}
+.brand small{display:block;color:var(--muted);font:10px monospace;letter-spacing:.05em;margin-top:3px}.topright{display:flex;align-items:center;gap:15px}.topright a{font:11px monospace}
+.pill{border:1px solid #365464;border-radius:4px;color:var(--cyan);padding:5px 8px;white-space:nowrap;font-size:10px}
+.controlbar{min-height:55px;display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--line);background:#0c1520;flex-wrap:wrap}
+.field{display:flex;align-items:center;gap:7px;color:var(--muted);font:10px monospace;white-space:nowrap}
+.field input[type=file]{max-width:245px;font:11px system-ui}.controlbar .auto{margin-left:auto}.controlbar .status{color:#b8d1d5}
+.workspace{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.12fr) minmax(390px,.88fr);gap:1px;background:var(--line)}
+.stage,.instruments{background:var(--bg);min-width:0;min-height:0;display:flex;flex-direction:column}
+.stage-head,.instrument-head{height:43px;padding:0 15px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);flex:none}
+.stage-head .left{display:flex;gap:10px;align-items:center}.tag{font-size:10px;font-weight:800;color:var(--cyan);letter-spacing:.09em}.subtle{font:10px monospace;color:var(--muted)}
+.game{flex:1;min-height:0;margin:10px;border:1px solid #314b5d;border-radius:6px;background:#03070c;overflow:hidden}
+.game iframe{width:100%;height:100%;display:block;border:0;background:#060d15}
+.stage-foot{height:35px;padding:8px 15px;display:flex;gap:12px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);font:10px monospace;color:var(--muted);flex:none}
+.tabstrip{height:40px;display:flex;align-items:stretch;gap:2px;padding:4px 10px 0;border-bottom:1px solid var(--line);flex:none;overflow-x:auto}
+.tabstrip button{background:transparent;color:var(--muted);border:0;border-radius:4px 4px 0 0;padding:6px 13px;font:750 11px monospace}
+.tabstrip button[aria-selected=true]{background:#1a2d3b;color:var(--cyan);box-shadow:inset 0 -2px var(--cyan)}
+.tabcontent{min-height:0;overflow:auto;padding:15px 16px;flex:1;scrollbar-width:thin;scrollbar-color:#3d5e6c transparent}
+.tabpage[hidden]{display:none!important}.tabpage{display:block}
+.section{border:1px solid var(--line);border-radius:6px;background:#101a25;padding:13px;margin-bottom:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:9px 0}.row:first-child{margin-top:0}.row:last-child{margin-bottom:0}
+.fieldset{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:9px;margin-bottom:13px}
+.fieldset label{display:grid;gap:5px;color:var(--muted);font:10px monospace}.fieldset select{width:100%}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:13px}
+.metric{background:#0d1721;border:1px solid var(--line);border-radius:5px;padding:10px}.metric b{display:block;font:750 23px monospace;color:#d7f4f2;margin:1px 0 2px}.metric small{font:10px monospace;color:var(--muted);text-transform:uppercase}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;margin:7px 0 0;border:1px solid #263948;border-radius:5px;background:#0a131d;color:#b2d5dc;padding:11px;font:11px/1.55 ui-monospace,monospace;max-height:280px;overflow:auto}
+.helper{font-size:11px;color:var(--muted);line-height:1.55;margin:8px 0}.signal{color:var(--cyan)}.warning{color:var(--amber)}
+.footerbar{height:30px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 16px;border-top:1px solid var(--line);background:#0b1420;font:10px monospace;color:var(--muted)}
+@media(max-width:980px){.app{height:auto;min-height:100dvh;overflow:visible}.workspace{display:flex;flex-direction:column}.stage{height:70vh;min-height:490px}.instruments{min-height:510px}.tabcontent{max-height:650px}.controlbar .auto{margin-left:0}.footerbar{height:auto;min-height:30px;flex-wrap:wrap;padding:8px 16px}}
+@media(max-width:550px){.topbar{padding:9px}.topright a{display:none}.controlbar{padding:8px}.controlbar .field input[type=file]{max-width:185px}.fieldset{grid-template-columns:1fr 90px}.metrics{gap:5px}.metric{padding:7px}.metric b{font-size:18px}}
+
+/* AV-089 GOLD / minimal single-screen operator skin */
+:root{--bg:#0d0c09;--surface:#17150f;--surface2:#211d13;--line:#4b4022;--ink:#f3e6c2;--muted:#b4a581;--cyan:#f7c948;--amber:#ffdc72;--red:#e6a373;accent-color:#f7c948}
+body{background:#0d0c09;color:var(--ink);font-family:ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:0}
+.topbar{background:#14120d;min-height:54px;padding:9px 18px}
+.brand .emblem{background:#f7c948;color:#17130a;border:1px solid #f7c948;border-radius:3px;box-shadow:none}
+.brand h1{font-size:17px;letter-spacing:.075em;color:#f6e9c9}
+.brand small{color:#b8a87e}
+.pill{color:#f7c948;background:#18150d;border-color:#615029}
+.controlbar{background:#15130e;gap:8px;min-height:50px}
+button{color:#ead7a9;background:#282214;border-color:#66532a;border-radius:3px;font-weight:650;transition:background .12s,border-color .12s}
+button:hover{background:#3d3016;border-color:#d4ad3c}
+button.primary,button.positive{background:#f7c948;border-color:#f7c948;color:#1d180c}
+button.primary:hover,button.positive:hover{background:#ffda69}
+button.alert{background:#382418;color:#f4c0a3;border-color:#865536}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline-color:#ffdf75}
+select,input[type=file]{background:#18150e;border-color:#5f502e;color:#eadbb8;border-radius:3px}
+input[type=checkbox]{accent-color:#f7c948}
+a{color:#f7c948}
+.workspace{grid-template-columns:minmax(0,1.2fr) minmax(385px,.8fr);background:#4b4022}
+.stage,.instruments{background:#100f0b}
+.stage-head,.instrument-head{background:#18160f}
+.game{margin:8px;border:1px solid #8e702a;border-radius:3px;background:#050505}
+.stage-foot,.footerbar{background:#14120e}
+.tabstrip{background:#14120d}
+.tabstrip button{color:#b7a77f;border-radius:2px 2px 0 0}
+.tabstrip button[aria-selected=true]{background:#2a2313;color:#ffdc64;box-shadow:inset 0 -2px #f7c948}
+.tabcontent{padding:12px}
+.section{background:#1b180f;border:1px solid #4f4224;border-radius:3px;padding:12px;margin-bottom:10px}
+.metric{background:#15130e;border-color:#514425;border-radius:3px}
+.metric b{color:#ffdc6e}
+pre{background:#11100b;border-color:#4b4022;color:#e5d19d;border-radius:3px}
+h2{color:#ffdb74}
+.helper,.subtle,.field{color:#baaa84}
+.tag,.signal{color:#f7c948}
+.warning{color:#f1b85c}
+@media(max-width:980px){.workspace{display:flex;flex-direction:column}}
+
+/* AV-089.1 / viewport-first compact instrumentation */
+@media(min-width:1101px){
+ .workspace{grid-template-columns:minmax(0,1fr) clamp(290px,27vw,370px)!important}
+ .app{min-height:500px}
+ .stage-head,.instrument-head{height:32px;padding:0 10px}
+ .stage-foot{height:24px;padding:3px 10px;font-size:9px}
+ .stage-foot span:last-child{display:none}
+ .game{margin:4px}
+ .tabstrip{height:32px;padding:2px 4px 0;gap:0}
+ .tabstrip button{padding:5px 7px;font-size:10px}
+ .tabcontent{padding:7px}
+ .section{padding:8px;margin-bottom:7px}
+ .fieldset{grid-template-columns:minmax(0,1fr) 70px;gap:5px;margin-bottom:7px}
+ .fieldset label{gap:2px}
+ .row{gap:4px;margin:6px 0}
+ .row button{flex:1 1 auto}
+ .metrics{gap:4px;margin-bottom:7px}
+ .metric{padding:6px}
+ .metric b{font-size:18px}
+ .metric small{font-size:9px}
+ pre{padding:7px;max-height:180px;font-size:10px}
+ .helper{font-size:10px;line-height:1.35;margin:5px 0}
+ h2{font-size:10px;margin-bottom:6px}
+}
+@media(min-width:1101px) and (max-height:760px){
+ .topbar{min-height:42px;padding:5px 12px}
+ .controlbar{min-height:40px;padding:5px 10px}
+ .footerbar{height:23px}
+ .topright,.brand small{font-size:9px}
+}
+@media(max-width:1100px){
+ .workspace{display:flex!important;flex-direction:column!important}
+ .app{height:auto;min-height:100dvh;overflow:visible}
+ .stage{height:78dvh;min-height:460px}
+ .game{margin:4px}
+ .instruments{min-height:360px}
+ .tabcontent{max-height:520px}
+ .tabstrip button{padding:5px 9px}
+}
+/* AV-089.2 actual screen-first layout */
+@media(min-width:1101px){.workspace{grid-template-columns:minmax(0,1fr) 310px!important}.topbar{min-height:42px;padding:5px 10px}.controlbar{min-height:38px;padding:4px 8px}.stage-head,.instrument-head{height:28px}.stage-foot{display:none}.footerbar{height:22px}.game{margin:2px;border:0}.instruments .row button{padding:5px 6px;font-size:10px}.instruments .section{padding:6px}.instruments .helper{font-size:10px}.tabstrip button{padding:4px 5px;font-size:9px}}
+ .film-controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.film-controls button{padding:6px 4px;font-size:10px}.film-media{width:100%;background:#050505;aspect-ratio:256/240;object-fit:contain;display:block;max-height:270px;image-rendering:pixelated}.film-range{width:100%;accent-color:#f7c948}.film-note{width:100%;resize:vertical;min-height:54px;background:#13110b;color:#f3e6c2;border:1px solid #66532a;padding:6px;font:11px monospace}.film-list{display:grid;gap:4px}.film-list button{text-align:left;white-space:normal}.film-review .workspace>.stage>.game{position:relative}.film-review #filmOverlay{display:flex!important}.film-review #arena{visibility:hidden}#filmOverlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#050505}#filmVideo{width:100%;height:100%;object-fit:contain;image-rendering:pixelated} .film-review .game{position:relative} @media(min-width:1101px){.workspace{grid-template-columns:minmax(0,1fr) 275px!important}.topbar{min-height:36px;padding:3px 8px}.controlbar{min-height:34px;padding:2px 6px}.stage-head,.instrument-head{height:23px}.footerbar{height:18px}.tabcontent{padding:5px}.instruments img{max-height:88px;max-width:100%;object-fit:contain}.game{margin:0}.tabstrip{height:29px}.tabstrip button{padding:3px 4px;font-size:9px}} </style></head>
+<body><div class="app">
+<header class="topbar"><div class="brand"><div class="emblem">J</div><div><h1>JANE <span style="color:var(--cyan)">/</span> PUNCH-OUT!!</h1><small>v95 · GOLDEN ARCADE · NES CUBIT · ROOT 0</small></div></div><div class="topright"><span id="mode" class="pill">INITIALIZING</span><a href="./arena.html">Advanced emulator</a></div></header>
+<div class="controlbar">
+<label class="field">CARTRIDGE <input id="rom" type="file" accept=".nes" aria-label="Load local NES cartridge"></label>
+<span id="state" class="pill status" role="status">LOAD .NES ROM</span>
+<button id="sample">Save trials</button><button id="reload">Verify evidence</button><button id="export">Export trials</button>
+<label class="field auto"><input type="checkbox" id="auto" checked> AUTO-SAVE / 5S</label><span id="pending" class="pill">0 PENDING</span>
+</div>
+<main class="workspace">
+<section class="stage" aria-label="NES emulator"><div class="stage-head"><div class="left"><span class="tag">01 / NES EMULATOR</span><span class="subtle">LIVE CARTRIDGE · ONE GAME STATE</span></div><span class="subtle">JANE / TOPH / PATRICIA</span></div>
+<div class="game"><div id="filmOverlay"><video id="filmVideo" playsinline preload="metadata"></video></div><iframe id="arena" src="./arena.html" title="NES emulator with Jane, Toph and Patricia"></iframe></div>
+<div class="stage-foot"><span>ROM bytes remain in your browser</span><span>Emulator controls remain available inside the game pane</span></div></section>
+<section class="instruments" aria-label="Punch-Out instruments"><div class="instrument-head"><span class="tag">02 / INSTRUMENTS</span><span class="subtle">MATCH · COACHING · TELEMETRY</span></div>
+<nav class="tabstrip" aria-label="Instrument tabs"><button type="button" data-tab="match" aria-selected="true">MATCH</button><button type="button" data-tab="coach" aria-selected="false">TOPH</button><button type="button" data-tab="telemetry" aria-selected="false">TELEMETRY</button><button type="button" data-tab="evidence" aria-selected="false">EVIDENCE</button><button type="button" data-tab="timing" aria-selected="false">TIMING</button><button type="button" data-tab="film" aria-selected="false">FILM</button><button type="button" data-tab="cubit" aria-selected="false">CUBIT</button><button type="button" data-tab="system" aria-selected="false">SYSTEM</button></nav>
+<div class="tabcontent">
+<section class="tabpage" id="tab-match">
+<div class="section"><h2>Fight configuration</h2><div class="fieldset"><label>OPPONENT<select id="opponent"><option>Glass Joe</option><option>Von Kaiser</option><option>Piston Honda</option><option>Don Flamenco</option><option>King Hippo</option><option>Great Tiger</option><option>Bald Bull</option><option>Soda Popinski</option><option>Mr. Sandman</option><option>Super Macho Man</option><option>Mike Tyson</option></select></label><label>ROUND<select id="fightRound"><option>1</option><option>2</option><option>3</option></select></label></div>
+<div class="row"><button id="newFight" class="primary">Start fight</button><button id="opponentDown">Opponent down</button><button id="janeDown" class="alert">Jane down / handoff</button></div>
+<div class="row"><button id="fightWin" class="positive">Confirm win</button><button id="fightLoss" class="alert">Confirm loss</button><button id="fightExport">Export match JSON</button></div>
+<p class="helper">Results and knockdowns are manually confirmed; no unverified game-specific RAM offsets are used.</p></div>
+<div class="metrics"><div class="metric"><b id="kdFor">0</b><small>Opponent downs</small></div><div class="metric"><b id="kdAgainst">0</b><small>Jane downs</small></div><div class="metric"><b id="fightCount">0</b><small>Completed fights</small></div></div>
+<div class="section"><h2>Recent match events</h2><pre id="fightLedger">No confirmed fight events.</pre></div>
+</section>
+<section class="tabpage" id="tab-coach" hidden><div class="section"><h2>TOPH / teaching inspection</h2><pre id="fightCoach">Start with Glass Joe. Observe timing and confirm outcomes.</pre><p class="helper">Teaching effectiveness requires comparable attempts and verified fight outcomes. Pixel movement alone is not a reward.</p></div></section>
+<section class="tabpage" id="tab-telemetry" hidden><div class="metrics"><div class="metric"><b id="frames">0</b><small>NES frames</small></div><div class="metric"><b id="trials">0</b><small>Action count</small></div><div class="metric"><b id="events">0</b><small>Saved trials</small></div></div><div class="section"><h2>Live emulator status</h2><pre id="readout">Waiting for emulator.</pre></div><div class="section"><h2>Recent action trials</h2><pre id="recent">No completed action trials yet.</pre></div></section>
+<section class="tabpage" id="tab-evidence" hidden><div class="section"><h2>Browser evidence journal</h2><pre id="ledger">Local browser evidence initializes automatically.</pre><p class="helper">All observations from one continuous game state share one source ancestry. The digest chain only helps detect modifications relative to trusted digests.</p></div></section>
+<section class="tabpage" id="tab-timing" hidden>
+<div class="section"><h2>AV-089 / Glass Joe timing trials</h2>
+<p class="helper">Record a visible opponent cue, then record Jane's attempted response and independently label its outcome. This is human observation, not automatic attack recognition.</p>
+<div class="fieldset"><label>CUE<select id="cueType"><option value="windup">Punch windup</option><option value="attack">Attack begins</option><option value="recovery">Opponent recovery</option><option value="unknown">Unknown visual cue</option></select></label><label>RESPONSE<select id="responseType"><option value="LEFT">LEFT dodge</option><option value="RIGHT">RIGHT dodge</option><option value="DOWN">DOWN dodge</option><option value="A">A punch</option><option value="B">B punch</option><option value="NONE">No action</option></select></label></div>
+<div class="row"><button id="markCue" class="primary">1 · Mark cue</button><button id="markResponse">2 · Mark response</button></div>
+<div class="row"><button id="outcomeSuccess" class="positive">3 · Effective</button><button id="outcomeFailure" class="alert">3 · Ineffective</button><button id="outcomeUnknown">3 · Unverified</button></div>
+<p class="helper" id="timingState">No timing trial started. Load a cartridge and begin a fight.</p>
+</div>
+<div class="metrics"><div class="metric"><b id="timingCount">0</b><small>Completed trials</small></div><div class="metric"><b id="timingSuccess">0</b><small>Effective / labeled</small></div><div class="metric"><b id="timingLag">—</b><small>Median frame lag</small></div></div>
+<div class="section"><h2>Reproducibility ledger</h2><pre id="timingLedger">No cue-response trials.</pre><div class="row"><button id="timingExport">Export timing JSON</button><button id="timingClear" class="alert">Clear timing journal</button></div><p class="helper">Frame lag uses emulator frame counters. If missing or unchanged, latency is unknown. Trials in one game run have shared ancestry, not independent witnesses. Clear is permanent.</p></div></section>
+<section class="tabpage" id="tab-film" hidden><div class="section"><h2>VCR / Film room</h2><label class="field"><input id="flyOn" type="checkbox" checked> RECURRING FLY-BACK</label><div class="row"><button id="flyNow">Fly back now</button><button id="flyExit">Return live</button></div><div class="row"><label class="field"><input id="policyOn" type="checkbox" checked> RECURSIVE TEST</label><button id="policyExport">Export tests</button></div><pre id="policyState">Awaiting film study</pre><pre id="flyState">ARMED · Await match start</pre><p class="helper">Automatically records on Start fight and studies the last 8 seconds twice after a confirmed outcome. Replay does not rewind the emulator.</p><div class="row"><button id="filmRec" class="alert">● REC</button><button id="filmStop">■ STOP</button><button id="filmLive">LIVE</button><button id="filmSave">SAVE VIDEO</button></div><p id="filmStatus" class="helper" role="status">Load a cartridge, then record a match.</p><label class="field">MATCH <select id="filmLibrary" style="width:100%"><option value="">No saved footage</option></select></label><input id="filmSeek" class="film-range" type="range" min="0" max="1" value="0" step=".01" aria-label="Film timeline"><div id="filmClock" class="subtle">00:00 / 00:00</div><div class="film-controls"><button id="filmRew">« 5s</button><button id="filmPlay">▶ / II</button><button id="filmFwd">5s »</button><button id="filmStep">+ 0.1s</button></div><div class="row"><label class="field">SPEED <select id="filmSpeed"><option value=".25">¼×</option><option value=".5">½×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label><button id="filmReview">REVIEW</button></div><p class="helper">Review is video-only. Live emulation is not paused by replay.</p></div><div class="section"><h2>TOPH / Film study</h2><select id="filmTag" style="width:100%"><option>Missed dodge</option><option>Good defense</option><option>Missed attack</option><option>Successful counter</option><option>Knockdown</option><option>Other</option></select><textarea id="filmNote" class="film-note" placeholder="Cue → action → outcome → next adjustment"></textarea><div class="row"><button id="filmMark" class="primary">Mark moment</button><button id="filmExport">Export study JSON</button></div><div id="filmMarks" class="film-list"></div><pre id="filmCoach">No lessons recorded.</pre><p class="helper">Manual coaching labels are hypotheses; validate on a new match.</p></div></section><section class="tabpage" id="tab-cubit" hidden><div class="section"><h2>NES controller cubit / Z184</h2><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;text-align:center;font-size:10px"><div style="border:1px solid #66532a;padding:5px">LEFT<br>▲<br>◀ ▼ ▶<br><b id="nesLeft">—</b></div><div style="border:1px solid #f7c948;padding:5px">CENTER<br>OPPONENT<br><b id="nesCenter">—</b></div><div style="border:1px solid #66532a;padding:5px">RIGHT<br>A B<br>SEL START<br><b id="nesRight">—</b></div></div><pre id="nesCoverage">0 / 184 observations</pre><p class="helper">Coverage is not gameplay stability. Opponent name is selected manually; visual hashes are observed evidence, not attack recognition.</p><h2>ERSE-018 / Memory</h2><div class="row"><button id="z184Test" class="primary">TEST Z=184</button></div><pre id="z184Result">Await stability test.</pre><pre>17 × {{n}} → {{i}} ← 208 × {{n}}
+JIT      9 × 9 / prediction
+OTF      9 × 9 / live retrieval
+PRE-SIST 9 × 9 / 3s checkpoint</pre><pre id="erseStatus">Initializing…</pre><div class="row"><button id="ersePull">Pull latest</button><button id="erseFreeze">Freeze evidence</button></div><pre id="erseRead">No checkpoint selected.</pre><p class="helper">Evidence snapshots only; not NES machine-state saves. Rolling capacity 208, hot cache 17. No ROM data stored.</p></div></section><section class="tabpage" id="tab-system" hidden><div class="section"><h2>Runtime architecture</h2><pre>Local .nes cartridge
+  → Embedded NES emulator
+  → Jane controller / Toph coach
+  → Patricia observation
+  → Browser-local action + match journals
+  → JSON export (manual)
+
+GitHub Actions: verify + static Pages deploy
+Python: optional development tools</pre></div><div class="section"><h2>Evidence constraints</h2><p class="helper">Game files are not distributed or uploaded. Match controls are human-labeled. GitHub Pages hosts the front end; it does not run a permanent Python server.</p><a href="../data/v88/punchout.json">Cartridge profile JSON</a></div></section>
+</div></section></main>
+<footer class="footerbar"><span>AV-095 / NES CONTROLLER CUBIT</span><span>OBSERVATION ≠ REWARD &nbsp;·&nbsp; REPEATED SOURCES ≠ INDEPENDENT WITNESSES</span></footer>
+</div>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);const KEY='jane.v88.nes.trials';let session=crypto.randomUUID().replaceAll('-',''),entries=[],pending=[],seen=new Set(),last=null,busy=false;
+const allowed=new Set(['A','B','START','SELECT','UP','DOWN','LEFT','RIGHT','NONE']);
+function doc(){try{return $('arena').contentDocument}catch(e){return null}}
+function emulator(){try{return doc()?.getElementById('game')?.contentWindow}catch(e){return null}}
+function context(){try{return emulator()?.JANE_PERCEPTION}catch(e){return null}}
+function snap(){try{const s=context()?.status?.();if(!s)return null;return{rom_id:String(s.rom||'unloaded').slice(0,120),frame:Math.max(0,Math.round(Number(s.frame)||0)),trials:Math.max(0,Math.round(Number(s.trials)||0)),running:!!s.running,actor:String(doc()?.getElementById('activeIndicator')?.textContent||'UNKNOWN').split(' ')[0].toUpperCase(),session_id:session}}catch(e){return null}}
+function hashValue(v){return typeof v==='string'&&/^[a-f0-9]{1,128}$/i.test(v)?v:null}
+function button(v){if(typeof v!=='string')return 'NONE';const s=v.toUpperCase().replaceAll(' ','');return s.length<=28&&s.split('+').every(x=>allowed.has(x))?s:'NONE'}
+function num(v,d){const n=Number(v);return Number.isSafeInteger(n)&&n>=0&&n<=1e9?n:d}
+function normalizedDelta(v){if(v===null||v===undefined)return null;const n=Number(v);return Number.isFinite(n)&&n>=0&&n<=1?n:null}
+function capture(){let s=snap();if(!s||!s.running||s.rom_id==='unloaded')return;
+let trials=[];try{trials=context()?.diagnostics?.()?.recentTrials||[]}catch(e){}if(!Array.isArray(trials))return;
+for(const t of trials){if(!t||typeof t!=='object')continue;
+const frame=num(t.startFrame??t.started??t.frame,s.frame),end=num(t.endFrame??t.ended??t.frame,frame);
+const trial_id=String(t.id??(frame+'-'+t.button+'-'+t.preHash)).slice(0,120);const key=session+'|'+trial_id;if(seen.has(key))continue;seen.add(key);
+pending.push({session_id:session,source_root:session,rom_id:s.rom_id,trial_id,frame,end_frame:Math.max(frame,end),button:button(t.button),pre_hash:hashValue(t.preHash??t.pre_hash),post_hash:hashValue(t.postHash??t.post_hash),pixel_delta:normalizedDelta(t.observed_delta??t.pixel_delta??t.pixelChange??t.delta),actor:s.actor});
+}
+$('pending').textContent=pending.length+' PENDING';
+$('recent').textContent=pending.slice(-8).map(x=>'F'+x.frame+' '+x.button+' '+String(x.pre_hash||'?').slice(0,9)+' | Δ '+(x.pixel_delta??'unknown')).join('\n')||'Waiting for completed NES actions.';}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(entries));return true}catch(e){$('state').textContent='STORAGE FULL — EXPORT JSON';return false}}
+async function hash(record){const bytes=new TextEncoder().encode(JSON.stringify(record));const digest=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(digest),x=>x.toString(16).padStart(2,'0')).join('')}
+function render(){const len=entries.length;$('events').textContent=len;$('ledger').textContent=entries.slice(-9).map(x=>'F'+x.trial.frame+' '+x.trial.button+' '+x.digest.slice(0,14)).join('\n')||'No recorded action trials yet.';}
+async function save(){if(busy||!pending.length)return;busy=true;const batch=pending.slice(0,30);try{
+let parent=entries.length?entries[entries.length-1].digest:'0'.repeat(64);
+for(const trial of batch){let item={schema:'jane.nes.trial.v88',parent_digest:parent,recorded_utc:new Date().toISOString(),trial};item.digest=await hash(item);parent=item.digest;entries.push(item);}
+if(!persist()){entries.splice(entries.length-batch.length,batch.length);return}
+pending.splice(0,batch.length);$('pending').textContent=pending.length+' PENDING';$('state').textContent='SAVED '+batch.length+' TO BROWSER';render()
+}catch(e){$('state').textContent='SAVE ERROR: '+e.message}finally{busy=false}}
+async function verify(){let parent='0'.repeat(64);for(let k=0;k<entries.length;k++){const row=entries[k],check={schema:row.schema,parent_digest:row.parent_digest,recorded_utc:row.recorded_utc,trial:row.trial};if(row.parent_digest!==parent||await hash(check)!==row.digest){$('state').textContent='CHAIN INVALID AT '+k;return false}parent=row.digest}$('state').textContent='CHAIN VALID · '+entries.length+' RECORDS';return true}
+function poll(){last=snap();$('frames').textContent=last?.frame??'0';$('trials').textContent=last?.trials??'0';$('readout').textContent=last?JSON.stringify(last,null,2):'Waiting for NES emulator';capture()}
+$('rom').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;if(!/\.nes$/i.test(file.name)||file.size>5e6){$('state').textContent='INVALID .NES (MAX 5MB)';return}try{
+const d=doc(),input=d?.getElementById('romAll');if(!input)throw Error('Emulator is loading');const buf=await file.arrayBuffer(),dt=new DataTransfer();dt.items.add(new File([buf],file.name,{type:'application/octet-stream'}));input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));session=crypto.randomUUID().replaceAll('-','');seen.clear();pending=[];$('state').textContent='ROM SENT TO NES EMULATOR'}catch(err){$('state').textContent='LOAD ERROR: '+err.message}};
+$('sample').onclick=save;$('reload').onclick=verify;
+$('export').onclick=()=>{const text=JSON.stringify({schema:'jane.nes.export.v88',current:last,records:entries,unsaved:pending},null,2),url=URL.createObjectURL(new Blob([text],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='jane-v88-nes-evidence.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+try{const rows=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(rows))entries=rows.filter(x=>x?.schema==='jane.nes.trial.v88')}catch(e){}
+$('mode').textContent='EMBEDDED · NO SERVER REQUIRED';$('state').textContent='LOAD YOUR .NES FILE';render();verify();
+setInterval(poll,750);setInterval(()=>{if($('auto').checked)save()},5000);
+})();
+</script>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id),KEY='jane.v88.punchout.matches';
+let fights=[],events=[],fight=null,working=false,root=crypto.randomUUID().replaceAll('-','');
+try{const obj=JSON.parse(localStorage.getItem(KEY)||'{}');if(Array.isArray(obj.events))events=obj.events;if(Array.isArray(obj.fights))fights=obj.fights;}catch(e){}
+function arena(){try{return $('arena').contentDocument}catch(e){return null}}
+function frame(){try{return Math.max(0,Math.floor(Number(arena()?.getElementById('frames')?.textContent)||0))}catch(e){return 0}}
+function newRoot(){return crypto.randomUUID().replaceAll('-','')}
+function actor(){return String(arena()?.getElementById('activeIndicator')?.textContent||'UNKNOWN').split(' ')[0]}
+function render(){
+$('kdFor').textContent=fight?.opponent_downs??0;$('kdAgainst').textContent=fight?.jane_downs??0;
+$('fightCount').textContent=fights.filter(f=>f.status==='WIN'||f.status==='LOSS').length;
+$('fightLedger').textContent=events.slice(-10).map(e=>'F'+e.frame+' '+e.kind+' '+e.opponent+' '+e.actor+' '+e.source+' '+e.digest.slice(0,10)).join('\n')||'No fight confirmations yet.';
+const opponents=fight?.opponent_downs??0,downs=fight?.jane_downs??0;
+$('fightCoach').textContent=[
+'TOPH: '+(fight?'Observing '+fight.opponent+' · round '+fight.round:'Start a fresh Glass Joe fight'),
+'OPPONENT DOWNS '+opponents+' | JANE DOWNS '+downs,
+'LESSON HYPOTHESIS: compare action timing around confirmed knockdowns.',
+'PATRICIA: a human confirmation is not a verified RAM event.',
+'Do not award improvement without repeatable game outcomes and paired starts.'
+].join('\n')}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({schema:'jane.punchout.v88',fights,events}));return true}catch(e){$('state').textContent='FIGHT STORAGE FULL — EXPORT';return false}}
+async function sha(text){const bytes=new TextEncoder().encode(text),d=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(d),x=>x.toString(16).padStart(2,'0')).join('')}
+async function record(kind){if(working)return;working=true;try{
+if((!fight||fight.status!=='ACTIVE')&&kind!=='START'){ $('state').textContent='START A FIGHT FIRST';return}
+let before=fight?structuredClone(fight):null;
+if(kind==='START'){if(fight?.status==='ACTIVE'){$('state').textContent='FINISH CURRENT FIGHT FIRST';return}
+fight={root:newRoot(),opponent:$('opponent').value,round:Number($('fightRound').value),opponent_downs:0,jane_downs:0,status:'ACTIVE',start_frame:frame()};root=fight.root;}
+if(kind==='OPPONENT_DOWN')fight.opponent_downs++;
+if(kind==='JANE_DOWN')fight.jane_downs++;
+if(kind==='WIN'||kind==='LOSS'){fight.status=kind;fight.end_frame=frame()}
+let item={schema:'jane.punchout.event.v88',root:root,frame:frame(),kind,opponent:fight.opponent,round:fight.round,actor:actor(),source:'human-confirmed',time_utc:new Date().toISOString(),parent_digest:events.at(-1)?.digest||'0'.repeat(64)};
+item.digest=await sha(JSON.stringify(item));events.push(item);
+if(kind==='WIN'||kind==='LOSS')fights.push(structuredClone(fight));
+if(!save()){events.pop();if(kind==='WIN'||kind==='LOSS')fights.pop();fight=before;return}
+if(kind==='JANE_DOWN'){const handoff=arena()?.getElementById('confirmDeath');if(handoff)handoff.click();}
+$('state').textContent='PUNCH-OUT EVENT '+kind+' RECORDED';render();window.dispatchEvent(new CustomEvent('jane-match',{detail:{kind,fight:structuredClone(fight)}}));
+}finally{working=false}}
+$('newFight').onclick=()=>record('START');$('opponentDown').onclick=()=>record('OPPONENT_DOWN');$('janeDown').onclick=()=>record('JANE_DOWN');$('fightWin').onclick=()=>record('WIN');$('fightLoss').onclick=()=>record('LOSS');
+$('fightExport').onclick=()=>{const payload=JSON.stringify({schema:'jane.punchout.export.v88',profile:'punchout',current:fight,events,fights,source_note:'manual match events, shared cartridge ancestry'},null,2);const url=URL.createObjectURL(new Blob([payload],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='jane-punchout-v88.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)};
+$('rom').addEventListener('change',()=>{if(fight?.status==='ACTIVE')fight.status='ABANDONED';fight=null;render()});
+render();
+})();
+</script><script>
+(()=>{'use strict';
+const buttons=[...document.querySelectorAll('[data-tab]')];
+const choose=id=>{buttons.forEach(b=>{const on=b.dataset.tab===id;b.setAttribute('aria-selected',String(on));document.getElementById('tab-'+b.dataset.tab).hidden=!on})};
+buttons.forEach(b=>b.addEventListener('click',()=>choose(b.dataset.tab)));
+choose('match');
+const iframe=document.getElementById('arena');
+iframe.addEventListener('load',()=>{
+  try{
+    const d=iframe.contentDocument;
+    if(!d)return;
+    const style=d.createElement('style');
+    style.textContent=':root{--teal:#f7c948!important;--gold:#ffdc72!important;--edge:#6d5528!important;--panel:#17140d!important;--ink:#f3e6c2!important}body{background:#0d0c09!important;color:#f3e6c2!important}button{background:#302716!important;border-color:#7e6127!important;color:#f7d77c!important;border-radius:3px!important}a{color:#f7c948!important}.panel{background:#17140d!important;border-color:#554524!important}header{display:none!important}main{max-width:none!important;padding:6px!important}.grid{grid-template-columns:minmax(0,1fr)!important}.grid>.panel:nth-child(2){display:none!important}.toolbar{margin-bottom:5px!important;padding:6px!important}.toolbar>label:first-child{display:none!important}.game{height:calc(100dvh - 125px)!important;min-height:310px!important}.note{display:none!important}';
+    d.head.appendChild(style);
+    // Compact embedded arena only; leave standalone advanced arena intact.
+    const compact=d.createElement('style');
+    compact.textContent=`html,body{height:100%!important;overflow:hidden!important;margin:0!important}main{height:100%!important;display:flex!important;flex-direction:column!important;padding:2px!important;gap:3px!important}.toolbar{flex:none!important;gap:6px!important;margin:0!important;padding:3px 5px!important;border:0!important}.toolbar button,.toolbar select{padding:3px 6px!important;font-size:11px!important}.toolbar input[type=range]{width:75px!important}.grid{flex:1!important;min-height:0!important;display:flex!important}.grid>.panel:first-child{display:flex!important;flex-direction:column!important;flex:1!important;min-height:0!important;padding:2px!important;border:0!important}.grid>.panel:first-child>.row,.grid>.panel:first-child>.meters{display:none!important}.grid>.panel:first-child>.game{flex:1!important;height:auto!important;min-height:0!important;margin:0!important;border:0!important;border-radius:0!important}.game iframe{display:block!important;width:100%!important;height:100%!important}`;
+    d.head.appendChild(compact);
+    const child=d.getElementById('game');
+    const fit=()=>{
+      try{
+        const q=child.contentDocument;if(!q?.body)return;
+        const candidates=[...q.querySelectorAll('canvas')].filter(c=>c.width>=240&&c.height>=200);
+        const canvas=candidates.find(c=>c.width===256&&c.height===240)||candidates.find(c=>/nes|screen|game/i.test(c.id))||candidates.sort((a,b)=>b.width*b.height-a.width*a.height)[0];
+        if(!canvas)return;
+        if(q.getElementById('gold-screen-fit'))return;
+        const st=q.createElement('style');st.id='gold-screen-fit';
+        st.textContent=`html,body{margin:0!important;width:100%!important;height:100%!important;overflow:hidden!important;background:#050505!important}.gold-screen-path{display:flex!important;flex:1 1 auto!important;align-items:center!important;justify-content:center!important;min-width:0!important;min-height:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#050505!important;box-shadow:none!important;position:relative!important;inset:auto!important;transform:none!important;grid-template-columns:none!important;overflow:hidden!important}.gold-screen-hidden{display:none!important}.gold-screen-path:before,.gold-screen-path:after{display:none!important}canvas.gold-screen-canvas{display:block!important;position:static!important;width:auto!important;height:100%!important;max-width:100%!important;max-height:100%!important;aspect-ratio:256/240!important;object-fit:contain!important;image-rendering:pixelated!important;margin:0!important;padding:0!important;border:0!important;transform:none!important;background:#050505!important}`;
+        q.head.appendChild(st);
+        canvas.classList.add('gold-screen-canvas');
+        let node=canvas;while(node.parentElement){const p=node.parentElement;for(const sib of p.children){if(sib!==node&&!['SCRIPT','STYLE','LINK'].includes(sib.tagName))sib.classList.add('gold-screen-hidden')}p.classList.add('gold-screen-path');if(p===q.body)break;node=p}
+        const resize=()=>{const w=q.documentElement.clientWidth,h=q.documentElement.clientHeight;if(w&&h){const scale=Math.min(w/canvas.width,h/canvas.height);canvas.style.setProperty('width',Math.floor(canvas.width*scale)+'px','important');canvas.style.setProperty('height',Math.floor(canvas.height*scale)+'px','important')}};
+        child.contentWindow.addEventListener('resize',resize);resize();
+      }catch(e){console.warn('Golden screen fit:',e)}
+    };
+    if(child){child.addEventListener('load',fit);fit();let retries=0;const timer=setInterval(()=>{fit();if(++retries>=30||child.contentDocument?.getElementById('gold-screen-fit'))clearInterval(timer)},250)}
+
+  }catch(e){}
+});
+})();
+</script><script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id), KEY='jane.v89.punchout.timing';
+let rows=[],active=null,run=crypto.randomUUID(),count=0;
+try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(v))rows=v.filter(x=>x&&x.schema==='jane.punchout.timing.v89').slice(-2000)}catch(_){}
+const snap=()=>{try{const d=$('arena').contentDocument, e=d?.getElementById('game')?.contentWindow?.JANE_PERCEPTION?.status?.();const n=Number(e?.frame);return {frame:Number.isSafeInteger(n)&&n>=0?n:null,rom:String(e?.rom||'unloaded').slice(0,120),running:!!e?.running,actor:String(d?.getElementById('activeIndicator')?.textContent||'UNKNOWN').split(' ')[0]}}catch(_){return {frame:null,rom:'unavailable',running:false,actor:'UNKNOWN'}}};
+const stamp=()=>({time_utc:new Date().toISOString(),...snap()});
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(rows));return true}catch(e){$('timingState').textContent='STORAGE FAILURE — EXPORT FIRST';return false}};
+const median=a=>{if(!a.length)return null;const s=a.slice().sort((a,b)=>a-b),m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2};
+function render(){const ok=rows.filter(r=>r.outcome==='effective').length,lags=rows.map(r=>r.lag_frames).filter(x=>x!==null);
+$('timingCount').textContent=rows.length;$('timingSuccess').textContent=ok;$('timingLag').textContent=median(lags)??'—';
+$('timingLedger').textContent=rows.slice(-12).map(r=>['#'+r.trial,'F'+(r.cue.frame??'?'),'→F'+(r.response?.frame??'?'),r.response_type,r.outcome,'lag '+(r.lag_frames??'?'),r.cue_type].join(' ')).join('\n')||'No cue-response trials.'}
+$('markCue').onclick=()=>{const s=stamp();if(!s.running||s.rom==='unloaded'){$('timingState').textContent='A running cartridge is required';return}if(active){$('timingState').textContent='Finish or label the current trial first';return}active={cue:s,cue_type:$('cueType').value,response_type:$('responseType').value,response:null};$('timingState').textContent='Cue at frame '+(s.frame??'?')+'; mark Jane response next.'};
+$('markResponse').onclick=()=>{if(!active||active.response){$('timingState').textContent='Mark one cue before one response';return}const s=stamp();if(s.rom!==active.cue.rom){active=null;$('timingState').textContent='Cartridge changed; trial discarded';return}active.response=s;$('timingState').textContent='Response marked at frame '+(s.frame??'?')+'. Label outcome.'};
+function finish(outcome){if(!active?.response){$('timingState').textContent='Cue and response required before outcome';return}const a=active,lag=a.cue.frame!==null&&a.response.frame!==null&&a.response.frame>=a.cue.frame?a.response.frame-a.cue.frame:null;
+const row={schema:'jane.punchout.timing.v89',trial:++count,run,source_root:run,cue_type:a.cue_type,response_type:a.response_type,cue:a.cue,response:a.response,lag_frames:lag,outcome,outcome_source:'manual',assumed_independent:false};
+rows.push(row);if(!persist()){rows.pop();count--;return}active=null;$('timingState').textContent='Trial '+row.trial+' saved · '+outcome+' · frame lag '+(lag??'unknown');render()}
+$('outcomeSuccess').onclick=()=>finish('effective');$('outcomeFailure').onclick=()=>finish('ineffective');$('outcomeUnknown').onclick=()=>finish('unverified');
+$('timingExport').onclick=()=>{const blob=new Blob([JSON.stringify({schema:'jane.punchout.timing.export.v89',source_note:'manual labels; repeated game observations are one root',rows},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='jane-v89-glass-joe-timing.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)};
+$('timingClear').onclick=()=>{if(!confirm('Permanently clear locally saved AV-089 timing trials? Export first if needed.'))return;rows=[];active=null;count=0;persist();render();$('timingState').textContent='Timing journal cleared'};
+$('rom').addEventListener('change',()=>{active=null;run=crypto.randomUUID();count=rows.length;$('timingState').textContent='New cartridge run / new source root'});count=rows.length;render();
+})();
+</script><script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id),v=$('filmVideo'),status=t=>$('filmStatus').textContent=t;
+let recorder=null,track=null,chunks=[],recording=null,current=null,url=null,tapes=[],db=null,timer=null;
+const DB='jane.av090.film',MAX_MS=20*60*1000;let fly=null,match=null,autoFinish=false,flyTimer=null,reviewEpoch=0;const flyState=t=>$('flyState').textContent=t;
+function open(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>r.result.createObjectStore('tapes',{keyPath:'id'});r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+function tx(mode,fn){return new Promise((resolve,reject)=>{const t=db.transaction('tapes',mode);let r=fn(t.objectStore('tapes'));t.oncomplete=()=>resolve(r?.result);t.onerror=()=>reject(t.error);t.onabort=()=>reject(t.error)})}
+function findCanvas(){try{const d=$('arena').contentDocument?.getElementById('game')?.contentDocument;return d?.querySelector('canvas.gold-screen-canvas')||[...d.querySelectorAll('canvas')].find(x=>x.width===256&&x.height===240)}catch(e){return null}}
+function emu(){try{const a=$('arena').contentDocument;let x=a?.getElementById('game')?.contentWindow?.JANE_PERCEPTION?.status?.();return {rom:String(x?.rom||'unloaded'),frame:Number.isSafeInteger(x?.frame)?x.frame:null,running:!!x?.running,actor:String(a?.getElementById('activeIndicator')?.textContent||'UNKNOWN')}}catch(e){return {rom:'unavailable',frame:null,running:false,actor:'UNKNOWN'}}}
+function download(blob,name){const a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)}
+function library(){const select=$('filmLibrary');select.replaceChildren(new Option('Choose recording',''));for(const t of tapes)select.add(new Option(t.opponent+' · '+new Date(t.started).toLocaleString(),t.id));select.value=current?.id||''}
+function render(){const b=$('filmMarks');b.replaceChildren();for(const m of current?.marks||[]){const el=document.createElement('button');el.textContent=fmt(m.seconds)+' · '+m.tag+' · '+m.note;el.onclick=()=>{if(Number.isFinite(v.duration)||v.seekable.length)v.currentTime=m.seconds;review()};b.append(el)}$('filmCoach').textContent=(current?.marks||[]).slice(-6).map(m=>m.tag+': '+(m.note||'Review cue and response')).join('\n')||'No lessons recorded.';$('filmSave').disabled=!current;$('filmMark').disabled=!current;$('filmExport').disabled=!current}
+const fmt=t=>Number.isFinite(t)?Math.floor(t/60).toString().padStart(2,'0')+':'+Math.floor(t%60).toString().padStart(2,'0'):'--:--';
+function review(){if(!current)return;document.body.classList.add('film-review')}
+function live(){cancelFly();v.pause();document.body.classList.remove('film-review')}
+function select(t){live();current=t||null;if(url)URL.revokeObjectURL(url);url=null;v.removeAttribute('src');if(t){url=URL.createObjectURL(t.blob);v.src=url;v.load();review()}library();render()}
+async function save(t){if(!db)throw Error('Local film archive unavailable');await tx('readwrite',o=>o.put(t))}
+function clock(){let duration=Number.isFinite(v.duration)?v.duration:(v.seekable.length?v.seekable.end(v.seekable.length-1):current?.elapsed_seconds||0);$('filmSeek').max=Math.max(.01,duration);$('filmSeek').value=v.currentTime||0;$('filmClock').textContent=fmt(v.currentTime)+' / '+fmt(duration)}
+v.ontimeupdate=clock;v.onloadedmetadata=clock;v.ondurationchange=clock;
+$('filmRec').onclick=()=>{if(recorder)return;if(!db){status('Film archive not ready');return}const c=findCanvas(),e=emu();if(!c||!e.running||e.rom==='unloaded'){status('Load and run the NES cartridge first');return}if(!window.MediaRecorder||!c.captureStream){status('Canvas video recording unsupported in this browser');return}try{live();track=c.captureStream(30);const mime=['video/webm;codecs=vp8','video/webm','video/mp4'].find(t=>MediaRecorder.isTypeSupported(t));recorder=new MediaRecorder(track,mime?{mimeType:mime}:undefined);chunks=[];recording={id:crypto.randomUUID(),schema:'jane.film.v90',started:Date.now(),rom:e.rom,start_frame:e.frame,match_id:match?.id||null,run_root:$('arena').contentWindow?.JANE_RUN_CONTEXT?.()?.root||null,actor:e.actor,opponent:$('opponent').value,marks:[],actions:[],source_root:match?.root||crypto.randomUUID()};const job=recorder;recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};recorder.onerror=()=>{status('Recorder error');stop()};recorder.onstop=async()=>{clearInterval(timer);track?.getTracks().forEach(t=>t.stop());const item={...recording,outcome:match?.id===recording.match_id?match.outcome:'unverified',end_frame:emu().frame,elapsed_seconds:(Date.now()-recording.started)/1000,blob:new Blob(chunks,{type:job.mimeType||'video/webm'})};recorder=null;recording=null;chunks=[];if(match?.id===item.match_id)match=null;try{await save(item);tapes.unshift(item);select(item);status('Recording saved · '+fmt(item.elapsed_seconds));if(autoFinish){autoFinish=false;beginFly(item)}}catch(e){tapes.unshift(item);select(item);status('Storage failed; export video before leaving')}};recorder.start(1000);timer=setInterval(()=>{if(!recording)return;const now=emu();if(now.rom!==recording.rom||(now.frame!==null&&recording.start_frame!==null&&now.frame<recording.start_frame)||Date.now()-recording.started>=MAX_MS){stop();return}try{const d=$('arena').contentDocument.getElementById('game').contentWindow.JANE_PERCEPTION.diagnostics();const known=new Set(recording.actions.map(a=>a.key));for(const a of d.recentTrials||[]){const frame=a.startFrame??a.started??a.frame;if(!Number.isFinite(frame)||frame<(recording.start_frame??0))continue;const key=String(a.id)+'|'+frame;if(!known.has(key)){recording.actions.push({key,frame,button:a.button,hash:a.preHash||a.pre_hash||null,observed_at_seconds:(Date.now()-recording.started)/1000});known.add(key)}}}catch(e){}status('● REC '+fmt((Date.now()-recording.started)/1000))},500);status('● REC / recording real NES canvas')}catch(e){track?.getTracks().forEach(t=>t.stop());recorder=null;status('Recording failed: '+e.message)}};
+function cancelFly(){reviewEpoch++;clearInterval(flyTimer);flyTimer=null;fly=null}
+async function beginFly(item){if(!item)return;cancelFly();const epoch=reviewEpoch;review();if(v.readyState<1){await new Promise(resolve=>{const done=()=>{clearTimeout(timeout);v.removeEventListener('loadedmetadata',done);v.removeEventListener('error',done);resolve()};const timeout=setTimeout(done,5000);v.addEventListener('loadedmetadata',done,{once:true});v.addEventListener('error',done,{once:true})})}if(epoch!==reviewEpoch||current!==item)return;if(v.readyState<1){flyState('ERROR · video metadata unavailable');return}const end=Number.isFinite(v.duration)?v.duration:item.elapsed_seconds;if(!Number.isFinite(end)||end<=0){flyState('No usable clip duration');return}const start=Math.max(0,end-8);fly={start,end,pass:1};v.playbackRate=.5;v.currentTime=start;v.play().then(()=>{flyState('REVIEW 1/2 · last 8 seconds at half speed')}).catch(()=>flyState('Press play to begin review'));flyTimer=setInterval(()=>{if(!fly)return;if(v.ended||v.currentTime>=fly.end-.08){if(fly.pass<2){fly.pass++;v.currentTime=fly.start;v.play().catch(()=>{});flyState('REVIEW 2/2 · inspect cue and response')}else{cancelFly();v.pause();const actions=(item.actions||[]).filter(a=>a.observed_at_seconds>=start);const counts={};for(const a of actions){const b=String(a.button||'UNKNOWN');counts[b]=(counts[b]||0)+1}const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);item.flyback={schema:'jane.flyback.v91',source_root:item.source_root,clip_start:start,clip_end:end,passes:2,outcome:item.outcome||'unverified',action_counts:counts,hypothesis:sorted.length?'Inspect repeated '+sorted[0][0]+' actions near the outcome; compare alternatives in a new fight.':'No action telemetry in clip; inspect footage manually.',status:'candidate-not-validated'};save(item).then(()=>window.dispatchEvent(new CustomEvent('jane-film-study',{detail:item}))).catch(e=>flyState('ERROR · film study persistence failed: '+e.message));flyState('STUDY COMPLETE · '+item.flyback.hypothesis);$('filmCoach').textContent=item.flyback.hypothesis+'\nNext fight: test one change; compare confirmed outcome.'}}},150)}
+$('flyNow').onclick=()=>{if(current)beginFly(current);else flyState('Choose a recorded match first')};
+$('flyExit').onclick=()=>{live();flyState('LIVE · next match ready')};
+window.addEventListener('jane-match',ev=>{if(ev.detail.kind!=='START'||!$('flyOn').checked||recorder||match?.active)return;const e=emu();if(!e.running||e.rom==='unloaded'){flyState('Load running cartridge first');return}match={id:crypto.randomUUID(),root:crypto.randomUUID(),active:true,outcome:'unverified'};live();$('filmRec').click();if(!recorder){match=null;return}flyState('CAPTURE · match recording')});
+window.addEventListener('jane-match',ev=>{const result=ev.detail.kind;if(!['WIN','LOSS'].includes(result)||!match?.active||!recorder)return;match.active=false;match.outcome=result;autoFinish=$('flyOn').checked;stop();flyState('FLY-BACK · confirmed '+result+' · saving clip')});
+$('rom').addEventListener('change',()=>{autoFinish=false;match=null;cancelFly()});
+function stop(){if(recorder&&recorder.state!=='inactive'){clearInterval(timer);recorder.stop();status('Saving footage…')}}
+$('filmStop').onclick=stop;$('filmLive').onclick=live;$('filmReview').onclick=review;$('filmLibrary').onchange=e=>select(tapes.find(t=>t.id===e.target.value));$('filmSeek').oninput=e=>{if(current)v.currentTime=Number(e.target.value)};$('filmSpeed').onchange=e=>v.playbackRate=Number(e.target.value);
+$('filmPlay').onclick=()=>{if(!current)return;review();if(v.paused)v.play().catch(e=>status(e.message));else v.pause()};
+function seek(d){if(!current)return;review();v.pause();const end=Number($('filmSeek').max)||0;v.currentTime=Math.max(0,Math.min(end,v.currentTime+d));clock()}
+$('filmRew').onclick=()=>seek(-5);$('filmFwd').onclick=()=>seek(5);$('filmStep').onclick=()=>seek(.1);
+$('filmSave').onclick=()=>{if(current)download(current.blob,'jane-film-'+current.id+(current.blob.type.includes('mp4')?'.mp4':'.webm'))};
+$('filmMark').onclick=async()=>{if(!current)return;const item=current;item.marks.push({id:crypto.randomUUID(),seconds:v.currentTime,tag:$('filmTag').value,note:$('filmNote').value.trim(),source:'human-review',status:'candidate-lesson'});try{await save(item);status('Study marker saved')}catch(e){status('Marker in memory only; export study JSON')}$('filmNote').value='';render()};
+$('filmExport').onclick=()=>{if(!current)return;const {blob,...rest}=current;download(new Blob([JSON.stringify(rest,null,2)],{type:'application/json'}),'jane-study-'+current.id+'.json')};
+$('rom').addEventListener('change',()=>{stop();live()});document.querySelector('[data-tab="film"]').addEventListener('click',()=>{if(current)review()});for(const b of document.querySelectorAll('[data-tab]:not([data-tab="film"])'))b.addEventListener('click',live);
+open().then(async x=>{db=x;tapes=(await tx('readonly',o=>o.getAll())).sort((a,b)=>b.started-a.started);library();render();status('Film room ready · '+tapes.length+' archived matches')}).catch(e=>status('Local archive unavailable: '+e.message));render();
+})();
+</script><script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id),KEY='jane.av092.policy',buttons=['LEFT','RIGHT','DOWN','A','B','UP'];
+let journal=[],candidate=null,trial=null;const seenSources=new Set();
+try{const state=JSON.parse(localStorage.getItem(KEY)||'{}');journal=Array.isArray(state.journal)?state.journal:[];candidate=state.candidate||null;for(const row of journal)if(row.kind==='proposal')seenSources.add(row.source)}catch(e){$('policyState').textContent='ERROR · invalid saved policy journal'}
+const context=()=>{try{return $('arena').contentWindow.JANE_RUN_CONTEXT()}catch(e){return null}};
+let storageFault=false;function persist(){try{localStorage.setItem(KEY,JSON.stringify({journal,candidate}));storageFault=false;return true}catch(e){storageFault=true;$('policyState').textContent='ERROR · storage failure; export tests';return false}}
+function render(){if(storageFault){$('policyState').textContent='ERROR · storage failure; export tests';return}const rows=journal.filter(x=>x.kind==='result'&&x.candidate===candidate?.id);$('policyState').textContent=trial?'TEST '+trial.arm+' · '+trial.hits+' action offers (execution unverified)':candidate?'CANDIDATE '+candidate.from+' → '+candidate.to+' | '+rows.length+'/6 trials\n'+(rows.at(-1)?.verdict||'Await fresh cartridge run'):'Await a lost match with usable screen-context telemetry'}
+function propose(tape){if(tape.outcome!=='LOSS'||!tape.run_root||seenSources.has(tape.id)||trial||candidate&&!candidate.closed)return;const list=(tape.actions||[]).filter(a=>a.hash&&buttons.includes(a.button)&&a.observed_at_seconds>=tape.flyback.clip_start);const groups=new Map();for(const a of list){const k=a.hash+'|'+a.button;groups.set(k,[...(groups.get(k)||[]),a])}const group=[...groups.values()].sort((a,b)=>b.length-a.length)[0];if(!group||group.length<2)return;const from=group[0].button,to=from==='LEFT'?'RIGHT':from==='RIGHT'?'LEFT':'DOWN'===from?'LEFT':'DOWN';candidate={id:crypto.randomUUID(),source:tape.id,source_root:tape.run_root,rom:tape.rom,opponent:tape.opponent,hash:group[0].hash,from,to,closed:false};journal.push({kind:'proposal',...candidate});seenSources.add(tape.id);persist();render()}
+window.addEventListener('jane-film-study',e=>propose(e.detail));
+window.addEventListener('jane-match',e=>{const {kind,fight}=e.detail,c=context();if(kind==='JANE_DOWN'&&trial){trial.contaminated=true;persist();render();return}if(kind==='START'){trial=null;if(!$('policyOn').checked||!candidate||candidate.closed||!c?.root||c.actor!=='JANE'||c.rom!==candidate.rom||fight.opponent!==candidate.opponent||c.root===candidate.source_root||journal.some(r=>r.kind==='result'&&r.root===c.root))return render();const rows=journal.filter(r=>r.kind==='result'&&r.candidate===candidate.id);const arm=rows.length%2===0?'baseline':'experiment';trial={candidate:candidate.id,root:c.root,arm,match:fight.root,round:fight.round,hits:0,last:-100000};journal.push({kind:'armed',...trial});persist();render()}else if(['WIN','LOSS'].includes(kind)&&trial&&trial.match===fight.root){const t=trial;trial=null;if(c?.root!==t.root||c.actor!=='JANE'||t.contaminated){journal.push({kind:'aborted',...t,reason:'run root or player changed'});persist();render();return}const row={kind:'result',...t,execution_verified:false,matched_start_verified:false,outcome:kind,opponent_downs:fight.opponent_downs,jane_downs:fight.jane_downs,source:'human-confirmed',verdict:'pending comparison'};journal.push(row);const rows=journal.filter(r=>r.kind==='result'&&r.candidate===candidate.id);if(rows.length>=6){const base=rows.filter(r=>r.arm==='baseline'),test=rows.filter(r=>r.arm==='experiment');const wins=a=>a.filter(r=>r.outcome==='WIN').length;const sameRound=rows.every(r=>r.round===rows[0].round);row.verdict=!sameRound||test.some(r=>!r.hits)?'INCONCLUSIVE: mismatch or zero interventions':wins(test)>wins(base)?'EXPLORATORY SIGNAL: execution and matched starts unverified':'NOT IMPROVED: retain original';candidate.closed=true;candidate.verdict=row.verdict}persist();render()}});
+window.JANE_FLYBACK_POLICY={recommend(ctx){if(storageFault||!trial||!candidate||!$('policyOn').checked||ctx.run_root!==trial.root||ctx.rom!==candidate.rom)return null;if(!['LEARNED','DONE'].includes(ctx.title))return null;if(trial.arm==='baseline')return null;if(ctx.hash!==candidate.hash||ctx.frame-trial.last<120||trial.hits>=12)return null;trial.last=ctx.frame;trial.hits++;journal.push({kind:'offer',candidate:trial.candidate,root:trial.root,frame:ctx.frame,hash:ctx.hash,button:candidate.to,status:'offered-not-execution-confirmed'});persist();render();return {handled:true,button:candidate.to}}};
+$('rom').addEventListener('change',()=>{trial=null;render()});$('policyExport').onclick=()=>{const u=URL.createObjectURL(new Blob([JSON.stringify({schema:'jane.policy.v92',candidate,journal},null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=u;a.download='jane-flyback-policy.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};render();
+})();
+</script><script src="./erse018_cubit.js"></script><script>
+(()=>{'use strict';const $=id=>document.getElementById(id),KEY='jane.erse018.checkpoints';const engine=ERSECubit.create({store:{read:()=>JSON.parse(localStorage.getItem(KEY)||'[]'),write:x=>localStorage.setItem(KEY,JSON.stringify(x))}});window.JANE_CUBIT=engine;
+function context(){try{const a=$('arena').contentWindow,c=a.JANE_RUN_CONTEXT(),p=a.document.getElementById('game').contentWindow.JANE_PERCEPTION.status();return {root:c.root,rom:c.rom,frame:c.frame,actor:c.actor,running:!!p.running}}catch(e){return null}}
+function refresh(){$('erseStatus').textContent=JSON.stringify(engine.status(),null,2)}
+function checkpoint(kind,extra={}){const c=context();if(!c?.root||!c.running)return;const result=engine.checkpoint(c.root,{kind,...c,...extra}); if(!result.ok)$('erseRead').textContent='Storage error: '+result.error;refresh()}
+setInterval(()=>checkpoint('pre-sist'),3000);
+window.addEventListener('jane-match',e=>checkpoint('match-event',{event:e.detail}));
+window.addEventListener('jane-film-study',e=>{const t=e.detail;if(!t.run_root)return;engine.checkpoint(t.run_root,{kind:'film-study',tape:t.id,outcome:t.outcome,study:t.flyback});refresh()});
+$('ersePull').onclick=()=>{const c=context();$('erseRead').textContent=JSON.stringify(c?.root?engine.pull(c.root,'OTF'):{hit:false},null,2);refresh()};
+$('erseFreeze').onclick=()=>checkpoint('manual-evidence-freeze');
+const original=window.JANE_FLYBACK_POLICY?.recommend;if(original)window.JANE_FLYBACK_POLICY.recommend=function(ctx){const evidence=engine.pull(ctx.run_root,'JIT');if(!evidence.hit)return null;return original.call(this,ctx)};refresh();
+})();
+</script><script src="./z184_stability.js"></script><script>(()=>{const out=document.getElementById('z184Result');document.getElementById('z184Test').onclick=()=>{try{const result=Z184.test(ERSECubit);out.textContent=(result.stable?'PASS':'FAIL')+' / '+result.rows.filter(x=>x.pass).length+'/'+result.rows.length+'\n'+result.rows.map(x=>(x.pass?'PASS ':'FAIL ')+x.name).join('\n')+'\n'+result.scope}catch(e){out.textContent='ERROR: '+e.message}}})();</script><script src="./nes_cubit.js"></script><script>(()=>{'use strict';const $=id=>document.getElementById(id),c=NESCubit.create();window.JANE_NES_CUBIT=c;setInterval(()=>{try{const a=$('arena').contentWindow,ctx=a.JANE_RUN_CONTEXT(),p=a.document.getElementById('game').contentWindow.JANE_PERCEPTION;if(!ctx.root||!p.status().running)return;for(const t of p.diagnostics().recentTrials||[]){c.observe({root:ctx.root,frame:t.startFrame??t.started??t.frame,hash:t.preHash??t.pre_hash,button:t.button,opponent:$('opponent').value})}const st=c.status(),r=st.latest;$('nesLeft').textContent=r?.left.join('+')||'—';$('nesRight').textContent=r?.right.join('+')||'—';$('nesCenter').textContent=r?.center.opponent||'—';$('nesCoverage').textContent=st.n+' / 184 observations · '+(st.coverage_met?'COVERAGE MET':'COLLECTING')+'\nGameplay stability: UNVERIFIED\nContext: '+(r?.center.hash||'—')}catch(e){$('nesCoverage').textContent='Awaiting NES telemetry'}},500)})();</script></body></html>
