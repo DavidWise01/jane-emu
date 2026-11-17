@@ -4,6 +4,7 @@
 :root{--g:#f5f0e6;--p:rgba(245,240,230,.92);--ln:rgba(80,60,40,.18);--ink:#2a2218;--dim:#8a7a65;
 --r:#c03020;--gr:#2a7a50;--b:#2255aa;--c:#1a5588;--m:#4a60a0;--y:#887744;--glow:42,34,24;
 --pipe:#ff6a00;--pipe-dim:rgba(255,106,0,.45);--pipe-glow:rgba(255,106,0,.25);
+--neon:#00ccff;--neon-dim:rgba(0,204,255,.35);--neon-glow:rgba(0,204,255,.2);--neon-hard:rgba(0,204,255,.85);
 --chr:linear-gradient(135deg,#c8b89a 0%,#a89878 18%,#e8dcc8 25%,#a89878 32%,#887858 50%,#a89878 68%,#e8dcc8 75%,#a89878 82%,#c8b89a 100%);
 --chr-s:linear-gradient(90deg,rgba(80,60,40,0),rgba(80,60,40,.25) 20%,rgba(42,34,24,.5) 50%,rgba(80,60,40,.25) 80%,rgba(80,60,40,0))}
 *{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden;background:var(--g)}
@@ -25,7 +26,8 @@ transform:rotate(-0.4deg);filter:url(#sketchy)}
 background:repeating-linear-gradient(45deg,transparent,transparent 8px,rgba(58,48,32,.02) 8px,rgba(58,48,32,.02) 9px)}
 .tube{position:relative;border-radius:4px;overflow:hidden;background:#000;
 border:3px solid #2a2218;box-shadow:3px 3px 0 rgba(42,34,24,.2),inset 0 0 20px 4px rgba(0,0,0,.4);
-transform:rotate(0.2deg)}
+transform:rotate(0.2deg);transition:box-shadow .4s}
+.tube.neon{box-shadow:3px 3px 0 rgba(42,34,24,.2),inset 0 0 20px 4px rgba(0,0,0,.4),0 0 12px var(--neon-glow),0 0 24px rgba(0,204,255,.08)}
 .tube::before{content:"";position:absolute;inset:0;border-radius:4px;z-index:6;pointer-events:none;
 background:none}
 #scr{width:100%;aspect-ratio:256/240;image-rendering:pixelated;display:block}
@@ -40,8 +42,8 @@ header{display:flex;gap:10px;align-items:center;min-width:0;flex:none;padding-bo
 .logo i:nth-child(1){background:#c03020}.logo i:nth-child(2){background:var(--pipe);box-shadow:0 0 6px var(--pipe-glow)}.logo i:nth-child(3){background:#2255aa}
 h1{font-size:15px;font-weight:700;margin:0;white-space:nowrap;color:#2a2218;font-family:'Comic Neue',Caveat,cursive}
 #romname{color:#8a7a65;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;font-family:'Comic Neue',Caveat,cursive}
-#phase{margin-left:auto;flex:none;padding:2px 11px;border-radius:3px;background:#2a2218;border:2px solid #2a2218;color:#f0e8d8;font-weight:700;letter-spacing:.06em;font-size:10.5px;text-transform:uppercase;transform:rotate(1deg)}
-#i13badge{flex:none;padding:2px 8px;border-radius:3px;background:#2a7a50;border:2px solid #1a5a38;color:#f0e8d8;font-weight:700;letter-spacing:.08em;font-size:9px;text-transform:uppercase;transform:rotate(-1.2deg)}
+#phase{margin-left:auto;flex:none;padding:2px 11px;border-radius:3px;background:#0a1a2a;border:2px solid var(--neon);color:var(--neon);font-weight:700;letter-spacing:.06em;font-size:10.5px;text-transform:uppercase;transform:rotate(1deg);box-shadow:0 0 8px var(--neon-glow),inset 0 0 6px rgba(0,204,255,.1);text-shadow:0 0 6px var(--neon-dim)}
+#i13badge{flex:none;padding:2px 8px;border-radius:3px;background:#0a1a2a;border:2px solid var(--neon);color:var(--neon);font-weight:700;letter-spacing:.08em;font-size:9px;text-transform:uppercase;transform:rotate(-1.2deg);box-shadow:0 0 6px var(--neon-glow);text-shadow:0 0 4px var(--neon-dim)}
 .bar,.tabs{display:flex;gap:6px;flex-wrap:wrap;flex:none}
 button,select,label.btn{background:#f0e8d8;color:var(--ink);border:2px solid #3a3020;border-radius:4px;padding:5px 11px;font:inherit;font-size:12px;cursor:pointer;white-space:nowrap;transition:border-color .15s;box-shadow:2px 2px 0 rgba(58,48,32,.15);transform:rotate(-0.3deg)}
 button:hover,label.btn:hover,select:hover{border-color:#1a5588;background:#e8e0c8}select{appearance:none}
@@ -49,9 +51,9 @@ button.on{background:#2a2218;color:#f0e8d8;border-color:#2a2218;font-weight:600;
 button.bad.on{background:#c03020;color:#f8f0e0;border-color:#8a2010}
 .tabs{gap:2px;margin-bottom:-8px}
 .tabs button{border-radius:4px 4px 0 0;border:2px solid #3a3020;border-bottom:0;background:#e8e0d0;color:#8a7a65;padding:5px 11px;font:700 10px/1.2 ui-monospace,Menlo,monospace;letter-spacing:.16em;text-transform:uppercase;box-shadow:none;transform:rotate(0deg)}
-.tabs button.on{background:#f5f0e6;color:#2a2218;text-shadow:none;border-top:3px solid var(--pipe);border-image:none;font-weight:800}
+.tabs button.on{background:#f5f0e6;color:#2a2218;text-shadow:none;border-top:3px solid var(--neon);border-image:none;font-weight:800;box-shadow:0 -2px 8px var(--neon-glow)}
 .panel{flex:1;min-height:0;overflow:auto;background:#f5f0e6;border:2px solid #3a3020;border-radius:4px;box-shadow:3px 3px 0 rgba(58,48,32,.1);padding:12px;display:none}
-.panel.on{display:block}#pLog.on{display:flex;flex-direction:column}
+.panel.on{display:block;border-top:2px solid var(--neon);box-shadow:0 -1px 6px var(--neon-glow),3px 3px 0 rgba(58,48,32,.1)}#pLog.on{display:flex;flex-direction:column}
 h2{font-size:11px;margin:10px 0 6px;color:#2a2218;text-transform:uppercase;letter-spacing:.14em;font-weight:800;border-bottom:1px solid #3a3020;padding-bottom:3px;font-family:'Comic Neue',Caveat,cursive}h2:first-child{margin-top:0}
 table{border-collapse:collapse;width:100%;font-size:12.5px}td{padding:4px 2px;border-bottom:1px dashed rgba(58,48,32,.25)}tr:last-child td{border-bottom:0}td:last-child{text-align:right;font-family:ui-monospace,Menlo,Consolas,monospace;color:#1a5588}
 td .sw{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px}
@@ -78,7 +80,7 @@ p{margin:6px 0}
 /* the cycle strip */
 .cyc{display:flex;flex-wrap:wrap;align-items:stretch;gap:3px 2px;margin-bottom:6px}
 .cyc .st{flex:1;background:#f8f4ea;border-radius:3px;border:1px solid #3a3020;padding:5px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;min-width:0;transition:border-color .2s,box-shadow .2s}
-.cyc .st.live{border-color:#2a7a50;border-width:2px;box-shadow:2px 2px 0 rgba(42,122,80,.15)}
+.cyc .st.live{border-color:var(--neon);border-width:2px;box-shadow:0 0 8px var(--neon-glow),2px 2px 0 rgba(0,204,255,.12)}
 .cyc .st b{display:block;font-size:9px;letter-spacing:.14em;color:#8a7a65}.cyc .st span{display:block;font-size:11px;color:#1a5588;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:none}
 .cyc i{align-self:center;color:var(--pipe);font-style:normal;font-size:12px;text-shadow:0 0 6px var(--pipe-glow)}
 .cyc .back{flex:0 0 100%;order:9;text-align:center;color:var(--dim);font-size:10px;letter-spacing:.1em;margin-top:2px;border-top:1px dashed var(--ln);padding-top:3px}
@@ -183,7 +185,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:16px;border-radius:3px;bac
 <canvas id="orn"></canvas><div id="ornlab">background doodles: ornament</div>
 <div class="app">
 <section class="left" id="left">
-  <div class="bezel" id="bezel"><canvas id="hudT" width="256" height="18"></canvas><div class="tube lines" id="tube"><canvas id="scr" width="1024" height="960"></canvas><div id="hitfx"></div><div id="pops"></div><div id="attract"><b>BEST STREAKS</b><div id="hst"></div><i>PRESS PLAY</i><small>SAVED IN THIS BROWSER WHEN IT ALLOWS</small></div></div><canvas id="hudB" width="256" height="20"></canvas><div class="rgbbar"><i></i><i></i><i></i></div></div>
+  <div class="bezel" id="bezel"><canvas id="hudT" width="256" height="18"></canvas><div class="tube lines neon" id="tube"><canvas id="scr" width="1024" height="960"></canvas><div id="hitfx"></div><div id="pops"></div><div id="attract"><b>BEST STREAKS</b><div id="hst"></div><i>PRESS PLAY</i><small>SAVED IN THIS BROWSER WHEN IT ALLOWS</small></div></div><canvas id="hudB" width="256" height="20"></canvas><div class="rgbbar"><i></i><i></i><i></i></div></div>
   <div id="err"></div><div id="alarm">AGENT ALARM: the RAM it reads is silent. It cannot learn from this input.</div>
   <div id="padui"><button data-k="64">&#9664;</button><button data-k="128">&#9654;</button><button data-k="16">&#9650;</button><button data-k="32">&#9660;</button><button data-k="2">B</button><button data-k="1">A</button><button data-k="4">Sel</button><button data-k="8">Start</button></div>
 </section>
@@ -316,7 +318,8 @@ input[type=range]::-moz-range-thumb{width:14px;height:16px;border-radius:3px;bac
     <span class="LIT">LIT</span> HD graphics: EPX 2&#215; upscaler verified deterministic and colour-safe (every output pixel is one of its five input neighbours — invents no colour the PPU didn't emit).<br>
     <span class="AMBER">AMBER</span> Picture chip, sound and mappers 1 2 3 4 7 9: exercised by the two built-in carts (mappers 0 and 2) only; your own cartridges are untested here.<br>
     <span class="AMBER">AMBER</span> The imagination fits games with a reward byte and a thing to approach or avoid. It cannot start until the score byte is found, so there is a reactive warm-up first.<br>
-    <span class="LIT">LIT</span> Build 20 — Compound Chroma: CHROMA wheel upgraded from single derived hue to <code>{{ r8!,g8!,b8! || or6!,yl6!,pu6!,gr6! || }}</code>. Level 1: 3 primaries at 8-bit (R=me byte, G=key byte, B=gap remapped). Level 2: 4 secondaries at 6-bit derived from inter-primary relationships (OR=R+G warm, YL=R+2G yellow, PU=R+B cool, GR=G+B green). Hue is now DERIVED from composed RGB, not stored. 48-bit chroma address. Compound channels in OBS leaf digest (Merkle evidence chain). Append-only — old chroma backward compat preserved.</p>
+    <span class="LIT">LIT</span> Build 20 — Compound Chroma: CHROMA wheel upgraded from single derived hue to <code>{{ r8!,g8!,b8! || or6!,yl6!,pu6!,gr6! || }}</code>. Level 1: 3 primaries at 8-bit (R=me byte, G=key byte, B=gap remapped). Level 2: 4 secondaries at 6-bit derived from inter-primary relationships (OR=R+G warm, YL=R+2G yellow, PU=R+B cool, GR=G+B green). Hue is now DERIVED from composed RGB, not stored. 48-bit chroma address. Compound channels in OBS leaf digest (Merkle evidence chain). Append-only — old chroma backward compat preserved.<br>
+    <span class="LIT">LIT</span> Build 21 — Neon Blue Motif + Polyak Soft-Update. Visual: <code>--neon:#00ccff</code> CSS variable with glow/dim/hard variants applied to active tabs, active panels, phase badge, i13 badge, cycle strip live state, tube glow (toggles with agent on/off). Polyak: target network upgraded from hard copy every 256 steps to per-step integer-safe EMA — <code>step = diff &gt;&gt; 8</code> clamped to ±1 when truncation kills it (τ≈1/256 for large gaps, guaranteed ±1 creep for small). Smoother critic targets, no period to tune. Append-only — save/load compat preserved, tgtAge now counts total soft-update steps.</p>
     <p><b>The deck.</b> The clock is emulated play time. The bars show how hard each stretch of RAM is changing. The trace is the gap between the agent and its key byte. DEAD ZONE and EXPLORE change the agent for real; the player styling itself is ornament.</p>
     <p><b>Primed cartridge (mapper 9 only).</b> On this one cartridge the agent is no longer told nothing. From public documentation it is given three things: the byte holding its own health ($0391), the byte holding the opponent&#39;s ($0398), and the rule that a boxer on the canvas gets up by tapping A and B fast. Everything else it must learn from RAM: which rare event is a tell, how long after it the hit lands, and which answer avoids it (dodge left at once, dodge left late, dodge right late, or block). After a clean avoid it throws jabs. Here the 1UP number is its health and a streak is punches landed without being hit. It also <b>rehearses</b>: a second copy of the console is replayed against the real one, and only if every byte matches is it trusted. Then, when an event foresees a hit at the same delay twice, the boxer plays each answer forward in the copy and takes the one that loses least, before the real punch lands. It keeps punching until 24 frames before the answer is due. Between punches coming at it, it looks for openings the same way and throws only what the copy says will land. If answers the copy called clean keep getting hit for real, rehearsal switches itself off. When the rival&#39;s health refills from low (a new opponent), tells are <b>decayed</b> (&times;0.5) rather than cleared — if it&#39;s the same opponent, the remnant rebuilds fast; if it&#39;s a genuinely new opponent, the old tells fade since they stop getting confirmed. After a dodge, a chain prediction says what comes next; the boxer holds block during that predicted window (a <b>guard</b>). If the predicted tell actually fires while guarding, the guard is <b>promoted</b> to a full dodge &mdash; exploration is skipped, and the dodge fires immediately. <b>Plain version:</b> it learns "when that number flips, a punch is coming in half a second, so move now", and it can practise the move in its head first. After dodging, if it expects the next punch and that punch arrives while it&#39;s already braced, it skips the flinch and ducks straight away. Its body remembers which dodge direction worked for each attack pattern, so when a new round starts it doesn&#39;t have to re-learn from scratch &mdash; it tries what worked last time first. If it gets hit three times in a row at roughly the same fast rhythm, it recognises a <b>stagger</b> combo and holds block for 30 frames to break the chain. The three core subsystems are <b>bound</b> together: the reservoir&#39;s energy level (how busy rare RAM events are) feeds into tell confidence &mdash; when the reservoir is active, exploration is skipped because the tell is almost certainly real. The CUBIT&#39;s pain prediction gates JIT combos &mdash; a dubious combo is vetoed when the CUBIT sees a calm state. And successful counter punches after dodges are fed back into the CUBIT&#39;s training as positive examples, teaching it that post-dodge counter states are scoring opportunities. <b>Plain version:</b> if the game&#39;s memory is buzzing with rare changes, a tell is real, so she acts instead of exploring. If her gut (the CUBIT) says it&#39;s calm and a combo has been unreliable, she drops the combo and tries something simpler. And every time a counter punch after a dodge actually scores, her gut learns that &#34;just-dodged&#34; states are good ones to attack in. After a dodge, she <b>escalates</b> her counter punches: she starts with the type that worked best against this tell, and if no damage lands within 9 frames she switches to the second-best, then the third-best. If one scores, she locks onto that type for the rest of the counter window. <b>Plain version:</b> instead of throwing the same punch over and over after dodging, she tries her best punch first, and if it doesn&#39;t work she quickly switches to plan B, then plan C &mdash; and once something lands, she sticks with it. She also tracks the actual <b>damage delta</b> &mdash; how many health points each counter punch type takes off the opponent, not just whether it connected. This means she learns to prefer face punches (which do more damage) over body punches (which do less) for the same tell. <b>Plain version:</b> she now knows the difference between a jab that nicks and a hook that hurts, and picks the one that hurts. When a counter punch lands during the window, the window <b>extends</b> by 8 frames (capped at 40 total) so she can press the advantage while the opponent is still reeling. <b>Plain version:</b> if her punch connects, she gets a few bonus frames to keep swinging instead of the clock running out mid-combo.</p>
     <p><b>Arcade.</b> The strip over the screen reads only bytes the agent found: 1UP stays dashed until it finds the score byte. A streak is scores in a row without losing a life. Press 5 to drop a coin and take the stick, 5 again to hand it back; a streak that changed hands is marked MIX. Pause shows the best streaks of this session (saved in this browser when it allows, otherwise memory only). With SOUND on, scores, hits and coins beep. The strip under the screen lights the buttons being pressed. On a primed cartridge the top strip becomes two health bars. Pop-ups, shake, the red hit flash, beeps, pixel lettering and the CRT tint are ornament; the numbers under them are live.</p>
@@ -1487,10 +1490,13 @@ var i13LastReward = 0;
 var i13PrevV = 0;        // V(previous state) for TD error
 var i13TDError = 0;     // last TD error (for display)
 // ── TARGET NETWORK: frozen critic copy for stable TD targets ──
-var I13_TGT_PERIOD = 256;  // copy live→frozen every N learn steps
+// BUILD 21: Polyak soft-update replaces hard copy. τ=1/256 in Q8.
+// tgt += (live - tgt) >> 8  — exponential moving average, every step.
+// Smoother than hard copy, no period to tune. tgtAge counts total steps.
+var I13_TGT_PERIOD = 256;  // legacy — kept for save/load compat
 var i13WTgt = new Array(25); // frozen value weights [0..23]=W[944..967], [24]=W[968]
 for (var _vt = 0; _vt < 25; _vt++) i13WTgt[_vt] = i13W[944 + _vt]; // init from live
-var i13TgtAge = 0;       // steps since last target copy
+var i13TgtAge = 0;       // total soft-update steps (display only)
 // ── N-STEP RETURNS: 4-step reward lookahead ──
 var I13_NSTEP = 4;
 var i13NRew = [0, 0, 0, 0];  // Q8 reward ring buffer
@@ -1853,12 +1859,22 @@ function i13Learn(reward) {
     }
     i13DecayCount++;
   }
-  // ── TARGET NETWORK: copy live→frozen every I13_TGT_PERIOD steps ──
-  if (++i13TgtAge >= I13_TGT_PERIOD) {
-    for (var tci = 0; tci < 24; tci++) i13WTgt[tci] = i13W[944 + tci];
-    i13WTgt[24] = i13W[968];
-    i13TgtAge = 0;
+  // ── TARGET NETWORK: Polyak soft-update (BUILD 21) ──
+  // Integer-safe EMA: step = diff >> 8, clamped to ±1 when truncation kills it.
+  // For |diff| >= 256 (Q8 gap >= 1.0): true Polyak τ=1/256.
+  // For 0 < |diff| < 256: steps ±1/step, converges in |diff| steps.
+  // Seamless: at diff=256, >>8 gives 1 — same as the clamp floor.
+  i13TgtAge++;
+  for (var tci = 0; tci < 24; tci++) {
+    var _pd = i13W[944 + tci] - i13WTgt[tci];
+    var _ps = _pd >> 8;
+    if (_ps === 0 && _pd !== 0) _ps = _pd > 0 ? 1 : -1;
+    i13WTgt[tci] += _ps;
   }
+  var _pd24 = i13W[968] - i13WTgt[24];
+  var _ps24 = _pd24 >> 8;
+  if (_ps24 === 0 && _pd24 !== 0) _ps24 = _pd24 > 0 ? 1 : -1;
+  i13WTgt[24] += _ps24;
 }
 
 // Mesh: find winner neuron
@@ -3725,7 +3741,9 @@ function spdShow(){var v=SPEEDS[+$("spd").value],t=v?v+"x":"max";$("oSpd").textC
 $("spd").oninput=spdShow;spdShow();
 $("sDead").oninput=function(){agent.act.dead=+this.value;$("oDead").textContent=this.value;};
 $("sEps").oninput=function(){agent.act.eps=+this.value/100;$("oEps").textContent=this.value+"%";};
-$("bAgent").onclick=function(){if(gv.streak>0)gv.mixed=true;agentOn=!agentOn;tog("bAgent",agentOn);$("padui").style.display=agentOn?"none":"flex";nes.pad[0]=0;};
+$("bAgent").onclick=function(){if(gv.streak>0)gv.mixed=true;agentOn=!agentOn;tog("bAgent",agentOn);$("padui").style.display=agentOn?"none":"flex";nes.pad[0]=0;
+  /* BUILD 21: neon blue motif — tube glows when agent is active */
+  var tb=document.querySelector(".tube");if(tb){if(agentOn)tb.classList.add("neon");else tb.classList.remove("neon");}};
 $("bPlay").onclick=function(){setPaused(false);};
 $("bPause").onclick=function(){setPaused(!paused);};
 $("bReset").onclick=function(){if(nes.rom){load(nes.rom,romTitle);frames=0;}};
@@ -3812,7 +3830,7 @@ $("bLoad").onclick=function(){var i=+$("sSlot").value;if(!slots[i]){pop("EMPTY",
 var cycleSlot=null,cycleAttempt=0,cycleKOs=0,cycleRing=[],CYCLE_EVERY=60,CYCLE_DEPTH=180,cycleCooldown=0,cycleArmed=false,cycleHpOk=0,cycleAnchor=null,janePasswords=[];
 $("bCycle").onclick=function(){cycling=!cycling;tog("bCycle",cycling);if(cycling){pop("CYCLE ON","big");if(Array.isArray(agent.log))agent.log.push("["+frames+"] DYNAMIC CYCLING enabled: rolling 3min checkpoint ring + R1 anchor. Jane picks best restart on knockdown. Brain preserved across reverts.");cycleAttempt=0;cycleKOs=0;}
   else{pop("CYCLE OFF","big");cycleAnchor=null;if(Array.isArray(agent.log))agent.log.push("["+frames+"] DYNAMIC CYCLING off. Attempts: "+cycleAttempt+", KOs: "+cycleKOs);}};
-$("bLines").onclick=function(){var t=$("tube"),on=t.className.indexOf("lines")<0;t.className="tube"+(on?" lines":"");tog("bLines",on);};
+$("bLines").onclick=function(){var t=$("tube"),on=t.className.indexOf("lines")<0;t.className="tube"+(on?" lines":"")+(agentOn?" neon":"");tog("bLines",on);};
 $("b3D").onclick=function(){var b=$("bezel"),on=b.style.transform!=="none";b.style.transform=on?"none":"rotateX(2deg)";b.style.transformStyle=on?"flat":"preserve-3d";$("tube").style.transform=on?"none":"translateZ(6px)";tog("b3D",!on);};
 $("bOrn").onclick=function(){ornOn=!ornOn;tog("bOrn",ornOn);oc.style.display=ornOn?"block":"none";$("ornlab").style.display=ornOn?"block":"none";};
 $("bDiode").onclick=function(){var r=agent.diodeTest();window.__d=r;this.textContent=r.tried?("Refused "+r.refused+" of "+r.tried):"No messages yet";this.className="bad"+(r.tried&&r.refused<r.tried?" on":"");this.title=r.why.join("; ");ui();};
