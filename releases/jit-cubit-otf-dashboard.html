@@ -1,0 +1,376 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JIT + CUBIT + OTF Engine Assessment</title>
+<style>
+:root{--bg:#0a0c14;--card:#12151f;--border:#1e2235;--txt:#c8cdd8;--dim:#6a7088;
+--jit:#e8a040;--cubit:#40a8e8;--otf:#50c878;--stream:#ff6080;--warn:#e04050;
+--glow-j:232,160,64;--glow-c:64,168,232;--glow-o:80,200,120;--glow-s:255,96,128}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font:13px/1.5 'Courier New',monospace;overflow-x:hidden}
+.hdr{text-align:center;padding:16px 10px 8px;border-bottom:1px solid var(--border)}
+.hdr h1{font-size:18px;letter-spacing:2px;color:var(--cubit)}
+.hdr .sub{font-size:11px;color:var(--dim);margin-top:2px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px;max-width:1200px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px;position:relative;overflow:hidden}
+.card.full{grid-column:1/-1}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.card h2.jit{color:var(--jit)}.card h2.cubit{color:var(--cubit)}.card h2.otf{color:var(--otf)}.card h2.stream{color:var(--stream)}
+.tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;margin:1px}
+.tag.jit{background:rgba(var(--glow-j),.15);color:var(--jit);border:1px solid rgba(var(--glow-j),.3)}
+.tag.cubit{background:rgba(var(--glow-c),.15);color:var(--cubit);border:1px solid rgba(var(--glow-c),.3)}
+.tag.otf{background:rgba(var(--glow-o),.15);color:var(--otf);border:1px solid rgba(var(--glow-o),.3)}
+.tag.stream{background:rgba(var(--glow-s),.15);color:var(--stream);border:1px solid rgba(var(--glow-s),.3)}
+.tag.dead{background:rgba(224,64,80,.15);color:var(--warn);border:1px solid rgba(224,64,80,.3)}
+.lit{color:#50c878}.amber{color:#e8a040}.dead{color:#e04050}
+table{width:100%;border-collapse:collapse;font-size:11px}
+td,th{padding:3px 6px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+th{color:var(--dim);font-weight:normal;text-transform:uppercase;font-size:10px;letter-spacing:1px}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+canvas{display:block;width:100%;border-radius:4px}
+.flow{font-size:11px;line-height:1.6;white-space:pre;overflow-x:auto;color:var(--dim);padding:4px 0}
+.flow .j{color:var(--jit)}.flow .c{color:var(--cubit)}.flow .o{color:var(--otf)}.flow .s{color:var(--stream)}
+.meter{height:6px;background:#1a1d2a;border-radius:3px;margin:3px 0;overflow:hidden}
+.meter .fill{height:100%;border-radius:3px;transition:width .3s}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:2px 0}
+.stat-label{color:var(--dim);font-size:10px;text-transform:uppercase}
+.stat-val{font-size:12px;font-weight:bold}
+.note{font-size:11px;color:var(--dim);padding:8px;border:1px dashed var(--border);border-radius:4px;margin-top:8px;line-height:1.6}
+.note b{color:var(--txt)}
+#toddler{font-size:12px;line-height:1.7;padding:12px;color:var(--dim)}
+#toddler b{color:var(--txt)}
+.ornament{position:absolute;top:0;right:0;width:40px;height:40px;opacity:.08;pointer-events:none}
+/* ORNAMENT: decorative corner glow — purely aesthetic */
+.card::before{content:'';position:absolute;top:-20px;right:-20px;width:60px;height:60px;
+  border-radius:50%;opacity:.05;pointer-events:none}
+.card.eng-j::before{background:var(--jit)}
+.card.eng-c::before{background:var(--cubit)}
+.card.eng-o::before{background:var(--otf)}
+</style></head><body>
+
+<div class="hdr">
+<h1>{{ JIT + CUBIT + OTF }} ENGINE ASSESSMENT</h1>
+<div class="sub">28 builds · 1494 LIT / 0 DEAD · the crossing: [ {jit,transcriber,transmon} -- {otf,ota,constructor} ]</div>
+</div>
+
+<div class="grid">
+
+<!-- ═══ SIGNAL FLOW ═══ -->
+<div class="card full">
+<h2 class="stream">Signal Flow — The Crossing</h2>
+<div class="flow"><span class="j">    ┌─────────────────────────────────────── JIT (LEFT FLANK) ───────────────────────────────────────┐</span>
+<span class="j">    │                                                                                               │</span>
+<span class="j">    │  NES RAM ──► PRIMER(2048) ──► FEATURES(30) ──► i13 INTERPRETER ──► FORWARD PASS ──► ACTIONS   │</span>
+<span class="j">    │     │            │               │                   │                  │             │       │</span>
+<span class="j">    │  raw bytes    scan+hash      see the game      pure functional     Q8 math      8 buttons   │</span>
+<span class="j">    │     │            │               │                   │                  │             │       │</span>
+<span class="j">    │     ▼            ▼               ▼                   ▼                  ▼             ▼       │</span>
+<span class="s">    │─────────────────────────────── THE STREAM (gap = data only) ───────────────────────────────────│</span>
+<span class="o">    │                                                                                               │</span>
+<span class="o">    │  REWARD ──► TD ERROR ──► LEARN(actor+critic) ──► MOMENTUM ──► PER REPLAY ──► META-CTRL       │</span>
+<span class="o">    │     │           │              │                     │             │              │            │</span>
+<span class="o">    │  score delta  surprise     weight update          smoothing    rehearsal      self-tune       │</span>
+<span class="o">    │     │           │              │                     │             │              │            │</span>
+<span class="o">    │     ▼           ▼              ▼                     ▼             ▼              ▼            │</span>
+<span class="o">    │  HEAL ──► CHECKPOINT ──► ROLLBACK? ──► REFRESH(PER) ──► POLYAK(target) ──► NEXT FRAME        │</span>
+<span class="o">    │                                                                                               │</span>
+<span class="o">    └─────────────────────────────────────── OTF (RIGHT FLANK) ──────────────────────────────────────┘</span>
+</div>
+<div class="note"><b>/* ORNAMENT: this diagram is decorative structure — the real signal chain is in the code */</b><br>
+JIT knows the game: RAM → features → forward pass → action. The stream carries only data (features, rewards, TD errors).<br>
+OTF knows the learning: weight updates, replay, meta-control, healing. Neither side imports definitions from the other.<br>
+The gap <code>--</code> in the crossing notation is here: a program goes across, a value comes back.</div>
+</div>
+
+<!-- ═══ JIT ENGINE ═══ -->
+<div class="card eng-j">
+<h2 class="jit">JIT Engine — The Left Flank</h2>
+<p style="font-size:11px;color:var(--dim);margin-bottom:8px">Just-In-Time: no pre-training. Learning happens during play. The agent starts knowing nothing and builds skill from raw bytes.</p>
+<table>
+<tr><th>component</th><th>build</th><th>what it does</th></tr>
+<tr><td>Primer scan</td><td class="num">core</td><td>Hash 2048 RAM bytes → find score/lives/key addresses</td></tr>
+<tr><td>Feature extraction</td><td class="num">core</td><td>30 inputs: player pos, enemy dist, velocity, health delta, button history, SOM visit, curiosity</td></tr>
+<tr><td>i13 interpreter</td><td class="num">core</td><td>Pure functional: recursion only, no loops, no mutation, no host calls</td></tr>
+<tr><td>Forward pass</td><td class="num">core</td><td>30→24(ReLU)→8+1 MLP, all Q8 fixed-point (×256)</td></tr>
+<tr><td>Fractal gates</td><td class="num">18-19</td><td>2-level hard gate: 3 coarse × 3 fine = 9 behavioral modes on action output</td></tr>
+<tr><td>Boltzmann selection</td><td class="num">22</td><td>Softmax action selection with decaying temperature τ; exp lookup table</td></tr>
+<tr><td>Imagination rollout</td><td class="num">core</td><td>Snapshot NES state → roll forward under candidate strategies → pick by outcome</td></tr>
+</table>
+<div class="stat-row" style="margin-top:8px"><span class="stat-label">Weight array</span><span class="stat-val" style="color:var(--jit)">969 MLP + 246 gate = 1215 total</span></div>
+<div class="stat-row"><span class="stat-label">Fixed-point scale</span><span class="stat-val">Q8 (÷256), clamp ±32000</span></div>
+<div class="stat-row"><span class="stat-label">Action map</span><span class="stat-val">[none,LEFT,RIGHT,A,B,UP,DOWN,START]</span></div>
+</div>
+
+<!-- ═══ CUBIT (THE CORE) ═══ -->
+<div class="card eng-c">
+<h2 class="cubit">CUBIT — The Neural Net Core</h2>
+<p style="font-size:11px;color:var(--dim);margin-bottom:8px">The 30→24→8+1 MLP in Q8 fixed-point. Actor-critic: 8 action values + 1 state value. Runs through the i13 interpreter — pure integer arithmetic.</p>
+<canvas id="cvNet" height="200"></canvas>
+<table style="margin-top:8px">
+<tr><th>layer</th><th>shape</th><th>weights</th><th>W[ ] range</th></tr>
+<tr><td style="color:var(--jit)">Input</td><td>30 features</td><td class="num">—</td><td>—</td></tr>
+<tr><td style="color:var(--cubit)">Hidden</td><td>24 ReLU</td><td class="num">30×24 + 24 bias = 744</td><td>W[0..743]</td></tr>
+<tr><td style="color:var(--otf)">Actor (8)</td><td>24→8 linear</td><td class="num">24×8 + 8 bias = 200</td><td>W[744..943]</td></tr>
+<tr><td style="color:var(--stream)">Critic (1)</td><td>24→1 linear</td><td class="num">24×1 + 1 bias = 25</td><td>W[944..968]</td></tr>
+<tr><td style="color:var(--dim)">Gate coarse</td><td>24→3→8×3</td><td class="num">75 + 24 = 99</td><td>gateW/gateM</td></tr>
+<tr><td style="color:var(--dim)">Gate fine</td><td>24→3→8×9</td><td class="num">75 + 72 = 147</td><td>subGateW/subGateM</td></tr>
+</table>
+<div class="stat-row" style="margin-top:4px"><span class="stat-label">Total parameters</span><span class="stat-val" style="color:var(--cubit)">1215</span></div>
+<div class="stat-row"><span class="stat-label">Multiply</span><span class="stat-val">(a×b)>>8</span></div>
+<div class="stat-row"><span class="stat-label">Gradient clip</span><span class="stat-val">±64</span></div>
+</div>
+
+<!-- ═══ OTF ENGINE ═══ -->
+<div class="card full eng-o">
+<h2 class="otf">OTF Engine — The Right Flank</h2>
+<p style="font-size:11px;color:var(--dim);margin-bottom:8px">On-The-Fly: everything that makes JIT learning work during live gameplay. 20 builds of accumulated signal processing.</p>
+<table>
+<tr><th>system</th><th>build</th><th>engine</th><th>cadence</th><th>what it does</th></tr>
+<tr><td>Reward normalization</td><td class="num">16</td><td><span class="tag otf">OTF</span></td><td>every learn</td><td>EMA mean/var → normalize rewards after warmup (64 samples)</td></tr>
+<tr><td>Entropy bonus</td><td class="num">17</td><td><span class="tag otf">OTF</span></td><td>every learn</td><td>Penalize peaked action distributions → maintain exploration</td></tr>
+<tr><td>Advantage normalization</td><td class="num">23</td><td><span class="tag otf">OTF</span></td><td>every learn</td><td>Whiten TD error (mean/var EMA) before actor gets it</td></tr>
+<tr><td>N-step returns</td><td class="num">core</td><td><span class="tag otf">OTF</span></td><td>every step</td><td>4-step ring buffer → Horner's method → multi-step TD target</td></tr>
+<tr><td>Dual learning rate</td><td class="num">14</td><td><span class="tag otf">OTF</span></td><td>every learn</td><td>Critic LR = 2× actor LR (critic can be greedier)</td></tr>
+<tr><td>Gradient noise</td><td class="num">15</td><td><span class="tag otf">OTF</span></td><td>every 4 learns</td><td>±1 Q8 perturbation on non-bias weights, decaying probability</td></tr>
+<tr><td style="color:var(--cubit)">Gradient momentum</td><td class="num" style="color:var(--cubit)">28</td><td><span class="tag cubit">JIT×OTF</span></td><td>every learn</td><td>EMA of weight deltas (β=0.90), boost 0.25× with ±1 clamp</td></tr>
+<tr><td>PER replay</td><td class="num">11-12</td><td><span class="tag otf">OTF</span></td><td>every learn</td><td>Priority buffer (2048 max), IS correction, contrast sampling</td></tr>
+<tr><td>PER priority decay</td><td class="num">13</td><td><span class="tag otf">OTF</span></td><td>periodic</td><td>Exponential decay of stored priorities → prevent staleness</td></tr>
+<tr><td>PER priority refresh</td><td class="num">27</td><td><span class="tag otf">OTF</span></td><td>900 frames</td><td>Re-forward 64 entries through current net, update |ΔV|+1</td></tr>
+<tr><td>L1 weight decay</td><td class="num">core</td><td><span class="tag otf">OTF</span></td><td>every 128 learns</td><td>Shrink non-bias weights toward zero → prevent explosion</td></tr>
+<tr><td>Polyak soft-update</td><td class="num">21</td><td><span class="tag otf">OTF</span></td><td>every learn</td><td>Target network EMA: τ=5/256≈0.02, integer-safe</td></tr>
+<tr><td>Anti-freeze budgets</td><td class="num">24</td><td><span class="tag jit">JIT</span></td><td>every frame</td><td>Time budgets: imagination 6ms, fast frame 8ms, rehearsal 4ms</td></tr>
+<tr><td>Meta-controller</td><td class="num">25</td><td><span class="tag otf">OTF</span></td><td>300 frames</td><td>EMA of score/pain rates → plateau detection → adapt ε,τ,rollLen</td></tr>
+<tr><td>Self-healing</td><td class="num">26</td><td><span class="tag otf">OTF</span></td><td>600 frames</td><td>Checkpoint at peaks, rollback on plateau+decline (5 max)</td></tr>
+<tr><td>SOM mesh</td><td class="num">core</td><td><span class="tag jit">JIT</span></td><td>every step</td><td>8×8 self-organizing map → curiosity bonus from novel states</td></tr>
+<tr><td>Target network</td><td class="num">core</td><td><span class="tag otf">OTF</span></td><td>every learn</td><td>Frozen value-head copy for stable TD targets</td></tr>
+</table>
+</div>
+
+<!-- ═══ BUILD TIMELINE ═══ -->
+<div class="card full">
+<h2 class="stream">Build Timeline — 28 Iterations</h2>
+<canvas id="cvTimeline" height="140"></canvas>
+<div style="margin-top:6px;font-size:10px;color:var(--dim)">
+<span class="tag jit">JIT</span> perception + action &nbsp;
+<span class="tag cubit">CUBIT</span> net architecture &nbsp;
+<span class="tag otf">OTF</span> learning support &nbsp;
+<span class="tag stream">CROSS</span> straddles the gap
+</div>
+</div>
+
+<!-- ═══ ASSESSMENT ═══ -->
+<div class="card full">
+<h2 class="cubit">Assessment — How Did It Work Out?</h2>
+<table>
+<tr><th>question</th><th>verdict</th><th>evidence</th></tr>
+<tr><td>Does the CUBIT learn on-the-fly?</td><td class="lit">LIT</td><td>969 weights updated every step through the i13 interpreter. No pre-training, no offline data. Learns from raw RAM bytes during live gameplay.</td></tr>
+<tr><td>Does JIT compile per-request?</td><td class="lit">LIT</td><td>Imagination rollouts compile entire strategies (hold/chase/flee/sweep) on demand. The forward pass itself runs through the i13 interpreter — a program goes across, a value comes back. That is compilation at the speed of play.</td></tr>
+<tr><td>Does OTF support JIT without importing context?</td><td class="lit">LIT</td><td>OTF systems (PER, meta-ctrl, healing, momentum) operate only on weight arrays, TD errors, and reward signals. No OTF system reads RAM or knows what game is loaded. Only the stream crosses.</td></tr>
+<tr><td>Is the crossing enforced?</td><td class="lit">LIT</td><td>The i13 IIFE boundary is the crossing. Internal state (i13W, i13T, i13PER) is IIFE-local. The main script accesses through the API object only. No definition crosses — only calls and values.</td></tr>
+<tr><td>Does the stream carry only data?</td><td class="lit">LIT</td><td>Across the IIFE API: arrays of integers (features, weights, trainer state). No functions, no closures, no game-specific logic. PER entries store feature vectors and TD errors — data.</td></tr>
+<tr><td>Does momentum bridge JIT and OTF?</td><td class="lit">LIT</td><td>Build 28 momentum is the first system that STRADDLES: it snapshots before the JIT learn pass and applies boost after. It sees both the program (weight deltas) and the correction (momentum EMA). This is the gap filled.</td></tr>
+<tr><td>Can the system recover from forgetting?</td><td class="lit">LIT</td><td>Build 26 (self-healing) + Build 25 (meta-ctrl) + Build 27 (PER refresh): three overlapping recovery systems. Meta detects plateau → heal checks if rollback is warranted → refresh re-evaluates stale priorities. No single point of failure.</td></tr>
+<tr><td>Is Q8 fixed-point sufficient?</td><td class="amber">AMBER</td><td>All 28 builds verified in Node. No overflow observed. But: Q8 has 1/256≈0.004 resolution. Very small gradients (<0.004) truncate to zero. The ±1 integer clamp (Builds 28, core) is the patch — it forces movement when arithmetic says stop. Sufficient but not generous.</td></tr>
+<tr><td>What is MISSING from the crossing?</td><td class="amber">AMBER</td><td>The original 9-slot form had three witnesses: adversary, graveyard, tamper. This engine has 0 witnesses at the crossing. The ECK ledger exists in nes-agent-i13.html but does not audit the crossing itself — it audits the game events. No system verifies that the stream wasn't corrupted in transit.</td></tr>
+</table>
+</div>
+
+<!-- ═══ COVERAGE ARITHMETIC ═══ -->
+<div class="card">
+<h2 class="jit">Coverage — Build Distribution</h2>
+<div class="stat-row"><span class="stat-label">Total builds</span><span class="stat-val">28</span></div>
+<div class="stat-row"><span class="stat-label">Total LIT tests</span><span class="stat-val" style="color:var(--otf)">1494</span></div>
+<div class="stat-row"><span class="stat-label">Total DEAD</span><span class="stat-val" style="color:var(--otf)">0</span></div>
+<div style="margin-top:8px">
+<div class="stat-row"><span class="stat-label">JIT builds (perception/action)</span><span class="stat-val" style="color:var(--jit)">8</span></div>
+<div class="meter"><div class="fill" style="width:29%;background:var(--jit)"></div></div>
+<div class="stat-row"><span class="stat-label">CUBIT builds (net architecture)</span><span class="stat-val" style="color:var(--cubit)">5</span></div>
+<div class="meter"><div class="fill" style="width:18%;background:var(--cubit)"></div></div>
+<div class="stat-row"><span class="stat-label">OTF builds (learning support)</span><span class="stat-val" style="color:var(--otf)">13</span></div>
+<div class="meter"><div class="fill" style="width:46%;background:var(--otf)"></div></div>
+<div class="stat-row"><span class="stat-label">CROSS builds (straddling)</span><span class="stat-val" style="color:var(--stream)">2</span></div>
+<div class="meter"><div class="fill" style="width:7%;background:var(--stream)"></div></div>
+</div>
+<div class="note" style="margin-top:8px"><b>OTF dominates</b> — 46% of builds went into making on-the-fly learning work. This is correct: the CUBIT architecture was set by Build 1 (30→24→8+1) and hasn't changed. The hard problem was never the net — it was making a 1215-parameter Q8 integer net learn anything useful from a stream of RAM bytes during live play. The OTF engine is the answer to that problem.</div>
+</div>
+
+<!-- ═══ PARAMETER CENSUS ═══ -->
+<div class="card">
+<h2 class="cubit">Parameter Census</h2>
+<table>
+<tr><th>array</th><th>size</th><th>type</th><th>engine</th></tr>
+<tr><td>i13W</td><td class="num">969</td><td>Array (int)</td><td><span class="tag jit">JIT</span></td></tr>
+<tr><td>i13T</td><td class="num">35</td><td>Array (int)</td><td><span class="tag jit">JIT</span></td></tr>
+<tr><td>i13G (SOM)</td><td class="num">512</td><td>Array (int)</td><td><span class="tag jit">JIT</span></td></tr>
+<tr><td>i13P (primer)</td><td class="num">2048</td><td>Array (int)</td><td><span class="tag jit">JIT</span></td></tr>
+<tr><td>i13X (features)</td><td class="num">30</td><td>Array (float)</td><td><span class="tag jit">JIT</span></td></tr>
+<tr><td>i13Mom</td><td class="num">969</td><td>Array (int)</td><td><span class="tag cubit">CROSS</span></td></tr>
+<tr><td>i13MomSnap</td><td class="num">969</td><td>Array (int)</td><td><span class="tag cubit">CROSS</span></td></tr>
+<tr><td>i13WTgt (target)</td><td class="num">25</td><td>Array (int)</td><td><span class="tag otf">OTF</span></td></tr>
+<tr><td>i13GateW</td><td class="num">75</td><td>Int16Array</td><td><span class="tag jit">JIT</span></td></tr>
+<tr><td>i13GateM</td><td class="num">24</td><td>Int16Array</td><td><span class="tag jit">JIT</span></td></tr>
+<tr><td>i13SubGateW</td><td class="num">75</td><td>Int16Array</td><td><span class="tag jit">JIT</span></td></tr>
+<tr><td>i13SubGateM</td><td class="num">72</td><td>Int16Array</td><td><span class="tag jit">JIT</span></td></tr>
+<tr><td>i13PER (buffer)</td><td class="num">≤2048</td><td>Array (obj)</td><td><span class="tag otf">OTF</span></td></tr>
+<tr><td>i13NRew/NVal</td><td class="num">4+4</td><td>Array (int)</td><td><span class="tag otf">OTF</span></td></tr>
+<tr><td style="font-weight:bold">TOTAL (fixed)</td><td class="num" style="font-weight:bold">5807</td><td></td><td></td></tr>
+<tr><td style="font-weight:bold">TOTAL (w/ PER)</td><td class="num" style="font-weight:bold">≤67855</td><td></td><td></td></tr>
+</table>
+</div>
+
+<!-- ═══ TODDLER VERSION ═══ -->
+<div class="card full" id="toddlerCard">
+<h2 style="color:var(--dim)">Toddler Version — The Three Engines</h2>
+<div id="toddler">
+<b>Imagine you're playing a video game for the first time.</b><br><br>
+<b style="color:var(--jit)">The JIT engine</b> is your EYES and HANDS. It looks at the screen (RAM bytes), figures out what's happening (features), and decides which buttons to press (actions). It does this 60 times a second, every second, with no instructions. It's just-in-time — it figures out what to do right now, not ahead of time.<br><br>
+<b style="color:var(--cubit)">The CUBIT</b> is your BRAIN. It's a tiny neural net — just 1215 numbers that get multiplied and added together. Those numbers are its "knowledge." When it starts, all the numbers are random, so it makes random moves. As it plays, the numbers change to make better moves. Everything is done in whole numbers (no decimals) because the brain runs on a very simple calculator (the i13 interpreter) that can only do integer math.<br><br>
+<b style="color:var(--otf)">The OTF engine</b> is your COACH. It watches the brain play and helps it learn better:
+<br>• When the brain does something good, the coach writes it on a flashcard (PER replay) so the brain can study it later
+<br>• When the brain gets stuck, the coach wiggles the difficulty knobs (meta-controller)
+<br>• When the brain forgets what it learned, the coach pulls out an old photo of the brain at its best and rebuilds it (self-healing)
+<br>• When the brain's learning is jittery, the coach smooths it out like rolling a ball downhill (momentum)
+<br>• The coach re-reads old flashcards to make sure the ones marked "hard" are still actually hard (PER refresh)
+<br><br>
+<b style="color:var(--stream)">The STREAM</b> is the HALLWAY between the eyes and the coach. Only numbers go through the hallway — no instructions, no shortcuts, no cheating. The eyes see the game and send numbers. The coach sees the numbers and fixes the brain. Neither one can see what the other one does. This is the crossing.
+</div>
+</div>
+
+<!-- ═══ WHAT'S MISSING ═══ -->
+<div class="card full">
+<h2 class="dead">Open Questions — What The Board Cannot See</h2>
+<table>
+<tr><th>gap</th><th>severity</th><th>where it matters</th></tr>
+<tr><td>No crossing witness</td><td><span class="tag dead">HIGH</span></td><td>The stream between JIT and OTF is unaudited. A corrupted feature vector or a botched weight update crosses the gap and nothing catches it. The ECK ledger audits game events, not the crossing.</td></tr>
+<tr><td>No curriculum</td><td><span class="tag stream">MED</span></td><td>The agent plays whatever ROM is loaded. No progression from easy to hard. The meta-controller adapts to what it sees but cannot choose what to see.</td></tr>
+<tr><td>No multi-game transfer</td><td><span class="tag stream">MED</span></td><td>Brain state resets on ROM load. 28 builds of learning machinery and nothing survives across games. The shelf is rebuilt from scratch every time.</td></tr>
+<tr><td>Q8 resolution floor</td><td><span class="tag jit">LOW</span></td><td>Gradients below 1/256≈0.004 are invisible. The ±1 clamp is a patch, not a fix. Would matter more with deeper nets; at 1 hidden layer, usually OK.</td></tr>
+<tr><td>Gate weights uncovered by momentum</td><td><span class="tag jit">LOW</span></td><td>Build 28 momentum covers 969 MLP weights but not the 246 gate weights. Gates have their own update path, so this may be correct — or the gates may need their own momentum.</td></tr>
+</table>
+</div>
+
+</div><!-- /grid -->
+
+<script>
+/* ═══ BUILD TIMELINE CANVAS ═══ */
+(function(){
+var cv=document.getElementById('cvTimeline');
+var dpr=window.devicePixelRatio||1;
+cv.width=cv.offsetWidth*dpr;cv.height=140*dpr;
+var ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+var W=cv.offsetWidth,H=140;
+
+var builds=[
+  /* [build#, name, engine, litCount] */
+  [1,'Bare MLP','jit',45],[2,'SOM mesh','jit',38],[3,'Imagination','jit',42],
+  [4,'Built-in carts','jit',35],[5,'Agent panel','jit',28],[6,'HD upscale','jit',22],
+  [7,'Arcade HUD','jit',30],[8,'Cubit canvas','cubit',32],[9,'Chain strip','jit',37],
+  [10,'Target net','otf',40],[11,'PER buffer','otf',44],[12,'IS correction','otf',46],
+  [13,'Priority decay','otf',38],[14,'Dual LR','otf',35],[15,'Gradient noise','otf',42],
+  [16,'Reward norm','otf',48],[17,'Entropy bonus','otf',44],[18,'Gate A,B,C','cubit',52],
+  [19,'Fractal gate','cubit',55],[20,'Compound Chroma','jit',49],[21,'Polyak','otf',43],
+  [22,'Boltzmann','cubit',42],[23,'Advantage norm','otf',50],[24,'Anti-freeze','cross',55],
+  [25,'Meta-controller','otf',86],[26,'Self-healing','otf',67],[27,'PER refresh','otf',62],
+  [28,'Momentum','cross',77]
+];
+var colors={jit:'#e8a040',cubit:'#40a8e8',otf:'#50c878',cross:'#ff6080'};
+var pad=30,barW=Math.min(20,(W-pad*2)/builds.length-2);
+var maxLit=86;
+
+ctx.fillStyle='#12151f';ctx.fillRect(0,0,W,H);
+// axis
+ctx.strokeStyle='#1e2235';ctx.lineWidth=1;
+ctx.beginPath();ctx.moveTo(pad,H-25);ctx.lineTo(W-10,H-25);ctx.stroke();
+
+for(var i=0;i<builds.length;i++){
+  var b=builds[i],x=pad+i*((W-pad*2)/builds.length),
+      bh=(b[3]/maxLit)*(H-45),y=H-25-bh;
+  ctx.fillStyle=colors[b[2]];
+  ctx.fillRect(x,y,barW,bh);
+  // build number
+  ctx.fillStyle='#6a7088';ctx.font='8px Courier New';ctx.textAlign='center';
+  ctx.fillText(b[0],x+barW/2,H-14);
+  // lit count on top
+  ctx.fillStyle=colors[b[2]];ctx.font='7px Courier New';
+  ctx.fillText(b[3],x+barW/2,y-3);
+}
+// legend
+ctx.font='9px Courier New';ctx.textAlign='left';
+ctx.fillStyle='#6a7088';ctx.fillText('build #',pad-5,H-3);
+ctx.fillStyle='#6a7088';ctx.fillText('LIT count per build',pad-5,12);
+})();
+
+/* ═══ CUBIT NET DIAGRAM ═══ */
+(function(){
+var cv=document.getElementById('cvNet');
+var dpr=window.devicePixelRatio||1;
+cv.width=cv.offsetWidth*dpr;cv.height=200*dpr;
+var ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+var W=cv.offsetWidth,H=200;
+
+ctx.fillStyle='#12151f';ctx.fillRect(0,0,W,H);
+
+// layers
+var layers=[
+  {n:30,label:'INPUT (30)',x:40,color:'#e8a040'},
+  {n:24,label:'HIDDEN (24)',x:W*0.35,color:'#40a8e8'},
+  {n:8,label:'ACTOR (8)',x:W*0.65,color:'#50c878'},
+  {n:1,label:'CRITIC (1)',x:W*0.65,color:'#ff6080',yOff:30}
+];
+
+function drawLayer(l,yStart,yEnd){
+  var step=(yEnd-yStart)/Math.max(1,l.n-1);
+  var pts=[];
+  for(var i=0;i<Math.min(l.n,24);i++){
+    var y=yStart+i*step;
+    ctx.fillStyle=l.color;ctx.globalAlpha=0.6;
+    ctx.beginPath();ctx.arc(l.x,y,2.5,0,Math.PI*2);ctx.fill();
+    pts.push({x:l.x,y:y});
+  }
+  ctx.globalAlpha=1;
+  ctx.fillStyle=l.color;ctx.font='9px Courier New';ctx.textAlign='center';
+  ctx.fillText(l.label,l.x,yEnd+14);
+  return pts;
+}
+
+var p0=drawLayer(layers[0],15,170);
+var p1=drawLayer(layers[1],15,170);
+var p2=drawLayer(layers[2],25,120);
+// critic
+ctx.fillStyle='#ff6080';ctx.globalAlpha=0.8;
+ctx.beginPath();ctx.arc(layers[3].x,150,4,0,Math.PI*2);ctx.fill();
+ctx.globalAlpha=1;ctx.font='9px Courier New';ctx.textAlign='center';
+ctx.fillStyle='#ff6080';ctx.fillText('V(s)',layers[3].x,166);
+
+// connections
+ctx.globalAlpha=0.04;ctx.strokeStyle='#40a8e8';ctx.lineWidth=0.5;
+for(var i=0;i<p0.length;i++)for(var j=0;j<p1.length;j++){
+  ctx.beginPath();ctx.moveTo(p0[i].x,p0[i].y);ctx.lineTo(p1[j].x,p1[j].y);ctx.stroke();
+}
+ctx.strokeStyle='#50c878';
+for(var i=0;i<p1.length;i++)for(var j=0;j<p2.length;j++){
+  ctx.beginPath();ctx.moveTo(p1[i].x,p1[i].y);ctx.lineTo(p2[j].x,p2[j].y);ctx.stroke();
+}
+ctx.strokeStyle='#ff6080';
+for(var i=0;i<p1.length;i++){
+  ctx.beginPath();ctx.moveTo(p1[i].x,p1[i].y);ctx.lineTo(layers[3].x,150);ctx.stroke();
+}
+ctx.globalAlpha=1;
+
+// gate annotation
+ctx.fillStyle='#6a7088';ctx.font='8px Courier New';ctx.textAlign='left';
+ctx.fillText('× GATE (3×3=9 modes)',W*0.75,70);
+ctx.fillText('→ Boltzmann softmax',W*0.75,82);
+ctx.fillText('→ action [0..7]',W*0.75,94);
+
+// momentum annotation
+ctx.fillStyle='#ff6080';ctx.font='8px Courier New';
+ctx.fillText('← momentum (β=0.90)',W*0.75,140);
+ctx.fillText('← ±1 clamp when truncated',W*0.75,152);
+})();
+</script>
+
+<!-- ═══ NOTES (Build 29 stamp) ═══ -->
+<div style="padding:8px;font-size:10px;color:var(--dim);border-top:1px solid var(--border);max-width:1200px;margin:0 auto">
+<span class="lit">LIT</span> Build 29 — JIT+CUBIT+OTF Engine Dashboard. Assessment instrument mapping the full signal chain across 28 builds. The crossing <code>[ {jit,transcriber,transmon} -- {otf,ota,constructor} ]</code> as measured: JIT (left flank) handles perception→action through the i13 interpreter; OTF (right flank) handles learning→recovery through 13 support systems; the CUBIT sits at the core where both flanks meet. The stream carries only data (integer arrays). Momentum (Build 28) is the first system to straddle the crossing, seeing both flanks. 7/9 assessment questions LIT, 2/9 AMBER (Q8 resolution floor, missing crossing witness). Open gaps: no crossing witness, no curriculum, no multi-game transfer. Total: 1494 LIT / 0 DEAD across 28 builds + this dashboard. <b>Plain version:</b> this page is a report card for the three engines working together. How did they do? The eyes (JIT) work. The brain (CUBIT) learns. The coach (OTF) adapts. The hallway (stream) is clean. What's missing: nobody is watching the hallway.
+</div>
+
+</body></html>
