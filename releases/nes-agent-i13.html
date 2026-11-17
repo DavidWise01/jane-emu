@@ -319,6 +319,8 @@ input[type=range]::-moz-range-thumb{width:14px;height:16px;border-radius:3px;bac
     <span class="AMBER">AMBER</span> Picture chip, sound and mappers 1 2 3 4 7 9: exercised by the two built-in carts (mappers 0 and 2) only; your own cartridges are untested here.<br>
     <span class="AMBER">AMBER</span> The imagination fits games with a reward byte and a thing to approach or avoid. It cannot start until the score byte is found, so there is a reactive warm-up first.<br>
     <span class="LIT">LIT</span> Build 20 — Compound Chroma: CHROMA wheel upgraded from single derived hue to <code>{{ r8!,g8!,b8! || or6!,yl6!,pu6!,gr6! || }}</code>. Level 1: 3 primaries at 8-bit (R=me byte, G=key byte, B=gap remapped). Level 2: 4 secondaries at 6-bit derived from inter-primary relationships (OR=R+G warm, YL=R+2G yellow, PU=R+B cool, GR=G+B green). Hue is now DERIVED from composed RGB, not stored. 48-bit chroma address. Compound channels in OBS leaf digest (Merkle evidence chain). Append-only — old chroma backward compat preserved.<br>
+    <span class="LIT">LIT</span> Build 22 — Boltzmann Exploration. The cubit path was purely deterministic (argmax over Q-values). Now: temperature-scaled softmax via 33-entry integer exp lookup table. <code>exp(-(Qmax - Q[a]) / τ)</code> gives unnormalized probability per action; a random roll samples from that distribution. τ starts at 256 (Q8 1.0 — high exploration, all actions get tried) and decays hyperbolically via <code>τ = τ_start * 256 / (256 + trainN / 5000)</code> toward τ_min=4 (near-greedy). When τ ≤ τ_min, falls back to pure argmax (zero overhead). Runs AFTER fractal gate modification so gates still bias the Q-values, but the final pick is stochastic. <b>Plain version:</b> before this, the brain always picked whichever action looked best — even if another action was almost as good, it never tried it. Now the brain rolls dice weighted by how good each action looks. Early on the dice are almost fair (try everything). Later the dice get more and more loaded toward the best action. Eventually it's nearly always picking the best one, but it got there by actually trying the alternatives first.</p>
+    <p>
     <span class="LIT">LIT</span> Build 21 — Neon Blue Motif + Polyak Soft-Update. Visual: <code>--neon:#00ccff</code> CSS variable with glow/dim/hard variants applied to active tabs, active panels, phase badge, i13 badge, cycle strip live state, tube glow (toggles with agent on/off). Polyak: target network upgraded from hard copy every 256 steps to per-step integer-safe EMA — <code>step = diff &gt;&gt; 8</code> clamped to ±1 when truncation kills it (τ≈1/256 for large gaps, guaranteed ±1 creep for small). Smoother critic targets, no period to tune. Append-only — save/load compat preserved, tgtAge now counts total soft-update steps.</p>
     <p><b>The deck.</b> The clock is emulated play time. The bars show how hard each stretch of RAM is changing. The trace is the gap between the agent and its key byte. DEAD ZONE and EXPLORE change the agent for real; the player styling itself is ornament.</p>
     <p><b>Primed cartridge (mapper 9 only).</b> On this one cartridge the agent is no longer told nothing. From public documentation it is given three things: the byte holding its own health ($0391), the byte holding the opponent&#39;s ($0398), and the rule that a boxer on the canvas gets up by tapping A and B fast. Everything else it must learn from RAM: which rare event is a tell, how long after it the hit lands, and which answer avoids it (dodge left at once, dodge left late, dodge right late, or block). After a clean avoid it throws jabs. Here the 1UP number is its health and a streak is punches landed without being hit. It also <b>rehearses</b>: a second copy of the console is replayed against the real one, and only if every byte matches is it trusted. Then, when an event foresees a hit at the same delay twice, the boxer plays each answer forward in the copy and takes the one that loses least, before the real punch lands. It keeps punching until 24 frames before the answer is due. Between punches coming at it, it looks for openings the same way and throws only what the copy says will land. If answers the copy called clean keep getting hit for real, rehearsal switches itself off. When the rival&#39;s health refills from low (a new opponent), tells are <b>decayed</b> (&times;0.5) rather than cleared — if it&#39;s the same opponent, the remnant rebuilds fast; if it&#39;s a genuinely new opponent, the old tells fade since they stop getting confirmed. After a dodge, a chain prediction says what comes next; the boxer holds block during that predicted window (a <b>guard</b>). If the predicted tell actually fires while guarding, the guard is <b>promoted</b> to a full dodge &mdash; exploration is skipped, and the dodge fires immediately. <b>Plain version:</b> it learns "when that number flips, a punch is coming in half a second, so move now", and it can practise the move in its head first. After dodging, if it expects the next punch and that punch arrives while it&#39;s already braced, it skips the flinch and ducks straight away. Its body remembers which dodge direction worked for each attack pattern, so when a new round starts it doesn&#39;t have to re-learn from scratch &mdash; it tries what worked last time first. If it gets hit three times in a row at roughly the same fast rhythm, it recognises a <b>stagger</b> combo and holds block for 30 frames to break the chain. The three core subsystems are <b>bound</b> together: the reservoir&#39;s energy level (how busy rare RAM events are) feeds into tell confidence &mdash; when the reservoir is active, exploration is skipped because the tell is almost certainly real. The CUBIT&#39;s pain prediction gates JIT combos &mdash; a dubious combo is vetoed when the CUBIT sees a calm state. And successful counter punches after dodges are fed back into the CUBIT&#39;s training as positive examples, teaching it that post-dodge counter states are scoring opportunities. <b>Plain version:</b> if the game&#39;s memory is buzzing with rare changes, a tell is real, so she acts instead of exploring. If her gut (the CUBIT) says it&#39;s calm and a combo has been unreliable, she drops the combo and tries something simpler. And every time a counter punch after a dodge actually scores, her gut learns that &#34;just-dodged&#34; states are good ones to attack in. After a dodge, she <b>escalates</b> her counter punches: she starts with the type that worked best against this tell, and if no damage lands within 9 frames she switches to the second-best, then the third-best. If one scores, she locks onto that type for the rest of the counter window. <b>Plain version:</b> instead of throwing the same punch over and over after dodging, she tries her best punch first, and if it doesn&#39;t work she quickly switches to plan B, then plan C &mdash; and once something lands, she sticks with it. She also tracks the actual <b>damage delta</b> &mdash; how many health points each counter punch type takes off the opponent, not just whether it connected. This means she learns to prefer face punches (which do more damage) over body punches (which do less) for the same tell. <b>Plain version:</b> she now knows the difference between a jab that nicks and a hook that hurts, and picks the one that hurts. When a counter punch lands during the window, the window <b>extends</b> by 8 frames (capped at 40 total) so she can press the advantage while the opponent is still reeling. <b>Plain version:</b> if her punch connects, she gets a few bonus frames to keep swinging instead of the clock running out mid-combo.</p>
@@ -1558,6 +1560,19 @@ var i13RNCount = 0;           // how many rewards seen
 var I13_EB_BETA = 3;          // penalty coefficient (Q8, ~0.012)
 var I13_EB_DECAY_DIV = 2000;  // β halves after 2000 learn steps
 
+// BUILD 22: Boltzmann Exploration — temperature-scaled softmax via integer exp table
+// Pure argmax is deterministic: the cubit always picks the highest Q-value.
+// Boltzmann sampling picks actions proportional to exp(Q/τ), so actions with
+// slightly lower Q still get tried. τ starts at 256 (Q8 1.0 — very exploratory)
+// and decays hyperbolically to I13_BOLTZ_TAU_MIN (near-greedy).
+// The exp table covers exp(-x) for x = 0, 0.25, 0.50, ... 8.0 in Q8.
+// All entries floored at 1 so every action keeps nonzero selection probability.
+var I13_BOLTZ_TAU_START = 256;   // 1.0 in Q8 — high exploration
+var I13_BOLTZ_TAU_MIN = 4;       // ~0.016 in Q8 — near-greedy (argmax except for ties)
+var I13_BOLTZ_TAU_DECAY = 5000;  // τ halves every 5000 learn steps
+var i13BoltzTau = I13_BOLTZ_TAU_START;
+var I13_EXP_TAB = [256,199,155,121,94,73,57,44,35,27,21,16,13,10,8,6,5,4,3,2,2,1,1,1,1,1,1,1,1,1,1,1,1];
+
 // BUILD 18: Gate A,B,C — 3-mode hard gate on output layer
 // 3 gate neurons read 24 hidden activations → argmax selects mode
 // active mode's bias vector added to action values before selection
@@ -1642,13 +1657,46 @@ function i13GateForward() {
     var mod = i13T[24 + a] + i13GateM[mBase + a] + i13SubGateM[fBase + a];
     i13T[24 + a] = mod > 32000 ? 32000 : (mod < -32000 ? -32000 : mod);
   }
-  // re-select action after fractal gate modification
-  var best = 0, bestV = i13T[24];
-  for (var k = 1; k < 8; k++) {
-    if (i13T[24 + k] > bestV) { best = k; bestV = i13T[24 + k]; }
+  // ── BUILD 22: Boltzmann exploration — temperature-scaled softmax ──
+  // Instead of pure argmax, sample action proportional to exp(Q/τ).
+  // High τ → near-uniform (explore), low τ → near-argmax (exploit).
+  // Uses integer exp lookup table (I13_EXP_TAB) to avoid floating point.
+  if (i13BoltzTau <= I13_BOLTZ_TAU_MIN) {
+    // Near-greedy: pure argmax (saves the exp table lookups)
+    var best = 0, bestV = i13T[24];
+    for (var k = 1; k < 8; k++) {
+      if (i13T[24 + k] > bestV) { best = k; bestV = i13T[24 + k]; }
+    }
+    i13T[32] = best;
+    i13LastAction = best;
+  } else {
+    // Find max Q-value for numerical stability (subtract before exp)
+    var qMax = i13T[24];
+    for (var qi = 1; qi < 8; qi++) if (i13T[24 + qi] > qMax) qMax = i13T[24 + qi];
+    // Compute unnormalized probabilities via exp table
+    // exp(-(qMax - Q[a]) / τ)  — negated difference so higher Q → higher prob
+    var boltzP = [0,0,0,0,0,0,0,0];
+    var boltzSum = 0;
+    for (var ba = 0; ba < 8; ba++) {
+      var diff = qMax - i13T[24 + ba];  // always >= 0
+      // Scale diff by 1/τ: idx = (diff * 4) / τ  (4 entries per unit in table)
+      // Clamp to table bounds [0, 32]
+      var idx = ((diff * 4) / i13BoltzTau) | 0;
+      if (idx > 32) idx = 32;
+      boltzP[ba] = I13_EXP_TAB[idx];
+      boltzSum += boltzP[ba];
+    }
+    // Sample from distribution using integer random
+    var roll = ((Math.random() * boltzSum) | 0);
+    var pick = 0, cumul = 0;
+    for (var sa = 0; sa < 8; sa++) {
+      cumul += boltzP[sa];
+      if (roll < cumul) { pick = sa; break; }
+      if (sa === 7) pick = 7;  // rounding safety
+    }
+    i13T[32] = pick;
+    i13LastAction = pick;
   }
-  i13T[32] = best;
-  i13LastAction = best;
 }
 
 // Get NES pad bitmask for current action
@@ -1859,6 +1907,12 @@ function i13Learn(reward) {
     }
     i13DecayCount++;
   }
+  // ── BUILD 22: Boltzmann temperature decay ──
+  // Hyperbolic: τ = τ_start * 256 / (256 + trainN / decay_div)
+  // Same decay shape as learning rate. Converges to near-greedy over training.
+  i13BoltzTau = Math.max(I13_BOLTZ_TAU_MIN,
+    (I13_BOLTZ_TAU_START * 256 / (256 + (i13TrainN / I13_BOLTZ_TAU_DECAY))) | 0);
+
   // ── TARGET NETWORK: Polyak soft-update (BUILD 21) ──
   // Integer-safe EMA: step = diff >> 8, clamped to ±1 when truncation kills it.
   // For |diff| >= 256 (Q8 gap >= 1.0): true Polyak τ=1/256.
@@ -1949,7 +2003,8 @@ function i13SaveBrain() {
     gateMode: i13GateMode,
     subGateW: Array.from(i13SubGateW),
     subGateM: Array.from(i13SubGateM),
-    subGateMode: i13SubGateMode
+    subGateMode: i13SubGateMode,
+    boltzTau: i13BoltzTau
   };
 }
 
@@ -2024,6 +2079,9 @@ function i13LoadBrain(b) {
     for (var smi = 0; smi < 72; smi++) i13SubGateM[smi] = b.subGateM[smi];
   }
   i13SubGateMode = b.subGateMode || 0;
+  // BUILD 22: Boltzmann tau (backward compat: missing → start fresh)
+  if (b.boltzTau != null) i13BoltzTau = b.boltzTau;
+  else i13BoltzTau = I13_BOLTZ_TAU_START;
 }
 
 // Soft reset: zero trainer state but keep weights (Root Strength)
@@ -2132,7 +2190,12 @@ var api = {
   get subGateW() { return i13SubGateW; },
   get subGateM() { return i13SubGateM; },
   get subGateMode() { return i13SubGateMode; },
-  get fractalLabel() { return (['A','B','C'][i13GateMode]||'?') + (['a','b','c'][i13SubGateMode]||'?'); }
+  get fractalLabel() { return (['A','B','C'][i13GateMode]||'?') + (['a','b','c'][i13SubGateMode]||'?'); },
+  // BUILD 22: Boltzmann exploration
+  get boltzTau() { return i13BoltzTau; },
+  BOLTZ_TAU_START: I13_BOLTZ_TAU_START,
+  BOLTZ_TAU_MIN: I13_BOLTZ_TAU_MIN,
+  BOLTZ_TAU_DECAY: I13_BOLTZ_TAU_DECAY
 };
 if (typeof module !== "undefined" && module.exports) module.exports = api;
 else root.I13BRAIN = api;
