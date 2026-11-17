@@ -114,6 +114,8 @@ h2{color:#ffdb74}
  .tabcontent{max-height:520px}
  .tabstrip button{padding:5px 9px}
 }
+/* AV-089.2 actual screen-first layout */
+@media(min-width:1101px){.workspace{grid-template-columns:minmax(0,1fr) 310px!important}.topbar{min-height:42px;padding:5px 10px}.controlbar{min-height:38px;padding:4px 8px}.stage-head,.instrument-head{height:28px}.stage-foot{display:none}.footerbar{height:22px}.game{margin:2px;border:0}.instruments .row button{padding:5px 6px;font-size:10px}.instruments .section{padding:6px}.instruments .helper{font-size:10px}.tabstrip button{padding:4px 5px;font-size:9px}}
 </style></head>
 <body><div class="app">
 <header class="topbar"><div class="brand"><div class="emblem">J</div><div><h1>JANE <span style="color:var(--cyan)">/</span> PUNCH-OUT!!</h1><small>v89 · GOLDEN ARCADE · TIMING LAB · ROOT 0</small></div></div><div class="topright"><span id="mode" class="pill">INITIALIZING</span><a href="./arena.html">Advanced emulator</a></div></header>
@@ -261,6 +263,29 @@ iframe.addEventListener('load',()=>{
     const style=d.createElement('style');
     style.textContent=':root{--teal:#f7c948!important;--gold:#ffdc72!important;--edge:#6d5528!important;--panel:#17140d!important;--ink:#f3e6c2!important}body{background:#0d0c09!important;color:#f3e6c2!important}button{background:#302716!important;border-color:#7e6127!important;color:#f7d77c!important;border-radius:3px!important}a{color:#f7c948!important}.panel{background:#17140d!important;border-color:#554524!important}header{display:none!important}main{max-width:none!important;padding:6px!important}.grid{grid-template-columns:minmax(0,1fr)!important}.grid>.panel:nth-child(2){display:none!important}.toolbar{margin-bottom:5px!important;padding:6px!important}.toolbar>label:first-child{display:none!important}.game{height:calc(100dvh - 125px)!important;min-height:310px!important}.note{display:none!important}';
     d.head.appendChild(style);
+    // Compact embedded arena only; leave standalone advanced arena intact.
+    const compact=d.createElement('style');
+    compact.textContent=`html,body{height:100%!important;overflow:hidden!important;margin:0!important}main{height:100%!important;display:flex!important;flex-direction:column!important;padding:2px!important;gap:3px!important}.toolbar{flex:none!important;gap:6px!important;margin:0!important;padding:3px 5px!important;border:0!important}.toolbar button,.toolbar select{padding:3px 6px!important;font-size:11px!important}.toolbar input[type=range]{width:75px!important}.grid{flex:1!important;min-height:0!important;display:flex!important}.grid>.panel:first-child{display:flex!important;flex-direction:column!important;flex:1!important;min-height:0!important;padding:2px!important;border:0!important}.grid>.panel:first-child>.row,.grid>.panel:first-child>.meters{display:none!important}.grid>.panel:first-child>.game{flex:1!important;height:auto!important;min-height:0!important;margin:0!important;border:0!important;border-radius:0!important}.game iframe{display:block!important;width:100%!important;height:100%!important}`;
+    d.head.appendChild(compact);
+    const child=d.getElementById('game');
+    const fit=()=>{
+      try{
+        const q=child.contentDocument;if(!q?.body)return;
+        const candidates=[...q.querySelectorAll('canvas')].filter(c=>c.width>=240&&c.height>=200);
+        const canvas=candidates.find(c=>c.width===256&&c.height===240)||candidates.find(c=>/nes|screen|game/i.test(c.id))||candidates.sort((a,b)=>b.width*b.height-a.width*a.height)[0];
+        if(!canvas)return;
+        if(q.getElementById('gold-screen-fit'))return;
+        const st=q.createElement('style');st.id='gold-screen-fit';
+        st.textContent=`html,body{margin:0!important;width:100%!important;height:100%!important;overflow:hidden!important;background:#050505!important}.gold-screen-path{display:flex!important;flex:1 1 auto!important;align-items:center!important;justify-content:center!important;min-width:0!important;min-height:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#050505!important;box-shadow:none!important;position:relative!important;inset:auto!important;transform:none!important;grid-template-columns:none!important;overflow:hidden!important}.gold-screen-hidden{display:none!important}.gold-screen-path:before,.gold-screen-path:after{display:none!important}canvas.gold-screen-canvas{display:block!important;position:static!important;width:auto!important;height:100%!important;max-width:100%!important;max-height:100%!important;aspect-ratio:256/240!important;object-fit:contain!important;image-rendering:pixelated!important;margin:0!important;padding:0!important;border:0!important;transform:none!important;background:#050505!important}`;
+        q.head.appendChild(st);
+        canvas.classList.add('gold-screen-canvas');
+        let node=canvas;while(node.parentElement){const p=node.parentElement;for(const sib of p.children){if(sib!==node&&!['SCRIPT','STYLE','LINK'].includes(sib.tagName))sib.classList.add('gold-screen-hidden')}p.classList.add('gold-screen-path');if(p===q.body)break;node=p}
+        const resize=()=>{const w=q.documentElement.clientWidth,h=q.documentElement.clientHeight;if(w&&h){const scale=Math.min(w/canvas.width,h/canvas.height);canvas.style.setProperty('width',Math.floor(canvas.width*scale)+'px','important');canvas.style.setProperty('height',Math.floor(canvas.height*scale)+'px','important')}};
+        child.contentWindow.addEventListener('resize',resize);resize();
+      }catch(e){console.warn('Golden screen fit:',e)}
+    };
+    if(child){child.addEventListener('load',fit);fit();let retries=0;const timer=setInterval(()=>{fit();if(++retries>=30||child.contentDocument?.getElementById('gold-screen-fit'))clearInterval(timer)},250)}
+
   }catch(e){}
 });
 })();
