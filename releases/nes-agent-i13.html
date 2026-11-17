@@ -319,6 +319,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:16px;border-radius:3px;bac
     <span class="AMBER">AMBER</span> Picture chip, sound and mappers 1 2 3 4 7 9: exercised by the two built-in carts (mappers 0 and 2) only; your own cartridges are untested here.<br>
     <span class="AMBER">AMBER</span> The imagination fits games with a reward byte and a thing to approach or avoid. It cannot start until the score byte is found, so there is a reactive warm-up first.<br>
     <span class="LIT">LIT</span> Build 20 — Compound Chroma: CHROMA wheel upgraded from single derived hue to <code>{{ r8!,g8!,b8! || or6!,yl6!,pu6!,gr6! || }}</code>. Level 1: 3 primaries at 8-bit (R=me byte, G=key byte, B=gap remapped). Level 2: 4 secondaries at 6-bit derived from inter-primary relationships (OR=R+G warm, YL=R+2G yellow, PU=R+B cool, GR=G+B green). Hue is now DERIVED from composed RGB, not stored. 48-bit chroma address. Compound channels in OBS leaf digest (Merkle evidence chain). Append-only — old chroma backward compat preserved.<br>
+    <span class="LIT">LIT</span> Build 30 — Argon/Lead-208 Pull Engine (ERSE-018). Asymmetric prediction-persistence architecture. The brain's 969 weights are partitioned into two zones: <b>Lead-208</b> (W[0..743] = 744 hidden-layer weights) is the heavy, dense, stable substrate — gradient updates are damped to 75% (<code>I13_PB_DAMP=192/256</code>), slowing learning to build persistent representations. <b>Argon</b> (W[744..968] = 225 output-layer weights) is the fast, light, agile prediction surface — full learning rate, no damping. The partition boundary falls exactly at <code>I13_AR_START=744</code> where hidden weights end and output weights begin. The formula <code>memsistor = 17 × n + i + 208 × n = 225n + singlet</code> maps: 17+208 = 225 = exact Argon output weight count. The <code>{{i}}</code> singlet = T[0..23] hidden activations, the neck between Lead output and Argon input. <b>MEMSISTOR:</b> a slow EMA shadow of Lead-208 (τ=8/256≈0.03) that tracks the persistent substrate — the implicit fourth engine that all three explicit engines pull from. Memsistor persists through soft reset because it IS the persistent substrate. <b>PRE-SIST:</b> a 9-slot ring buffer that snapshots the full brain state every 180 frames (3 seconds). Three explicit engines (JIT, OTF, PRE-SIST) pulling from one implicit (MEMSISTOR) substrate. The NEXC test: "Can a small fast predictive surface pull the correct state from a large persistent substrate with bounded latency and stable recall?" <b>Plain version:</b> imagine a pencil (Argon) writing on a stone tablet (Lead-208). The pencil moves fast and light — it can scribble ideas quickly. The stone underneath is heavy and hard to change — when something gets carved into stone, it stays. The pencil sits ON the stone (the hidden layer activations are the contact point). There is also a very slow photograph being taken of the stone (the memsistor) — if the stone ever gets damaged, the photograph remembers what was there. And every 3 seconds, someone takes a full snapshot of the whole desk (PRE-SIST ring) — pencil position, stone carvings, everything — keeping the last 9 photos in a stack. The question being asked: can a quick little pencil find the right spot on a big slow stone, every time, without taking too long?<br>
     <span class="LIT">LIT</span> Build 28 — Gradient Momentum (Adam-lite). Weight updates in CUBIT go through the i13 interpreter, which modifies <code>i13W[969]</code> directly — we cannot inject momentum inside the pure-functional interpreter. Post-step correction: before each learn call pair (<code>agent_learn</code> + <code>value_learn</code>), all 969 weights are snapshot. After both calls complete, delta = W_after − W_before is computed per weight. An exponential moving average (EMA) of these deltas accumulates in <code>i13Mom[969]</code> with β = 230/256 ≈ 0.90: <code>mom[i] = (β × mom[i] + (1−β) × delta[i]) >> 8</code>. A fractional boost of 64/256 ≈ 0.25 of the accumulated momentum is added back: <code>W[i] += (mom[i] × boost) >> 8</code>. The ±1 integer clamp pattern is applied: when momentum is nonzero but the boost truncates to 0 in Q8, the step is forced to ±1 so the weight still moves. Weights are then clamped to ±32000. Momentum is zeroed on soft reset (fight-specific direction history shouldn't cross fights) and saved/loaded with the brain state for checkpoint compatibility. Only the main 969 MLP weights get momentum — gate weights (Builds 18-19) have their own update path and different learning dynamics. <b>Plain version:</b> when you push a ball, it rolls. Push it the same direction many times and it picks up speed — that's momentum. The brain's weights change a little each training step. Sometimes those steps are noisy and jitter around. Momentum remembers which direction the weights have been going — like a ball rolling downhill. If a weight keeps getting pushed right, momentum builds up and pushes it further right, even if one noisy step says go left. The ball's memory of rolling smooths out the bumps. β ≈ 0.90 means 90% of the old direction is remembered; boost ≈ 0.25 means the extra push is gentle, about a quarter of the momentum. It's like learning to ride a bike — you don't start from scratch every pedal stroke, you build on the motion you already have.<br>
     <span class="LIT">LIT</span> Build 27 — PER Priority Refresh. The PER buffer stores experiences with priority based on TD-error at insertion time. As the network learns, those priorities go stale: an entry that was surprising when stored may be fully predicted now (inflated priority), or an entry that seemed boring may now contradict the network's beliefs (deflated priority). <code>perRefreshTick()</code> runs every 900 frames (~15 seconds), re-forwarding 64 stored feature vectors through the current network. For each entry it compares the new V(state) with the V stored at insertion time; the new priority becomes <code>|ΔV| + 1</code>. A round-robin cursor ensures the entire buffer (up to 2048 entries) is swept over multiple refresh cycles. The <code>refreshPER()</code> method lives inside the i13 IIFE and saves/restores the X input array so the current game state is not corrupted. PER total is recalculated after each batch. Minimum buffer size of 32 before refresh activates. Logs every 5th cycle. Stats panel shows cycles, total entries refreshed, and buffer fill. X-RAY brain chip shows refresh cycle count. <b>Plain version:</b> the brain keeps a box of flashcards (old experiences). Each flashcard has a number on the back saying how important it is. But those numbers were written when the flashcard was first made — by now the brain may have already learned that lesson, so the number is wrong. Every 15 seconds the brain pulls out 64 random flashcards, re-reads them with its current knowledge, and re-scores them. Cards it already knows get lower scores (less replay). Cards that now surprise it get higher scores (more replay). It's like a student going through their study pile and moving the easy cards to the bottom and the hard cards to the top.<br>
     <span class="LIT">LIT</span> Build 26 — Self-Healing Weight Checkpoints. The meta-controller (Build 25) can wiggle hyperparameters but cannot undo catastrophic forgetting — when the neural net's weights decay past the point of no return, no amount of epsilon or tau adjustment recovers what was learned. Now: <code>healTick()</code> runs every 600 frames (~10 seconds) after metaTick, using the existing <code>saveBrain()/loadBrain()</code> API. <b>Checkpoint:</b> when the EMA score rate exceeds the previous best by a threshold (20 Q8 ≈ 0.08), the full brain state (969 weights + gates + PER + normalization state) is snapshot. <b>Rollback:</b> when the meta-controller fires a plateau AND the current score rate has fallen below 50% of the peak checkpoint, the brain is restored to the checkpoint weights. Rollback has a 1-minute cooldown (3600 frames) and a cap of 5 per ROM load to prevent oscillation. The checkpoint is not cleared on rollback — the peak stays the peak, and the agent rebuilds from the last known-good state. Minimum 200 training steps required before first checkpoint (the brain must have learned something worth saving). State resets on ROM load. Visible in stats panel and X-RAY brain chip (heal=Ns Nr where N=saves/rollbacks). <b>Plain version:</b> the brain now keeps a photo album of itself at its smartest moments. When it notices it's gotten dumber — it used to score well and now it can't — it looks at the photo and rebuilds itself the way it was. It's like a student who took good notes: when they forget what they learned, they go back to the notes instead of starting from scratch. It can only do this 5 times per game, so it doesn't get stuck in a loop of forgetting-and-restoring.<br>
@@ -1601,6 +1602,20 @@ for (var _mi = 0; _mi < 969; _mi++) i13Mom[_mi] = 0;
 var i13MomSnap = new Array(969); // pre-learn snapshot (reused each call, no alloc)
 var i13MomApplied = 0;        // count of learn steps where momentum was applied
 
+// BUILD 30: Argon/Lead-208 Pull Engine (ERSE-018)
+// Asymmetric prediction-persistence architecture.
+// memsistor = 17 × {{n}} + {{i}} + 208 × {{n}} = 225n + singlet
+// Argon (W[744..968] = 225 output weights): fast, light, agile prediction — full LR
+// Lead-208 (W[0..743] = 744 hidden weights): heavy, dense, stable substrate — damped LR
+// {{i}} singlet = T[0..23] hidden activations (neck between Lead output and Argon input)
+// MEMSISTOR: slow EMA shadow of Lead-208 — the implicit fourth that all engines pull from
+var I13_PB_DAMP = 192;        // Lead-208 keeps 192/256 ≈ 75% of gradient (heavy, slow)
+var I13_MEM_TAU = 8;          // memsistor EMA rate: 8/256 ≈ 0.03 (very slow tracking)
+var I13_AR_START = 744;       // Argon partition boundary
+var i13Memsistor = new Array(744);  // slow shadow of Lead-208 partition
+for (var _mei = 0; _mei < 744; _mei++) i13Memsistor[_mei] = 0;
+var i13PullCount = 0;         // memsistor pull operations (= learn steps with partition active)
+
 // BUILD 23: Advantage Normalization — whiten TD error before actor update
 // Raw TD error swings wildly (e.g. +3000 one step, +2 the next).
 // Running mean/var via EMA, then: tdNorm = (td - mean) * 256 / max(256, σ)
@@ -1909,6 +1924,21 @@ function i13Learn(reward) {
     if (i13W[_mu] < -32000) i13W[_mu] = -32000;
   }
   i13MomApplied++;
+  // ── BUILD 30: ARGON/LEAD-208 ASYMMETRIC PARTITION ──
+  // Lead-208 (W[0..743]): damp total delta — heavy, stable substrate
+  // Total delta includes both learn calls + momentum boost
+  for (var _pb = 0; _pb < I13_AR_START; _pb++) {
+    var _totalD = i13W[_pb] - i13MomSnap[_pb]; // full change from learn + momentum
+    var _dampD = (_totalD * I13_PB_DAMP) >> 8;  // keep only 75%
+    if (_dampD === 0 && _totalD !== 0) _dampD = _totalD > 0 ? 1 : -1; // ±1 clamp
+    i13W[_pb] = i13MomSnap[_pb] + _dampD;       // rewrite with damped version
+    if (i13W[_pb] > 32000) i13W[_pb] = 32000;
+    if (i13W[_pb] < -32000) i13W[_pb] = -32000;
+    // MEMSISTOR: slow EMA shadow of Lead-208 — the persistent-predictive substrate
+    i13Memsistor[_pb] = ((i13Memsistor[_pb] * (256 - I13_MEM_TAU) + i13W[_pb] * I13_MEM_TAU) >> 8) | 0;
+  }
+  // Argon (W[744..968]): full speed — fast, agile prediction (no damping)
+  i13PullCount++;
   // ── BUILD 15: GRADIENT NOISE INJECTION ──
   // Every GN_EVERY steps, perturb non-bias weights by ±1 Q8 with decaying probability
   if (i13TrainN % I13_GN_EVERY === 0) {
@@ -2092,7 +2122,9 @@ function i13SaveBrain() {
     anVar: i13ANVar,
     anCount: i13ANCount,
     mom: i13Mom.slice(),
-    momApplied: i13MomApplied
+    momApplied: i13MomApplied,
+    memsistor: i13Memsistor.slice(),
+    pullCount: i13PullCount
   };
 }
 
@@ -2182,6 +2214,15 @@ function i13LoadBrain(b) {
     for (var _mz2 = 0; _mz2 < 969; _mz2++) i13Mom[_mz2] = 0;
     i13MomApplied = 0;
   }
+  // BUILD 30: memsistor (backward compat: missing → init from current Lead-208 weights)
+  if (b.memsistor && b.memsistor.length === 744) {
+    for (var _mli = 0; _mli < 744; _mli++) i13Memsistor[_mli] = b.memsistor[_mli];
+    i13PullCount = b.pullCount || 0;
+  } else {
+    // best approximation: init memsistor from current Lead-208 weights
+    for (var _mli2 = 0; _mli2 < 744; _mli2++) i13Memsistor[_mli2] = i13W[_mli2];
+    i13PullCount = 0;
+  }
 }
 
 // Soft reset: zero trainer state but keep weights (Root Strength)
@@ -2208,6 +2249,9 @@ function i13SoftReset() {
   // BUILD 28: zero momentum accumulator on soft reset (direction history is fight-specific)
   for (var _mz = 0; _mz < 969; _mz++) i13Mom[_mz] = 0;
   i13MomApplied = 0;
+  // BUILD 30: memsistor PERSISTS on soft reset — it IS the persistent substrate (Lead-208)
+  // only reset the pull counter (per-fight stats)
+  i13PullCount = 0;
   // weights survive — this IS root strength
 }
 
@@ -2358,6 +2402,13 @@ var api = {
   set momApplied(v) { i13MomApplied = v; },
   MOM_BETA: I13_MOM_BETA,
   MOM_BOOST: I13_MOM_BOOST, /* BUILD 25: expose setter for meta-controller */
+  // BUILD 30: Argon/Lead-208 pull engine
+  get memsistor() { return i13Memsistor; },
+  get pullCount() { return i13PullCount; },
+  set pullCount(v) { i13PullCount = v; },
+  PB_DAMP: I13_PB_DAMP,
+  MEM_TAU: I13_MEM_TAU,
+  AR_START: I13_AR_START,
   BOLTZ_TAU_START: I13_BOLTZ_TAU_START,
   BOLTZ_TAU_MIN: I13_BOLTZ_TAU_MIN,
   BOLTZ_TAU_DECAY: I13_BOLTZ_TAU_DECAY,
@@ -3212,7 +3263,7 @@ function b64(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;
 function fail(msg){var e=$("err");e.textContent=msg;e.style.display=msg?"block":"none";}
 function load(buf,name,builtIn){try{var c=nes.load(buf);nes.rom=buf;loaded=true;agent.reset();logN=0;$("log").innerHTML="";fail("");frames=0;
   eck=new window.ECKMOD.ECK(KC.sha256);eckPrev={r:0,p:0,logN:0};eckTamper=false;eckBackup=null;eckCkpt=null;
-  cnet=new window.NNMOD.NN(30,(Math.random()*65535)|1);var rs=(Math.random()*65535)|1;rsv=new window.NNMOD.Reservoir(24,rs);rsv2=new window.NNMOD.Reservoir(24,rs);rsv.drain=rsv2.drain=rDrain;echo.on=false;echo.last=-1;nnBuf=[];nnPos=0;nnNeg=0;nnPosN=0;nnNegN=0;nnLastRew=0;nnRP=[];nnRN=[];qPrevAct=-1;qPrevQ=0;qEps=1.0;qTrainN=0;qLoss=0;qDriving=false;gPained=false;tim=new window.NNMOD.Timing(256);wd=new window.NNMOD.Watchdog();gv.iv=[];gv.lastEv=0;gv.sus=false;gv.hmax=1;gv.omax=1;gv.bt=0;gv.ps=-1;gv.pl=-1;gv.sa=-1;gv.la=-1;gv.pp=0;gv.streak=0;gv.mixed=false;metaScoreEMA=0;metaPainEMA=0;metaPrevRewards=0;metaPrevPains=0;metaFlatStreak=0;metaPrevRate=0;metaAdapts=0;metaLastAdapt=0;metaState="observe";healBest=null;healBestEMA=0;healBestFrame=0;healSaves=0;healRolls=0;healLastRoll=0;healPrevAdapts=0;refreshCount=0;refreshEntries=0;i13.momApplied=0;
+  cnet=new window.NNMOD.NN(30,(Math.random()*65535)|1);var rs=(Math.random()*65535)|1;rsv=new window.NNMOD.Reservoir(24,rs);rsv2=new window.NNMOD.Reservoir(24,rs);rsv.drain=rsv2.drain=rDrain;echo.on=false;echo.last=-1;nnBuf=[];nnPos=0;nnNeg=0;nnPosN=0;nnNegN=0;nnLastRew=0;nnRP=[];nnRN=[];qPrevAct=-1;qPrevQ=0;qEps=1.0;qTrainN=0;qLoss=0;qDriving=false;gPained=false;tim=new window.NNMOD.Timing(256);wd=new window.NNMOD.Watchdog();gv.iv=[];gv.lastEv=0;gv.sus=false;gv.hmax=1;gv.omax=1;gv.bt=0;gv.ps=-1;gv.pl=-1;gv.sa=-1;gv.la=-1;gv.pp=0;gv.streak=0;gv.mixed=false;metaScoreEMA=0;metaPainEMA=0;metaPrevRewards=0;metaPrevPains=0;metaFlatStreak=0;metaPrevRate=0;metaAdapts=0;metaLastAdapt=0;metaState="observe";healBest=null;healBestEMA=0;healBestFrame=0;healSaves=0;healRolls=0;healLastRoll=0;healPrevAdapts=0;refreshCount=0;refreshEntries=0;i13.momApplied=0;preSistRing=[];preSistIdx=0;preSistFrame=0;preSistSaves=0;i13.pullCount=0;
   if(builtIn){try{sim.load(buf);sim.fast=true;sim.frozen=false;agent.attachWorld(sim,function(){return nes.snap();});}catch(e){}}
   primer=(c.mapper===9)?{pain:0x391,reward:0x398}:null;boxer=primer?new window.BOXMOD.Boxer({pain:primer.pain,reward:primer.reward,seed:(Math.random()*65535)|1}):null;if(boxer&&window.INFMOD)boxer.inf=new window.INFMOD.Inference();
     if(boxer&&primer){curOppKey=oppHash(nes.ram,primer.reward);boxer.beforeNewFight=function(bx,frame){
@@ -3396,7 +3447,7 @@ var frames=0;function one(){var pad=human;if(agentOn)pad=blind?agent.step(zeros,
           if(pick2){var rewind2=frames-pickFrame2;
             if(Array.isArray(agent.log))agent.log.push("["+frames+"] CYCLE (no boxer): lives-down #"+cycleKOs+" — reverting to frame "+pickFrame2+" ("+(rewind2/60).toFixed(1)+"s ago). Attempt "+cycleAttempt);
             restoreAll(pick2);cycleRing=[];pop("RETRY "+cycleAttempt,"big");sfx("start");}}}
-  if(agentOn&&!blind){i13.primerScan(nes.ram);var wb=wd.step(nes.ram,pad,boxer?-1:agent.view().me);if(wb){pad|=wb;if(wd.tap===7){pop(wb===8?"PUSH START":"PUSH A","big");sfx("start");}}}rehCheck(pad);padSeen|=pad;nes.pad[0]=pad;chainUpdate(agentOn?"jane":"human",pad,{seen:i13.seen||0,act:i13.T?i13.T[24]:0});nes.frame();frames++;vfeed();eckTick();gameTick();nnTick();metaTick();healTick();perRefreshTick();}
+  if(agentOn&&!blind){i13.primerScan(nes.ram);var wb=wd.step(nes.ram,pad,boxer?-1:agent.view().me);if(wb){pad|=wb;if(wd.tap===7){pop(wb===8?"PUSH START":"PUSH A","big");sfx("start");}}}rehCheck(pad);padSeen|=pad;nes.pad[0]=pad;chainUpdate(agentOn?"jane":"human",pad,{seen:i13.seen||0,act:i13.T?i13.T[24]:0});nes.frame();frames++;vfeed();eckTick();gameTick();nnTick();metaTick();healTick();perRefreshTick();preSistTick();}
 /* ── BUILD 25: SELF-IMPROVING META-CONTROLLER ──
    Tracks the agent's own score rate via EMA, detects plateaus, and adapts
    hyperparameters (eps, rollLen, replan, boltzTau) to escape local optima.
@@ -3579,6 +3630,35 @@ function perRefreshTick() {
         " — " + n + " entries re-evaluated, total=" + refreshEntries +
         " bufSize=" + i13.perSize);
     }
+  }
+}
+/* BUILD 30: PRE-SIST — 9-slot ring buffer of brain snapshots at 3-second intervals */
+var I13_PRESIST_INTERVAL = 180;  /* 3 seconds at 60fps */
+var I13_PRESIST_SLOTS = 9;
+var preSistRing = [];
+var preSistIdx = 0;
+var preSistFrame = 0;
+var preSistSaves = 0;
+function preSistTick() {
+  if (!agentOn || blind || frames < 360) return; /* warmup: 6 seconds minimum */
+  preSistFrame++;
+  if (preSistFrame < I13_PRESIST_INTERVAL) return;
+  preSistFrame = 0;
+  /* snapshot the full brain state into the ring */
+  var snap = i13.saveBrain();
+  snap._score = (nes && nes.ram) ? (nes.ram[0x398] || 0) : 0; /* score proxy */
+  snap._frame = frames;
+  if (preSistRing.length < I13_PRESIST_SLOTS) {
+    preSistRing.push(snap);
+  } else {
+    preSistRing[preSistIdx] = snap;
+  }
+  preSistIdx = (preSistIdx + 1) % I13_PRESIST_SLOTS;
+  preSistSaves++;
+  if (Array.isArray(agent.log) && preSistSaves % 9 === 1) {
+    agent.log.push("[" + frames + "] PRE-SIST: slot " + ((preSistIdx + I13_PRESIST_SLOTS - 1) % I13_PRESIST_SLOTS) +
+      " saved, ring=" + preSistRing.length + "/" + I13_PRESIST_SLOTS +
+      " total=" + preSistSaves);
   }
 }
 /* ECK memory controller: durable agent memories become hash-chained leaves */
@@ -3765,7 +3845,7 @@ function xrayDraw(){
     txt(660,315,"tgt="+(i13.tgtAge||0)+"/256",S.dim);
     txt(760,255,"n-step="+(i13.nStepFill||0)+"/4",S.dim);
     txt(760,270,"decay="+(i13.decayCount||0)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0)+" eb="+(i13.ebEffectiveBeta||0)+" F"+(i13.fractalLabel||"Aa"),S.dim);
-    txt(760,285,"train="+i13.trainN+" meta="+metaState+(metaAdapts?" #"+metaAdapts:"")+" heal="+healSaves+"s"+healRolls+"r ref="+refreshCount+"c mom="+i13.momApplied,S.dim);
+    txt(760,285,"train="+i13.trainN+" meta="+metaState+(metaAdapts?" #"+metaAdapts:"")+" heal="+healSaves+"s"+healRolls+"r ref="+refreshCount+"c mom="+i13.momApplied+" ar/pb="+i13.pullCount+"p ps="+preSistSaves+"s",S.dim);
     txt(760,300,"W[1215]",S.brain);
   } else { txt(410,200,"(brain offline)",S.dim); }
 
@@ -3906,7 +3986,8 @@ function ui(){var v=agent.view(),r=nes.ram,st=v.st,i;hud(v);
     "<tr><td>meta-controller</td><td>"+metaState+" · eps="+agent.act.eps.toFixed(3)+" · tau="+i13.boltzTau+" · roll="+agent.act.rollLen+" · replan="+agent.act.replan+(metaAdapts?" · adapted "+metaAdapts+"×":"")+"</td></tr>"+
     "<tr><td>self-healing</td><td>"+(healBest?"checkpoint at f"+healBestFrame+" (peak="+healBestEMA+")":"no checkpoint yet")+" · saves="+healSaves+" · rollbacks="+healRolls+"/"+HEAL_MAX_ROLLS+"</td></tr>"+
     "<tr><td>per-refresh</td><td>cycles="+refreshCount+" · entries="+refreshEntries+" · buf="+i13.perSize+"/"+i13.PER_MAX+"</td></tr>"+
-    "<tr><td>momentum</td><td>steps="+i13.momApplied+" · β="+i13.MOM_BETA+"/256 · boost="+i13.MOM_BOOST+"/256</td></tr>";
+    "<tr><td>momentum</td><td>steps="+i13.momApplied+" · β="+i13.MOM_BETA+"/256 · boost="+i13.MOM_BOOST+"/256</td></tr>"+
+    "<tr><td>argon/lead</td><td>pulls="+i13.pullCount+" · Pb-damp="+i13.PB_DAMP+"/256 · mem-τ="+i13.MEM_TAU+"/256 · Ar@W["+i13.AR_START+"..968] · preSist="+preSistSaves+"/"+I13_PRESIST_SLOTS+"ring</td></tr>";
   var L=agent.log,box=$("log");if(L.length<logN){logN=0;box.innerHTML="";}
   for(;logN<L.length;logN++){var d=document.createElement("div"),s=L[logN];d.textContent=s;if(/DISSENT|ALARM/.test(s))d.className="d";else if(/found|idea|holds/.test(s))d.className="i";box.appendChild(d);box.scrollTop=box.scrollHeight;}
   if($("pRam").className.indexOf("on")>=0){
