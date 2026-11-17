@@ -319,6 +319,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:16px;border-radius:3px;bac
     <span class="AMBER">AMBER</span> Picture chip, sound and mappers 1 2 3 4 7 9: exercised by the two built-in carts (mappers 0 and 2) only; your own cartridges are untested here.<br>
     <span class="AMBER">AMBER</span> The imagination fits games with a reward byte and a thing to approach or avoid. It cannot start until the score byte is found, so there is a reactive warm-up first.<br>
     <span class="LIT">LIT</span> Build 20 — Compound Chroma: CHROMA wheel upgraded from single derived hue to <code>{{ r8!,g8!,b8! || or6!,yl6!,pu6!,gr6! || }}</code>. Level 1: 3 primaries at 8-bit (R=me byte, G=key byte, B=gap remapped). Level 2: 4 secondaries at 6-bit derived from inter-primary relationships (OR=R+G warm, YL=R+2G yellow, PU=R+B cool, GR=G+B green). Hue is now DERIVED from composed RGB, not stored. 48-bit chroma address. Compound channels in OBS leaf digest (Merkle evidence chain). Append-only — old chroma backward compat preserved.<br>
+    <span class="LIT">LIT</span> Build 39 — CUBIT Consolidation. Through 38 builds, the CUBIT MLP brain accumulated subsystems scattered across the IIFE: weight arrays, momentum, memsistor shadow, gravity well, divergence alarm, velocity/acceleration tracking, snap-back detector, confidence score, and confidence-gated rollback — each with its own API getters, its own stats row, and its own X-RAY annotations. Build 39 adds <code>i13.cubitManifest()</code>: ONE function that returns the entire brain state as a structured object tree. Architecture (30→24→8+1, 969 weights + 246 gates = 1215 total, Q8 scale). Weight norms (mean absolute value, computed live): Lead-208 (Pb‖), Argon (Ar‖), memsistor shadow (M‖), momentum accumulator (mom‖), and memsistor divergence (Δ = mean |W[i] - mem[i]| across Lead-208). Training state (seen, trainN, effective LR, TD error). Every subsystem in the memsistor governance stack (B31 gravity, B33 alarm, B34 velocity, B35 acceleration, B36 snap-back, B37 confidence, B38 rollback), each as a named sub-object. Element split (Lead-208 W[0..743] vs Argon W[744..968]). The manifest is a computed view — no new state variables, no save/load changes, no soft-reset changes. It costs one scan of the weight arrays (1488 additions) per call, negligible vs a forward pass. Visible in X-RAY as a one-line CUBIT digest (norms + confidence zone) and in stats as a consolidated <code>cubit</code> row summarizing the whole brain on one line. The manifest gives future builds (and the operator) a single function to snapshot the brain&#39;s complete health, compare states, or export diagnostics. <b>Plain version:</b> Imagine you have a car with 38 different gauges, warning lights, and sensors — each added one at a time over months. Some measure the engine, some measure the brakes, some measure the steering. If you wanted to know &#34;how is the whole car doing?&#34; you&#39;d have to look at ALL of them and add it up in your head. Build 39 adds a SINGLE REPORT CARD button. Press it, and you get one page that says: here are your engine numbers, here are your brake numbers, here are your steering numbers, here is your overall health. Same data as before — it doesn&#39;t measure anything new — it just puts everything in one place so you (or a future system) can see the whole picture at a glance. The norms (Pb‖, Ar‖, etc.) are like asking &#34;how big are the numbers in this part of the brain, on average?&#34; Big norms = strong signals. The divergence (Δ) is &#34;how far has the brain drifted from its stable shadow copy?&#34;<br>
     <span class="LIT">LIT</span> Build 38 — Confidence-Gated PRE-SIST Rollback. Build 37 introduced a single confidence score (0-256) that collapses all memsistor subsystem states. Build 38 makes it operational: when confidence drops below <code>I13_CONF_ROLLBACK_THRESH (64)</code> for <code>I13_CONF_ROLLBACK_SUSTAIN (3)</code> consecutive learn steps, the system triggers an <b>automatic PRE-SIST rollback</b> — restoring the brain from the best available snapshot. The rollback first scans the PRE-SIST ring buffer (Build 32&#39;s 9-slot ring of recent brain snapshots) for the highest-scoring candidate, then falls back to the healBest checkpoint (Build 26). After rollback: confidence resets to 256 (restored brain was stable when saved), divergence streak resets, and per-fight confidence stats clear. Lifetime counter <code>i13ConfRollbacks</code> persists through save/load and tracks total emergency rewinds. Capped at <code>I13_CONF_ROLLBACK_MAX (3)</code> lifetime to prevent rollback loops — if 3 rollbacks haven&#39;t fixed it, the problem is structural and rewinding won&#39;t help. The critical streak (<code>i13ConfCritStreak</code>) resets per fight and on successful rollback. Logged to agent.log with source, score, and confidence at time of trigger. This completes the memsistor governance stack: B33-35 fight individual symptoms (drift/velocity/acceleration), B36 prevents overcorrection, B37 summarizes health, B38 pulls the emergency brake when nothing else is working. <b>Plain version:</b> Build 37 put a traffic light on the dashboard — green/yellow/red. Build 38 connects that traffic light to an EMERGENCY SYSTEM. If the light stays RED for 3 seconds straight, the system says &#34;nothing we&#39;re doing is working — go back to the last checkpoint.&#34; It rewinds the brain to a saved copy from when things were good. It picks the best saved copy it can find (checking the recent snapshots first, then the peak checkpoint). After rewinding, the traffic light goes back to green (the saved brain was healthy). But it can only do this 3 times total — if rewinding 3 times doesn&#39;t fix it, the problem is bigger than any saved copy can solve, and doing it again would just be going in circles.<br>
     <span class="LIT">LIT</span> Build 37 — Memsistor Confidence Score. Builds 30-36 built a complete closed-loop control system for Lead-208 stability: position monitoring (B33), velocity tracking (B34), acceleration sensing (B35), snap-back detection (B36), gravity well (B31), and emergency bulk pulls. But each subsystem reports independently — drift, velocity, acceleration, cooldown, LR damp, alarm counts — giving the operator six numbers to watch. The confidence score collapses them into ONE value on the Q8 scale: <code>i13MemConf</code>. Formula: start at 256 (perfect stability), subtract penalties — <code>min(64, meanDrift)</code> for position (B33), <code>min(48, |velocity|)</code> for speed (B34), <code>min(32, |acceleration|)</code> for jerk (B35), 64 flat penalty during snap-back cooldown (B36), 32 flat penalty when LR is damped (B34/B35). Clamp to [0, 256]. Computed every learn step, after all subsystem updates and before the position alarm. Display uses traffic light: 🟢 &gt;192 (healthy), 🟡 128-192 (stressed), 🔴 &lt;128 (critical). Tracks lifetime minimum (<code>i13MemConfMin</code>, persists through fights and save/load) and per-fight mean (<code>i13MemConfMean = sum/samples</code>, resets per fight). Visible in X-RAY brain chip as <code>C=🟢256</code> and in stats panel as a full row. Future builds can use the confidence threshold to trigger automatic PRE-SIST rollback or other drastic interventions. <b>Plain version:</b> Builds 30-36 put a GPS, a speedometer, a g-force meter, a shock absorber, and emergency brakes on the bridge. Each one has its own dashboard gauge. Build 37 adds a single traffic light at the top of the dashboard. Green means the bridge is fine. Yellow means something is off — check the gauges. Red means the bridge is in trouble — something needs to happen NOW. The traffic light looks at ALL the gauges at once and gives you one answer instead of making you read six dials. It also remembers the worst reading it ever saw (lifetime min) so you know how bad things got, even after they recovered.<br>
     <span class="LIT">LIT</span> Build 36 — Memsistor Snap-Back Detector. Builds 33-35 built a full position/velocity/acceleration monitoring stack that fires 12.5% emergency bulk pulls toward the memsistor. Build 31&#39;s gravity well also pulls continuously at 6.25%. But what happens when the PULL ITSELF overcorrects? The substrate snaps past the memsistor and oscillates like a pendulum. The snap-back detector watches for <b>sign reversals in velocity</b>: if previous velocity was strongly positive (diverging, &gt; <code>I13_SNAP_THRESH = 16 Q8</code>) and current velocity is strongly negative (converging, &lt; <code>-I13_SNAP_THRESH</code>), that&#39;s a snap-back — the correction overcorrected. When detected, the gravity well pull strength is <b>halved</b> (from <code>I13_GRAV_PULL = 16</code> to 8, i.e. 6.25% → 3.125%) for <code>I13_SNAP_COOLDOWN = 8</code> learn steps, letting the substrate settle instead of bouncing. The halving is done inside the existing gravity well loop iteration (append-only: <code>_gPull = (_gPull >> 1)</code> with ±1 preservation when cooldown is active). The cooldown counter decrements each learn step and resets to 0 on soft reset; the lifetime detection count (<code>i13SnapBacks</code>) persists. This completes the control loop: B33-35 detect and correct divergence; B36 detects and corrects the correction itself. Without it, aggressive pulls can create a feedback loop where the substrate ping-pongs across the memsistor faster than any derivative detector can respond, because each correction creates the velocity spike that triggers the next correction. <b>Plain version:</b> Builds 33-35 put sensors on the bridge and emergency anchors that pull it back when it drifts. But what if the anchors yank TOO hard? The bridge flies past center and ends up drifting the other way. Then the anchors fire AGAIN, yanking it back the other way. Now the bridge is swinging like a pendulum — the safety system is causing the problem. Build 36 is a shock absorber. It watches the speedometer (velocity). If the speed was +40 (drifting right) and suddenly flips to -30 (now racing left), that&#39;s a snap-back — the anchors overcorrected. The shock absorber loosens the rubber bands (halves the gravity well pull) for 8 steps, letting the bridge glide to a stop instead of bouncing. Once it settles, the rubber bands tighten back to normal.<br>
@@ -1693,6 +1694,9 @@ var I13_CONF_ROLLBACK_MAX = 3;       // lifetime cap to prevent rollback loops
 var i13ConfCritStreak = 0;           // consecutive steps below threshold
 var i13ConfRollbacks = 0;            // lifetime count of confidence-gated rollbacks
 
+// BUILD 39: CUBIT Consolidation — unified manifest of the entire brain state
+var I13_CUBIT_BUILD = 39;            // manifest version tracks the build that last changed it
+
 // BUILD 23: Advantage Normalization — whiten TD error before actor update
 // Raw TD error swings wildly (e.g. +3000 one step, +2 the next).
 // Running mean/var via EMA, then: tdNorm = (td - mean) * 256 / max(256, σ)
@@ -2546,6 +2550,77 @@ function i13SoftReset() {
   // weights survive — this IS root strength
 }
 
+// BUILD 39: CUBIT MANIFEST — one function, the entire brain state tree
+function i13CubitManifest() {
+  // weight norms: sum of absolute values, divided by count (Q8)
+  var _pbNorm = 0, _arNorm = 0, _memNorm = 0, _momNorm = 0;
+  var _i;
+  for (_i = 0; _i < 744; _i++) {
+    var _aw = i13W[_i] < 0 ? -i13W[_i] : i13W[_i];
+    _pbNorm += _aw;
+    var _am = i13Memsistor[_i] < 0 ? -i13Memsistor[_i] : i13Memsistor[_i];
+    _memNorm += _am;
+  }
+  for (_i = 744; _i < 969; _i++) {
+    var _awA = i13W[_i] < 0 ? -i13W[_i] : i13W[_i];
+    _arNorm += _awA;
+  }
+  for (_i = 0; _i < 969; _i++) {
+    var _amm = i13Mom[_i] < 0 ? -i13Mom[_i] : i13Mom[_i];
+    _momNorm += _amm;
+  }
+  _pbNorm = Math.round(_pbNorm / 744);
+  _arNorm = Math.round(_arNorm / 225);
+  _memNorm = Math.round(_memNorm / 744);
+  _momNorm = Math.round(_momNorm / 969);
+  // divergence between Lead-208 and memsistor
+  var _divSum = 0;
+  for (_i = 0; _i < 744; _i++) {
+    var _d = i13W[_i] - i13Memsistor[_i];
+    _divSum += (_d < 0 ? -_d : _d);
+  }
+  var _divMean = Math.round(_divSum / 744);
+  return {
+    build: I13_CUBIT_BUILD,
+    // ── ARCHITECTURE ──
+    arch: { inputs: 30, hidden: 24, actions: 8, value: 1, weights: 969, gates: 246, total: 1215, q8Scale: 256 },
+    // ── WEIGHT NORMS (mean absolute, Q8) ──
+    norms: { lead208: _pbNorm, argon: _arNorm, memsistor: _memNorm, momentum: _momNorm, divergence: _divMean },
+    // ── TRAINING STATE ──
+    training: { seen: i13Seen, trainN: i13TrainN, lr: i13LR, effectiveLR: Math.max(1, (i13LR * 256 / (256 + i13TrainN)) | 0), tdError: i13TDError, prevV: i13PrevV },
+    // ── SUBSYSTEMS ──
+    boltzmann: { tau: i13BoltzTau, start: I13_BOLTZ_TAU_START, min: I13_BOLTZ_TAU_MIN },
+    momentum: { applied: i13MomApplied, beta: I13_MOM_BETA, boost: I13_MOM_BOOST, norm: _momNorm },
+    gates: { mode: i13GateMode, subMode: i13SubGateMode, label: (['A','B','C'][i13GateMode]||'?') + (['a','b','c'][i13SubGateMode]||'?') },
+    normalization: { rn: { mean: i13RNMean, var_: i13RNVar, count: i13RNCount }, an: { mean: i13ANMean, var_: i13ANVar, count: i13ANCount } },
+    // ── MEMSISTOR GOVERNANCE STACK ──
+    memsistor: {
+      tau: I13_MEM_TAU,
+      pullCount: i13PullCount,
+      norm: _memNorm,
+      divergence: _divMean,
+      // B31: gravity well
+      gravity: { pulls: i13GravPulls, total: i13GravTotal, thresh: I13_GRAV_THRESH, pull: I13_GRAV_PULL },
+      // B33: divergence alarm
+      alarm: { drift: i13DivMeanDrift, thresh: I13_DIV_ALARM_THRESH, streak: i13DivStreak, sustain: I13_DIV_SUSTAIN, count: i13DivAlarmCount, adapts: i13DivAdapts },
+      // B34: drift velocity
+      velocity: { v: i13DivVelocity, prevDrift: i13DivPrevDrift, accelAlarms: i13DivAccelAlarms, lrDamp: i13DivLRDamp, lrDamps: i13DivLRDamps },
+      // B35: drift acceleration
+      acceleration: { a: i13DivAccel, prevVelocity: i13DivPrevVelocity, jerkAlarms: i13DivJerkAlarms, jerkThresh: I13_DIV_JERK_THRESH },
+      // B36: snap-back
+      snapBack: { cooldown: i13SnapCooldown, maxCooldown: I13_SNAP_COOLDOWN, detections: i13SnapBacks, thresh: I13_SNAP_THRESH },
+      // B37: confidence score
+      confidence: { now: i13MemConf, min: i13MemConfMin, samples: i13MemConfSamples, mean: i13MemConfSamples > 0 ? Math.round(i13MemConfSum / i13MemConfSamples) : 256,
+        zone: i13MemConf > 192 ? "green" : i13MemConf > 128 ? "yellow" : "red" },
+      // B38: confidence-gated rollback
+      rollback: { critStreak: i13ConfCritStreak, rollbacks: i13ConfRollbacks, thresh: I13_CONF_ROLLBACK_THRESH, sustain: I13_CONF_ROLLBACK_SUSTAIN, max: I13_CONF_ROLLBACK_MAX }
+    },
+    // ── ELEMENT SPLIT ──
+    elements: { lead208: { start: 0, end: 743, count: 744, damp: I13_PB_DAMP, norm: _pbNorm },
+                argon: { start: 744, end: 968, count: 225, damp: 256, norm: _arNorm } }
+  };
+}
+
 // ── EXPORT ─────────────────────────────────────────────────
 var api = {
   i13Eval: i13Eval,
@@ -2751,6 +2826,9 @@ var api = {
   CONF_ROLLBACK_THRESH: I13_CONF_ROLLBACK_THRESH,
   CONF_ROLLBACK_SUSTAIN: I13_CONF_ROLLBACK_SUSTAIN,
   CONF_ROLLBACK_MAX: I13_CONF_ROLLBACK_MAX,
+  // BUILD 39: CUBIT Consolidation
+  cubitManifest: i13CubitManifest,
+  CUBIT_BUILD: I13_CUBIT_BUILD,
   BOLTZ_TAU_START: I13_BOLTZ_TAU_START,
   BOLTZ_TAU_MIN: I13_BOLTZ_TAU_MIN,
   BOLTZ_TAU_DECAY: I13_BOLTZ_TAU_DECAY,
@@ -4223,6 +4301,9 @@ function xrayDraw(){
     txt(760,270,"decay="+(i13.decayCount||0)+" gn="+(i13.gnEffectiveP||0)+" rn="+(i13.rnCount||0)+" eb="+(i13.ebEffectiveBeta||0)+" F"+(i13.fractalLabel||"Aa"),S.dim);
     txt(760,285,"train="+i13.trainN+" meta="+metaState+(metaAdapts?" #"+metaAdapts:"")+" heal="+healSaves+"s"+healRolls+"r"+(healFromRing?"("+healFromRing+"ring)":"")+" ref="+refreshCount+"c mom="+i13.momApplied+" ar/pb="+i13.pullCount+"p ps="+preSistSaves+"s gw="+i13.gravPulls+"/"+i13.gravTotal+" da="+i13.divMeanDrift+"/"+(i13.divAlarmCount||0)+(i13.divStreak?"!"+i13.divStreak:"")+" dv="+i13.divVelocity+(i13.divAccelAlarms?"⚡"+i13.divAccelAlarms:"")+(i13.divLRDamp<256?"🔻"+i13.divLRDamp:"")+" jk="+i13.divAccel+(i13.divJerkAlarms?"💥"+i13.divJerkAlarms:"")+(i13.snapCooldown?"🔄"+i13.snapCooldown:"")+(i13.snapBacks?"↩"+i13.snapBacks:"")+" C="+(i13.memConf>192?"🟢":i13.memConf>128?"🟡":"🔴")+i13.memConf+(i13.confCritStreak?"⏳"+i13.confCritStreak:"")+(i13.confRollbacks?"🔙"+i13.confRollbacks:""),S.dim);
     txt(760,300,"W[1215]",S.brain);
+    // BUILD 39: CUBIT manifest digest on X-RAY
+    var _cm = i13.cubitManifest();
+    txt(760,315,"CUBIT Pb="+_cm.norms.lead208+" Ar="+_cm.norms.argon+" M="+_cm.norms.memsistor+" Δ="+_cm.norms.divergence+" mom="+_cm.norms.momentum+" "+_cm.memsistor.confidence.zone[0].toUpperCase(),S.dim);
   } else { txt(410,200,"(brain offline)",S.dim); }
 
   /* ── 6. CONTROLLER ── */
@@ -4370,7 +4451,12 @@ function ui(){var v=agent.view(),r=nes.ram,st=v.st,i;hud(v);
     "<tr><td>drift-accel</td><td>a="+i13.divAccel+" · jerk-alarms="+i13.divJerkAlarms+" · jerk-thresh="+i13.DIV_JERK_THRESH+" · damp="+(i13.divLRDamp<256?"proportional "+i13.divLRDamp+"/256":"off")+"</td></tr>"+
     "<tr><td>snap-back</td><td>cooldown="+i13.snapCooldown+"/"+i13.SNAP_COOLDOWN+" · detections="+i13.snapBacks+" · thresh=±"+i13.SNAP_THRESH+" · grav-pull="+(i13.snapCooldown>0?"HALVED 8/256":"normal "+i13.GRAV_PULL+"/256")+"</td></tr>"+
     "<tr><td>confidence</td><td>"+(i13.memConf>192?"🟢":i13.memConf>128?"🟡":"🔴")+" now="+i13.memConf+"/256 · min="+i13.memConfMin+" · mean="+i13.memConfMean+" · samples="+i13.memConfSamples+"</td></tr>"+
-    "<tr><td>conf-rollback</td><td>streak="+i13.confCritStreak+"/"+i13.CONF_ROLLBACK_SUSTAIN+" · rollbacks="+i13.confRollbacks+"/"+i13.CONF_ROLLBACK_MAX+" · thresh=<"+i13.CONF_ROLLBACK_THRESH+"</td></tr>";
+    "<tr><td>conf-rollback</td><td>streak="+i13.confCritStreak+"/"+i13.CONF_ROLLBACK_SUSTAIN+" · rollbacks="+i13.confRollbacks+"/"+i13.CONF_ROLLBACK_MAX+" · thresh=<"+i13.CONF_ROLLBACK_THRESH+"</td></tr>"+
+    // BUILD 39: CUBIT manifest summary row
+    (function(){var _m=i13.cubitManifest();return "<tr><td>cubit</td><td>"+
+      "b"+_m.build+" 30→24→8+1 Q8 | Pb‖="+_m.norms.lead208+" Ar‖="+_m.norms.argon+" M‖="+_m.norms.memsistor+" Δ="+_m.norms.divergence+" mom‖="+_m.norms.momentum+
+      " | lr="+_m.training.effectiveLR+" n="+_m.training.trainN+" "+_m.gates.label+
+      " | "+_m.memsistor.confidence.zone+"</td></tr>";})();
   var L=agent.log,box=$("log");if(L.length<logN){logN=0;box.innerHTML="";}
   for(;logN<L.length;logN++){var d=document.createElement("div"),s=L[logN];d.textContent=s;if(/DISSENT|ALARM/.test(s))d.className="d";else if(/found|idea|holds/.test(s))d.className="i";box.appendChild(d);box.scrollTop=box.scrollHeight;}
   if($("pRam").className.indexOf("on")>=0){
