@@ -1,0 +1,17 @@
+/* AV-106: pre-action multisensory convergence. Human-labeled outcomes only. */
+(function(g){'use strict';
+const copy=x=>JSON.parse(JSON.stringify(x));const finite=Number.isFinite;
+function features(s,trace){const f={};const put=(k,v)=>{if(finite(v))f[k]=v};
+for(let i=0;i<(s.ram?.length||0);i++)put('RAM:'+i,s.ram[i]);
+for(const p of s.sprites||[]){put('OAM:'+p.id+':X',p.x);put('OAM:'+p.id+':Y',p.y);put('OAM:'+p.id+':TILE',p.tile);put('OAM:'+p.id+':ATTR',p.attr)}
+for(const [k,v] of Object.entries(s.cpu||{}))put('CPU:'+k,typeof v==='boolean'?Number(v):v);
+for(const [k,v] of Object.entries(s.apu||{}))for(const [a,b] of Object.entries(v||{}))put('APU:'+k+':'+a,typeof b==='boolean'?Number(b):b);
+if(trace&&trace.source_root===s.root&&trace.frame<=s.frame&&s.frame-trace.frame<=6){put('VISION:DELTA',trace.delta);for(const r of trace.regions||[])put('VISION:'+r.id,r.delta)}
+for(const [k,v] of Object.entries(s.audio||{}))put('AUDIO:'+k,v);
+for(let i=0;i<(s.ppu?.length||0);i+=64){let sum=0;for(let j=i;j<Math.min(i+64,s.ppu.length);j++)sum+=s.ppu[j];put('PPU:'+i,sum)}
+return f}
+function create(){let rows=[],pending=new Map(),seen=new Set();function capture(s,trace){if(!s?.root||!s.rom||!Number.isSafeInteger(s.frame))return false;const k=s.root+'|'+s.frame;pending.set(k,{root:s.root,rom:s.rom,frame:s.frame,features:features(s,trace)});if(pending.size>208)pending.delete(pending.keys().next().value);return true}
+function label(row){if(!row?.root||!row.executed||!['SUCCESS','FAILURE'].includes(row.outcome)||!row.steps?.length)return false;const st=row.steps[0],k=row.root+'|'+st.frame;if(seen.has(row.root)||!pending.has(k))return false;const p=pending.get(k);if(p.rom!==row.rom)return false;rows.push({...p,hash:st.hash,action:row.button,outcome:row.outcome});seen.add(row.root);pending.delete(k);if(rows.length>208)rows.shift();return true}
+function rank(rom,action){const data=rows.filter(x=>x.rom===rom&&x.action===action);const train=data.filter((x,i)=>i%3!==2),test=data.filter((x,i)=>i%3===2);const pos=train.filter(x=>x.outcome==='SUCCESS'),neg=train.filter(x=>x.outcome==='FAILURE');if(pos.length<3||neg.length<3)return {state:'INSUFFICIENT',total:data.length,train:train.length,test:test.length,ranked:[]};const keys=Object.keys(pos[0].features);const out=[];for(const key of keys){const a=pos.map(x=>x.features[key]),b=neg.map(x=>x.features[key]);if([...a,...b].some(v=>!finite(v)))continue;const mean=x=>x.reduce((s,v)=>s+v,0)/x.length;const ma=mean(a),mb=mean(b);if(ma===mb)continue;const lo=Math.min(...a,...b),hi=Math.max(...a,...b);const score=Math.abs(ma-mb)/(hi-lo);const threshold=(ma+mb)/2;const direction=ma>mb?1:-1;const hold=test.filter(x=>finite(x.features[key]));const hp=hold.filter(x=>x.outcome==='SUCCESS'),hn=hold.filter(x=>x.outcome==='FAILURE');const match=x=>(direction*(x.features[key]-threshold)>0)===(x.outcome==='SUCCESS');const validation=hp.length>=2&&hn.length>=2?(hp.filter(match).length/hp.length+hn.filter(match).length/hn.length)/2:null;out.push({key,score,threshold,direction,validation,holdout:hold.length,claim:'candidate association only'})}out.sort((a,b)=>b.score-a.score||a.key.localeCompare(b.key));return {state:'EXPLORATORY',total:data.length,train:train.length,test:test.length,ranked:out.slice(0,24)}}
+return {capture,label,rank,rows:()=>copy(rows),actions:rom=>[...new Set(rows.filter(x=>x.rom===rom).map(x=>x.action))]}}
+g.JaneConvergence={create,features};})(typeof window==='undefined'?globalThis:window);
