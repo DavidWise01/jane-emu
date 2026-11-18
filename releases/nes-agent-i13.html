@@ -319,6 +319,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:16px;border-radius:3px;bac
     <span class="AMBER">AMBER</span> Picture chip, sound and mappers 1 2 3 4 7 9: exercised by the two built-in carts (mappers 0 and 2) only; your own cartridges are untested here.<br>
     <span class="AMBER">AMBER</span> The imagination fits games with a reward byte and a thing to approach or avoid. It cannot start until the score byte is found, so there is a reactive warm-up first.<br>
     <span class="LIT">LIT</span> Build 20 — Compound Chroma: CHROMA wheel upgraded from single derived hue to <code>{{ r8!,g8!,b8! || or6!,yl6!,pu6!,gr6! || }}</code>. Level 1: 3 primaries at 8-bit (R=me byte, G=key byte, B=gap remapped). Level 2: 4 secondaries at 6-bit derived from inter-primary relationships (OR=R+G warm, YL=R+2G yellow, PU=R+B cool, GR=G+B green). Hue is now DERIVED from composed RGB, not stored. 48-bit chroma address. Compound channels in OBS leaf digest (Merkle evidence chain). Append-only — old chroma backward compat preserved.<br>
+    <span class="LIT">LIT</span> Build 43 — Drift Histogram Trend. Build 42 gives the shape of drift at one instant — a snapshot. But a snapshot cannot tell you whether things are getting worse or better. Build 43 tracks a 16-step exponential moving average of each histogram bucket (Q8, τ=32/256≈0.125). Four EMA values track the smoothed calm, mild, hot, and extreme bucket counts over time. The key detector: when the extreme-EMA rises for <code>I13_EXTREME_TREND_SUSTAIN (4)</code> consecutive learn steps AND the previous extreme-EMA was already nonzero, that is a structural drift problem — not a one-step spike but a persistent pattern of weights entering the extreme zone. The <code>i13StructuralDrift</code> flag goes to 1 and <code>i13StructuralDriftTotal</code> increments (lifetime counter). When the extreme-EMA stops rising or hits zero, the flag clears and the consecutive counter resets. During warmup (B40), all trend state is suppressed to zero — same principle as the other governance subsystems. No new persistent state — the EMA is derived from the histogram which is derived from the weights. Visible on X-RAY as a 4-number EMA sparkline <code>TREND [ema0|ema1|ema2|ema3]</code> with STRUCTURAL flag when active, and in stats as a trend row showing the EMA values, the rise counter, and the structural drift flag. <b>Plain version:</b> Build 42 gave you a thermometer — it reads the temperature RIGHT NOW. But a thermometer cannot tell you whether the patient is getting sicker or recovering. Build 43 gives you a TREND LINE. It watches the thermometer over time and says: &#34;the number of emergency-temperature students has been rising for 4 readings in a row.&#34; That is not a spike — that is a fever that is getting worse. One hot reading could be noise. Four consecutive increases in the smoothed average means something structural is wrong with the classroom HVAC, not just one sick kid. The flag says: &#34;this is not random — something is broken.&#34;<br>
     <span class="LIT">LIT</span> Build 42 — Memsistor Drift Histogram. The divergence alarm (Build 33) uses mean absolute drift — one number for 744 weights. A mean hides structure: 740 weights at drift=2 and 4 weights at drift=500 gives meanDrift≈4.7, well below the alarm threshold of 96. But those 4 weights are catastrophically diverged and the mean cannot see them. Build 42 adds a 4-bucket histogram computed inside the existing Lead-208 loop (zero new loops): <code>[0,32)</code> calm, <code>[32,96)</code> mild, <code>[96,256)</code> hot, <code>[256+)</code> extreme. Each weight&#39;s <code>|W[i] - memsistor[i]|</code> sorts into one bucket per learn step. The extreme bucket feeds directly into the confidence score as a penalty: <code>conf -= min(48, extreme_count × 4)</code>. Even one extremely-diverged weight now costs confidence — the flat mean can no longer hide outliers. No new persistent state — the histogram is recomputed each step from the existing drift values. Visible on X-RAY as a 4-number sparkline <code>DRIFT [calm|mild|hot|extreme]</code> and in stats as a histogram row showing all bucket counts plus the confidence penalty when extreme weights exist. <b>Plain version:</b> Imagine you have 744 students and you check their temperature. The old system reported the AVERAGE temperature: 98.7°F. Sounds fine! But what if 4 students have 106°F fevers? The average hides them in the crowd of 740 healthy students. Build 42 sorts every student into groups: Normal, Warm, Hot, and Emergency. Now you can see: &#34;740 normal, 0 warm, 0 hot, 4 EMERGENCY.&#34; Those 4 emergency students each cost you 4 points of confidence. The average never changed, but now you can see the shape of the problem.<br>
     <span class="LIT">LIT</span> Build 41 — Warmup-Aware Memsistor Seeding. Build 40 suppressed governance during the first 512 learn steps (warmup), but the memsistor EMA (τ=8/256≈0.03) was still running — tracking weights through the entire warmup via its slow exponential average. By step 512, the memsistor shadow has absorbed 512 steps of noise-contaminated EMA updates. It is dragging stale noise into post-warmup governance: the gravity well pulls toward a noise-smeared reference, and the divergence alarm measures drift from a contaminated baseline. Build 41: at the exact moment warmup completes (trainN crosses <code>I13_WARMUP_STEPS</code>), one-time hard copy the current weights into the memsistor: <code>memsistor[i] = W[i]</code> for all 744 Lead-208 weights. This overwrites the noise-contaminated EMA with the actual trained state at warmup-end. New mutable state: <code>i13WarmupSeeded</code> (0/1 lifetime flag) — checked once per learn step, fires exactly once. After seeding, the gravity well and divergence alarm start measuring from a clean baseline — the real trained substrate, not a ghost of 512 steps of bootstrapping noise. Persists through save/load. Resets on ROM load (new game = new training). Does NOT reset on soft reset (it is a lifetime training milestone, not per-fight state). <b>Plain version:</b> Build 40 told the alarm system to stay quiet while the engine warms up. Good — no false alarms. But there is a hidden problem. The memsistor shadow is like a running average of where the engine has been. During warmup, the engine is wild — revving, stalling, sputtering. The shadow was averaging ALL of that noise into its memory. When warmup ends and the alarms come online, they compare the engine to the shadow — but the shadow remembers the noise, not the trained engine. Build 41: when warmup finishes, take a fresh photograph of the engine RIGHT NOW and replace the blurry old photograph. From this moment on, every measurement starts from the real thing, not from a smeared memory of chaos.<br>
     <span class="LIT">LIT</span> Build 40 — Memsistor Warmup Ramp. When a ROM loads, Lead-208 starts with random weights and memsistor starts as a copy of them. The memsistor EMA (τ=8/256≈0.03) is designed for stability tracking of a TRAINED substrate. During the first ~500 learn steps, weights are churning wildly as the brain bootstraps from noise — the memsistor is tracking noise, gravity well pulls toward noise, and divergence alarm can false-fire on healthy exploration. Build 40 adds a warmup ramp: for the first <code>I13_WARMUP_STEPS (512)</code> learn steps, the governance stack runs at reduced authority. Gravity pull strength scales linearly from 0% to 100% via Q8 factor <code>_warmup40 = (trainN * 256) / 512</code>. All alarm effects are suppressed: divergence streak zeroed, LR damping released, confidence pinned at 256, rollback streak cleared. After warmup completes (trainN ≥ 512), all systems engage at full authority — the governor UNDERSTANDS cold start. No new state variables — reads existing <code>i13TrainN</code>. CUBIT manifest updated with <code>memsistor.warmup</code> sub-object: steps, progress, factor (0-256 Q8), active (boolean). Visible on X-RAY as a WARMUP progress bar during active warmup, and in stats as a warmup row showing ACTIVE/COMPLETE. FREEZE-AT-V0 compliant: existing governance code unchanged. Gravity pull constant saved before the Lead-208 loop, scaled by warmup factor, restored after. All suppressions are APPENDED after the existing alarm sections. <b>Plain version:</b> Imagine you just installed all those gauges and sensors on a brand-new engine that hasn&#39;t been started yet. When you first turn the key, the engine is SUPPOSED to rev wildly — it&#39;s warming up. But the alarm system doesn&#39;t know that — it sees wild numbers and panics. &#34;Engine unstable! Brakes overheating! Steering drifting!&#34; None of that is real — it&#39;s just cold-start noise. Build 40 tells the alarm system: &#34;for the first 512 learning steps, ease into it. Start with the rubber bands at zero tension and slowly tighten them. Don&#39;t sound any alarms. The traffic light stays green. Once the engine is warm, THEN you can start watching for real trouble.&#34; The difference between a good governor and a panicky one is knowing what cold start looks like.<br>
@@ -1698,7 +1699,7 @@ var i13ConfCritStreak = 0;           // consecutive steps below threshold
 var i13ConfRollbacks = 0;            // lifetime count of confidence-gated rollbacks
 
 // BUILD 39: CUBIT Consolidation — unified manifest of the entire brain state
-var I13_CUBIT_BUILD = 42;            // manifest version tracks the build that last changed it
+var I13_CUBIT_BUILD = 43;            // manifest version tracks the build that last changed it
 
 // BUILD 40: Memsistor Warmup Ramp — governance at reduced authority during cold start
 // During first I13_WARMUP_STEPS learn steps, gravity pull scales 0→full,
@@ -1718,6 +1719,16 @@ var I13_DRIFT_HIST_B1 = 32;          // bucket boundary: calm → mild
 var I13_DRIFT_HIST_B2 = 96;          // bucket boundary: mild → hot
 var I13_DRIFT_HIST_B3 = 256;         // bucket boundary: hot → extreme
 var I13_DRIFT_HIST_PENALTY = 4;      // confidence penalty per extreme-bucket weight (Q8)
+
+// BUILD 43: Drift Histogram Trend — EMA of each bucket over time
+// Position (B42) → Velocity (B43). Tracks whether extreme weights are growing or draining.
+// τ=32/256≈0.125 — responsive enough to catch 4-step trends, smooth enough to ignore spikes.
+var i13DriftHistEMA = [0, 0, 0, 0];  // EMA of [calm, mild, hot, extreme] bucket counts (Q8)
+var I13_DRIFT_HIST_EMA_TAU = 32;     // EMA smoothing constant (Q8, ~0.125)
+var i13ExtremeTrendCount = 0;        // consecutive steps where extreme-EMA rose
+var I13_EXTREME_TREND_SUSTAIN = 4;   // consecutive rises before structural drift flag
+var i13StructuralDrift = 0;          // 0 = no structural drift, 1 = flagged
+var i13StructuralDriftTotal = 0;     // lifetime count of structural drift flags
 
 // BUILD 23: Advantage Normalization — whiten TD error before actor update
 // Raw TD error swings wildly (e.g. +3000 one step, +2 the next).
@@ -2232,6 +2243,30 @@ function i13Learn(reward) {
     for (var _s41 = 0; _s41 < 744; _s41++) i13Memsistor[_s41] = i13W[_s41];
     i13WarmupSeeded = 1;
   }
+  // BUILD 43: Drift Histogram Trend — EMA of each bucket + extreme-rise detector
+  // Position (B42 histogram) → Velocity (B43 trend). Same leap Build 34 made for drift.
+  // EMA: bucket_ema = (bucket_ema * (256 - τ) + bucket_count * τ) >> 8
+  var _prevExtremeEMA = i13DriftHistEMA[3];
+  for (var _t43 = 0; _t43 < 4; _t43++) {
+    i13DriftHistEMA[_t43] = ((i13DriftHistEMA[_t43] * (256 - I13_DRIFT_HIST_EMA_TAU)) + (i13DriftHist[_t43] * I13_DRIFT_HIST_EMA_TAU)) >> 8;
+  }
+  // Detect rising extreme-EMA trend
+  if (i13DriftHistEMA[3] > _prevExtremeEMA && _prevExtremeEMA > 0) {
+    i13ExtremeTrendCount++;
+    if (i13ExtremeTrendCount >= I13_EXTREME_TREND_SUSTAIN) {
+      i13StructuralDrift = 1;
+      i13StructuralDriftTotal++;
+    }
+  } else {
+    i13ExtremeTrendCount = 0;
+    i13StructuralDrift = 0;
+  }
+  // Suppress B43 trend tracking during warmup
+  if (_warmup40 < 256) {
+    i13DriftHistEMA[0] = 0; i13DriftHistEMA[1] = 0; i13DriftHistEMA[2] = 0; i13DriftHistEMA[3] = 0;
+    i13ExtremeTrendCount = 0;
+    i13StructuralDrift = 0;
+  }
   // Argon (W[744..968]): full speed — fast, agile prediction (no damping)
   i13PullCount++;
   // ── BUILD 15: GRADIENT NOISE INJECTION ──
@@ -2667,7 +2702,9 @@ function i13CubitManifest() {
       // B40: warmup ramp
       warmup: { steps: I13_WARMUP_STEPS, progress: Math.min(i13TrainN, I13_WARMUP_STEPS), factor: i13TrainN >= I13_WARMUP_STEPS ? 256 : ((i13TrainN * 256) / I13_WARMUP_STEPS) | 0, active: i13TrainN < I13_WARMUP_STEPS, seeded: i13WarmupSeeded },
       // B42: drift histogram
-      driftHist: { calm: i13DriftHist[0], mild: i13DriftHist[1], hot: i13DriftHist[2], extreme: i13DriftHist[3], bounds: [I13_DRIFT_HIST_B1, I13_DRIFT_HIST_B2, I13_DRIFT_HIST_B3], penalty: I13_DRIFT_HIST_PENALTY }
+      driftHist: { calm: i13DriftHist[0], mild: i13DriftHist[1], hot: i13DriftHist[2], extreme: i13DriftHist[3], bounds: [I13_DRIFT_HIST_B1, I13_DRIFT_HIST_B2, I13_DRIFT_HIST_B3], penalty: I13_DRIFT_HIST_PENALTY },
+      // B43: drift histogram trend
+      driftTrend: { ema: i13DriftHistEMA.slice(), tau: I13_DRIFT_HIST_EMA_TAU, extremeRises: i13ExtremeTrendCount, sustain: I13_EXTREME_TREND_SUSTAIN, structural: i13StructuralDrift, totalFlags: i13StructuralDriftTotal }
     },
     // ── ELEMENT SPLIT ──
     elements: { lead208: { start: 0, end: 743, count: 744, damp: I13_PB_DAMP, norm: _pbNorm },
@@ -2893,6 +2930,10 @@ var api = {
   // BUILD 42: Drift Histogram
   get driftHist() { return i13DriftHist.slice(); },
   DRIFT_HIST_PENALTY: I13_DRIFT_HIST_PENALTY,
+  get driftHistEMA() { return i13DriftHistEMA.slice(); },
+  get structuralDrift() { return i13StructuralDrift; },
+  get structuralDriftTotal() { return i13StructuralDriftTotal; },
+  EXTREME_TREND_SUSTAIN: I13_EXTREME_TREND_SUSTAIN,
   BOLTZ_TAU_START: I13_BOLTZ_TAU_START,
   BOLTZ_TAU_MIN: I13_BOLTZ_TAU_MIN,
   BOLTZ_TAU_DECAY: I13_BOLTZ_TAU_DECAY,
@@ -4374,6 +4415,8 @@ function xrayDraw(){
     if (_cm.memsistor.warmup.seeded) txt(760,345,"MEMSISTOR SEEDED",S.ok);
     // BUILD 42: drift histogram sparkline on X-RAY
     var _dh=_cm.memsistor.driftHist;txt(760,360,"DRIFT ["+_dh.calm+"|"+_dh.mild+"|"+_dh.hot+"|"+_dh.extreme+"]",_dh.extreme>0?S.warn:S.dim);
+    // BUILD 43: drift trend indicator on X-RAY
+    var _dt=_cm.memsistor.driftTrend;txt(760,375,"TREND ["+_dt.ema[0]+"|"+_dt.ema[1]+"|"+_dt.ema[2]+"|"+_dt.ema[3]+"]"+(_dt.structural?" STRUCTURAL":""),_dt.structural?S.bad:_dt.extremeRises>0?S.warn:S.dim);
   } else { txt(410,200,"(brain offline)",S.dim); }
 
   /* ── 6. CONTROLLER ── */
@@ -4535,7 +4578,13 @@ function ui(){var v=agent.view(),r=nes.ram,st=v.st,i;hud(v);
     (function(){var _dh=i13.cubitManifest().memsistor.driftHist;return "<tr><td>drift hist</td><td>"+
       "calm(&lt;"+_dh.bounds[0]+"):"+_dh.calm+" mild(&lt;"+_dh.bounds[1]+"):"+_dh.mild+
       " hot(&lt;"+_dh.bounds[2]+"):"+_dh.hot+" <b>extreme("+_dh.bounds[2]+"+):"+_dh.extreme+"</b>"+
-      (_dh.extreme>0?" — "+_dh.extreme+"×"+_dh.penalty+"="+Math.min(48,_dh.extreme*_dh.penalty)+" conf penalty":"")+"</td></tr>";})();
+      (_dh.extreme>0?" — "+_dh.extreme+"×"+_dh.penalty+"="+Math.min(48,_dh.extreme*_dh.penalty)+" conf penalty":"")+"</td></tr>";})() +
+    // BUILD 43: drift trend stats row
+    (function(){var _dt=i13.cubitManifest().memsistor.driftTrend;return "<tr><td>drift trend</td><td>"+
+      "EMA ["+_dt.ema[0]+"|"+_dt.ema[1]+"|"+_dt.ema[2]+"|"+_dt.ema[3]+"] τ="+_dt.tau+"/256"+
+      " · rises="+_dt.extremeRises+"/"+_dt.sustain+
+      (_dt.structural?" <b>⚠ STRUCTURAL DRIFT</b>":"")+
+      " · total-flags="+_dt.totalFlags+"</td></tr>";})();
   var L=agent.log,box=$("log");if(L.length<logN){logN=0;box.innerHTML="";}
   for(;logN<L.length;logN++){var d=document.createElement("div"),s=L[logN];d.textContent=s;if(/DISSENT|ALARM/.test(s))d.className="d";else if(/found|idea|holds/.test(s))d.className="i";box.appendChild(d);box.scrollTop=box.scrollHeight;}
   if($("pRam").className.indexOf("on")>=0){
