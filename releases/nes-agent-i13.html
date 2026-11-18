@@ -319,6 +319,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:16px;border-radius:3px;bac
     <span class="AMBER">AMBER</span> Picture chip, sound and mappers 1 2 3 4 7 9: exercised by the two built-in carts (mappers 0 and 2) only; your own cartridges are untested here.<br>
     <span class="AMBER">AMBER</span> The imagination fits games with a reward byte and a thing to approach or avoid. It cannot start until the score byte is found, so there is a reactive warm-up first.<br>
     <span class="LIT">LIT</span> Build 20 — Compound Chroma: CHROMA wheel upgraded from single derived hue to <code>{{ r8!,g8!,b8! || or6!,yl6!,pu6!,gr6! || }}</code>. Level 1: 3 primaries at 8-bit (R=me byte, G=key byte, B=gap remapped). Level 2: 4 secondaries at 6-bit derived from inter-primary relationships (OR=R+G warm, YL=R+2G yellow, PU=R+B cool, GR=G+B green). Hue is now DERIVED from composed RGB, not stored. 48-bit chroma address. Compound channels in OBS leaf digest (Merkle evidence chain). Append-only — old chroma backward compat preserved.<br>
+    <span class="LIT">LIT</span> Build 45 — Governance Cascade Summary. The memsistor governance stack is 15 builds deep (B30-B44) with 6 distinct response mechanisms: gravity well (B31), position alarm (B33), velocity LR damp (B34), proportional accel damp (B35), confidence-gated rollback (B38), and structural surgical re-seed (B44). These can fire simultaneously and stack in ways that are hard to reason about by reading 6 separate sub-objects. Build 45 adds a purely diagnostic composite object inside cubitManifest: <code>memsistor.cascade</code>. It computes three things: (1) <b>Pressure</b> — how many of the 6 mechanisms are currently active [0-6]. Each mechanism has a simple on/off test: gravity well has pulls this step, position alarm has an active streak, velocity damp is below 256, acceleration is positive, confidence rollback has a critical streak, structural LR damp is below 256. (2) <b>Combined LR factor</b> — the product of all LR multipliers: <code>(i13DivLRDamp × i13StructDriftLRDamp) >> 8</code>. This is the actual combined throttle effect as a Q8 fraction, plus the percentage for display. (3) <b>Zone</b> — a traffic label: CLEAR (0 active), WATCH (1-2), HEAVY (3-4), STORM (5-6). No new governance logic whatsoever — the cascade object is computed inside cubitManifest and reads only existing state variables. No new mutable state, no save/load changes, no soft-reset changes. Visible on X-RAY as a one-line cascade digest <code>CASCADE p=N/6 LR=N% [ZONE]</code> and in stats as a governance cascade row showing pressure, combined LR, zone, and bold/dim labels for each mechanism showing which are firing right now. <b>Plain version:</b> You have a car with 6 different safety systems: rubber bands, a position alarm, a speedometer brake, a g-force brake, an emergency rewind button, and a surgical repair tool. Each one has its own gauge on the dashboard. Build 45 adds ONE summary panel at the top that says: &#34;3 of 6 systems are currently active. Your combined brake effect is 72%. Status: HEAVY.&#34; Below that, the 6 system names light up when they are on and go dim when they are off. You can see at a glance: rubber bands ON, speedometer brake ON, g-force brake ON, everything else off. No new safety system — just the instrument panel that shows all 6 gauges at once instead of making you read them one by one.<br>
     <span class="LIT">LIT</span> Build 44 — Structural Drift Response. Build 43 detects structural drift — a confirmed pattern of extreme weights growing over 4 consecutive observations. Build 44 completes the detect→respond loop. Response #1: Proportional LR damp based on the extreme-EMA magnitude. <code>LR_damp = 256 - min(96, extremeEMA)</code>. Range 160-256 (62.5%-100%). Stronger than B34/B35 velocity/accel damp because structural drift means the problem has been confirmed over 4+ observations, not just inferred from derivatives. Stacks multiplicatively with B34/B35 damp. Response #2: Surgical re-seed. When structural drift persists for <code>I13_STRUCT_PERSIST (8)</code> consecutive steps — double the detection threshold — a targeted memsistor re-seed fires. Unlike B38 rollback (nuclear: entire brain from pre-sist snapshot), surgical re-seed touches ONLY the extreme-drifting weights: those with <code>|W[i] - memsistor[i]| &gt;= I13_DRIFT_HIST_B3 (256)</code>. For each such weight, <code>memsistor[i] = W[i]</code> — the memsistor reference is updated to match the current weight, so the gravity well stops pulling on these weights. Lifetime cap: <code>I13_SURGICAL_RESEED_MAX (5)</code>. The last re-seed count is tracked for diagnostics. All transient state resets per fight (soft reset); lifetime surgical count persists through save/load. During warmup (B40), all response state is suppressed. <b>Plain version:</b> Build 43 installed a smoke detector. It goes off when it sees smoke rising for 4 readings in a row. But a smoke detector that just beeps does not put out the fire. Build 44 adds the sprinkler system. First sprinkler: when the smoke detector goes off, it slows down the furnace — the more smoke, the more it throttles. This is the LR damp — stop feeding the fire. Second sprinkler: if the smoke detector has been going off for 8 straight readings, it means the furnace throttle was not enough. Time for a targeted intervention. But instead of flooding the whole building (B38 rollback), B44 sends a firefighter to ONLY the rooms that are actually on fire (the extreme-drifting weights). The firefighter resets just those rooms to baseline. Five lifetime interventions allowed before you call the fire marshal.<br>
     <span class="LIT">LIT</span> Build 43 — Drift Histogram Trend. Build 42 gives the shape of drift at one instant — a snapshot. But a snapshot cannot tell you whether things are getting worse or better. Build 43 tracks a 16-step exponential moving average of each histogram bucket (Q8, τ=32/256≈0.125). Four EMA values track the smoothed calm, mild, hot, and extreme bucket counts over time. The key detector: when the extreme-EMA rises for <code>I13_EXTREME_TREND_SUSTAIN (4)</code> consecutive learn steps AND the previous extreme-EMA was already nonzero, that is a structural drift problem — not a one-step spike but a persistent pattern of weights entering the extreme zone. The <code>i13StructuralDrift</code> flag goes to 1 and <code>i13StructuralDriftTotal</code> increments (lifetime counter). When the extreme-EMA stops rising or hits zero, the flag clears and the consecutive counter resets. During warmup (B40), all trend state is suppressed to zero — same principle as the other governance subsystems. No new persistent state — the EMA is derived from the histogram which is derived from the weights. Visible on X-RAY as a 4-number EMA sparkline <code>TREND [ema0|ema1|ema2|ema3]</code> with STRUCTURAL flag when active, and in stats as a trend row showing the EMA values, the rise counter, and the structural drift flag. <b>Plain version:</b> Build 42 gave you a thermometer — it reads the temperature RIGHT NOW. But a thermometer cannot tell you whether the patient is getting sicker or recovering. Build 43 gives you a TREND LINE. It watches the thermometer over time and says: &#34;the number of emergency-temperature students has been rising for 4 readings in a row.&#34; That is not a spike — that is a fever that is getting worse. One hot reading could be noise. Four consecutive increases in the smoothed average means something structural is wrong with the classroom HVAC, not just one sick kid. The flag says: &#34;this is not random — something is broken.&#34;<br>
     <span class="LIT">LIT</span> Build 42 — Memsistor Drift Histogram. The divergence alarm (Build 33) uses mean absolute drift — one number for 744 weights. A mean hides structure: 740 weights at drift=2 and 4 weights at drift=500 gives meanDrift≈4.7, well below the alarm threshold of 96. But those 4 weights are catastrophically diverged and the mean cannot see them. Build 42 adds a 4-bucket histogram computed inside the existing Lead-208 loop (zero new loops): <code>[0,32)</code> calm, <code>[32,96)</code> mild, <code>[96,256)</code> hot, <code>[256+)</code> extreme. Each weight&#39;s <code>|W[i] - memsistor[i]|</code> sorts into one bucket per learn step. The extreme bucket feeds directly into the confidence score as a penalty: <code>conf -= min(48, extreme_count × 4)</code>. Even one extremely-diverged weight now costs confidence — the flat mean can no longer hide outliers. No new persistent state — the histogram is recomputed each step from the existing drift values. Visible on X-RAY as a 4-number sparkline <code>DRIFT [calm|mild|hot|extreme]</code> and in stats as a histogram row showing all bucket counts plus the confidence penalty when extreme weights exist. <b>Plain version:</b> Imagine you have 744 students and you check their temperature. The old system reported the AVERAGE temperature: 98.7°F. Sounds fine! But what if 4 students have 106°F fevers? The average hides them in the crowd of 740 healthy students. Build 42 sorts every student into groups: Normal, Warm, Hot, and Emergency. Now you can see: &#34;740 normal, 0 warm, 0 hot, 4 EMERGENCY.&#34; Those 4 emergency students each cost you 4 points of confidence. The average never changed, but now you can see the shape of the problem.<br>
@@ -1700,7 +1701,7 @@ var i13ConfCritStreak = 0;           // consecutive steps below threshold
 var i13ConfRollbacks = 0;            // lifetime count of confidence-gated rollbacks
 
 // BUILD 39: CUBIT Consolidation — unified manifest of the entire brain state
-var I13_CUBIT_BUILD = 44;            // manifest version tracks the build that last changed it
+var I13_CUBIT_BUILD = 45;            // manifest version tracks the build that last changed it
 
 // BUILD 40: Memsistor Warmup Ramp — governance at reduced authority during cold start
 // During first I13_WARMUP_STEPS learn steps, gravity pull scales 0→full,
@@ -2759,7 +2760,33 @@ function i13CubitManifest() {
       // B43: drift histogram trend
       driftTrend: { ema: i13DriftHistEMA.slice(), tau: I13_DRIFT_HIST_EMA_TAU, extremeRises: i13ExtremeTrendCount, sustain: I13_EXTREME_TREND_SUSTAIN, structural: i13StructuralDrift, totalFlags: i13StructuralDriftTotal },
       // B44: structural drift response
-      driftResponse: { lrDamp: i13StructDriftLRDamp, lrMax: I13_STRUCT_LR_MAX, persistCount: i13StructPersistCount, persistThresh: I13_STRUCT_PERSIST, surgicalReseeds: i13SurgicalReseeds, surgicalMax: I13_SURGICAL_RESEED_MAX, lastReseedWeights: i13SurgicalReseedWeights }
+      driftResponse: { lrDamp: i13StructDriftLRDamp, lrMax: I13_STRUCT_LR_MAX, persistCount: i13StructPersistCount, persistThresh: I13_STRUCT_PERSIST, surgicalReseeds: i13SurgicalReseeds, surgicalMax: I13_SURGICAL_RESEED_MAX, lastReseedWeights: i13SurgicalReseedWeights },
+      // B45: governance cascade summary — all 6 mechanisms in one diagnostic
+      cascade: (function() {
+        var _active = 0;
+        var _g = i13GravPulls > 0 ? 1 : 0; _active += _g;
+        var _p = i13DivStreak > 0 ? 1 : 0; _active += _p;
+        var _v = i13DivLRDamp < 256 ? 1 : 0; _active += _v;
+        var _a = i13DivAccel > 0 ? 1 : 0; _active += _a;
+        var _r = i13ConfCritStreak > 0 ? 1 : 0; _active += _r;
+        var _s = i13StructDriftLRDamp < 256 ? 1 : 0; _active += _s;
+        var _combinedLR = (i13DivLRDamp * i13StructDriftLRDamp) >> 8;
+        return {
+          active: _active,
+          pressure: _active,
+          mechanisms: {
+            gravityWell: { on: _g, pulls: i13GravPulls, build: 31 },
+            positionAlarm: { on: _p, streak: i13DivStreak, alarms: i13DivAlarmCount, build: 33 },
+            velocityDamp: { on: _v, damp: i13DivLRDamp, build: 34 },
+            accelDamp: { on: _a, accel: i13DivAccel, build: 35 },
+            confRollback: { on: _r, critStreak: i13ConfCritStreak, rollbacks: i13ConfRollbacks, build: 38 },
+            structReseed: { on: _s, damp: i13StructDriftLRDamp, reseeds: i13SurgicalReseeds, build: 44 }
+          },
+          combinedLRFactor: _combinedLR,
+          effectiveLRPct: Math.round(_combinedLR * 100 / 256),
+          zone: _active === 0 ? "clear" : _active <= 2 ? "watch" : _active <= 4 ? "heavy" : "storm"
+        };
+      })()
     },
     // ── ELEMENT SPLIT ──
     elements: { lead208: { start: 0, end: 743, count: 744, damp: I13_PB_DAMP, norm: _pbNorm },
@@ -2997,6 +3024,10 @@ var api = {
   STRUCT_LR_MAX: I13_STRUCT_LR_MAX,
   STRUCT_PERSIST: I13_STRUCT_PERSIST,
   SURGICAL_RESEED_MAX: I13_SURGICAL_RESEED_MAX,
+  // BUILD 45: Governance Cascade Summary
+  get cascadePressure() { return i13CubitManifest().memsistor.cascade.pressure; },
+  get cascadeZone() { return i13CubitManifest().memsistor.cascade.zone; },
+  get cascadeLRPct() { return i13CubitManifest().memsistor.cascade.effectiveLRPct; },
   BOLTZ_TAU_START: I13_BOLTZ_TAU_START,
   BOLTZ_TAU_MIN: I13_BOLTZ_TAU_MIN,
   BOLTZ_TAU_DECAY: I13_BOLTZ_TAU_DECAY,
@@ -4482,6 +4513,8 @@ function xrayDraw(){
     var _dt=_cm.memsistor.driftTrend;txt(760,375,"TREND ["+_dt.ema[0]+"|"+_dt.ema[1]+"|"+_dt.ema[2]+"|"+_dt.ema[3]+"]"+(_dt.structural?" STRUCTURAL":""),_dt.structural?S.bad:_dt.extremeRises>0?S.warn:S.dim);
     // BUILD 44: drift response indicator on X-RAY
     var _dr=_cm.memsistor.driftResponse;txt(760,390,"RESP LR="+_dr.lrDamp+"/256 persist="+_dr.persistCount+"/"+_dr.persistThresh+" surg="+_dr.surgicalReseeds+"/"+_dr.surgicalMax+(_dr.lastReseedWeights>0?" ["+_dr.lastReseedWeights+"w]":""),_dr.lrDamp<256?S.bad:_dr.persistCount>0?S.warn:S.dim);
+    // BUILD 45: governance cascade summary on X-RAY
+    var _gc=_cm.memsistor.cascade;txt(760,405,"CASCADE p="+_gc.pressure+"/6 LR="+_gc.effectiveLRPct+"% ["+_gc.zone.toUpperCase()+"]",_gc.zone==="storm"?S.bad:_gc.zone==="heavy"?S.warn:_gc.zone==="watch"?S.ok:S.dim);
   } else { txt(410,200,"(brain offline)",S.dim); }
 
   /* ── 6. CONTROLLER ── */
@@ -4656,6 +4689,16 @@ function ui(){var v=agent.view(),r=nes.ram,st=v.st,i;hud(v);
       " · persist="+_dr.persistCount+"/"+_dr.persistThresh+
       " · surgical-reseeds="+_dr.surgicalReseeds+"/"+_dr.surgicalMax+
       (_dr.lastReseedWeights>0?" <b>last-reseed="+_dr.lastReseedWeights+" weights</b>":"")+
+      "</td></tr>";})() +
+    // BUILD 45: governance cascade summary stats row
+    (function(){var _gc=i13.cubitManifest().memsistor.cascade;var _m=_gc.mechanisms;return "<tr><td>gov cascade</td><td>"+
+      "pressure="+_gc.pressure+"/6 · LR="+_gc.effectiveLRPct+"% · ["+_gc.zone.toUpperCase()+"]"+
+      " · "+(_m.gravityWell.on?"<b>GRAV</b>":"grav")+
+      " "+(_m.positionAlarm.on?"<b>POS</b>":"pos")+
+      " "+(_m.velocityDamp.on?"<b>VEL</b>":"vel")+
+      " "+(_m.accelDamp.on?"<b>ACC</b>":"acc")+
+      " "+(_m.confRollback.on?"<b>ROLL</b>":"roll")+
+      " "+(_m.structReseed.on?"<b>SURG</b>":"surg")+
       "</td></tr>";})();
   var L=agent.log,box=$("log");if(L.length<logN){logN=0;box.innerHTML="";}
   for(;logN<L.length;logN++){var d=document.createElement("div"),s=L[logN];d.textContent=s;if(/DISSENT|ALARM/.test(s))d.className="d";else if(/found|idea|holds/.test(s))d.className="i";box.appendChild(d);box.scrollTop=box.scrollHeight;}
