@@ -75,7 +75,7 @@ pre{margin:5px 0;padding:4px;border:0;border-left:1px solid #48464b;background:#
 /* AV-102.2: canvas-first compact stage */
 @media(min-width:901px){html,body{height:100%;overflow:hidden}body{display:flex;flex-direction:column}header{flex:none;min-height:32px;padding:2px 8px}.art-brand svg{width:23px;height:23px}.art-brand h1{font-size:14px}main{flex:1;min-height:0;display:flex;flex-direction:column;padding:3px 6px}.toolbar{flex:none;gap:4px;padding:2px 0 4px;margin-bottom:3px}.toolbar button,.toolbar input,.toolbar select{font-size:10px;padding:2px 4px}.grid{flex:1;min-height:0;grid-template-columns:minmax(0,1fr) 220px;gap:5px;align-items:stretch}.stage-panel{display:flex;flex-direction:column;min-height:0}.stage-panel>.row{flex:none;height:19px}.game{flex:1;min-height:0;height:auto}.stage-panel>.meters{flex:none;margin:2px 0 0}.grid>.panel:nth-child(2){min-height:0;max-height:none;padding-left:5px}.instrument{padding:3px 0}.instrument summary{font-size:10px;padding:2px 0}.instrument[open]>summary{margin-bottom:3px}.trace-grid span{height:11px;font-size:7px}.trace-preview{height:40px;max-height:40px}.instrument pre{max-height:64px;font-size:9px;padding:3px}.art-brand small{font-size:8px}}
 </style></head><body>
-<header><div class="art-brand"><svg viewBox="0 0 44 44" width="30" height="30" aria-hidden="true"><circle cx="22" cy="22" r="19" fill="none" stroke="#ba995c" stroke-width="1"/><ellipse cx="22" cy="22" rx="19" ry="8" fill="none" stroke="#658e91" transform="rotate(-45 22 22)"/><ellipse cx="22" cy="22" rx="19" ry="8" fill="none" stroke="#8b779e" transform="rotate(45 22 22)"/><circle cx="22" cy="22" r="3" fill="#eed399"/></svg><h1>JANE <span>/ Z184</span></h1><small>ART &amp; INSTRUMENT · AV-106 · CONVERGENCE</small></div><a href="./">Archive ↗</a></header>
+<header><div class="art-brand"><svg viewBox="0 0 44 44" width="30" height="30" aria-hidden="true"><circle cx="22" cy="22" r="19" fill="none" stroke="#ba995c" stroke-width="1"/><ellipse cx="22" cy="22" rx="19" ry="8" fill="none" stroke="#658e91" transform="rotate(-45 22 22)"/><ellipse cx="22" cy="22" rx="19" ry="8" fill="none" stroke="#8b779e" transform="rotate(45 22 22)"/><circle cx="22" cy="22" r="3" fill="#eed399"/></svg><h1>JANE <span>/ Z184</span></h1><small>ART &amp; INSTRUMENT · AV-106.1 · HANDOFF</small></div><a href="./">Archive ↗</a></header>
 <main>
 <div class="toolbar">
 <label>Load your NES ROM <input id="romAll" type="file" accept=".nes"></label>
@@ -193,13 +193,14 @@ function switchTurn(reason,verified){
    }
    effectArmed=null;renderEffect();
  }
+ const next=(active+1)%3;const transfer=w().JANE_PLAYER_STATE?.switchTo(people[next].name,people[next].observations);if(!transfer?.ok){status('Handoff blocked: player state unavailable');return false}window.JANE_ABC?.abort();
  const leaving=people[active];leaving.turns++;
- const old=active;active=(active+1)%3;handoffs++;
+ const old=active;active=next;handoffs++;lastTrials=transfer.trials;seenTrialIds.clear();for(const t of w().JANE_PERCEPTION?.diagnostics?.().recentTrials||[])seenTrialIds.add(String(t.id)+'|'+String(t.started||t.startFrame||0)+'|'+String(t.preHash||''));
  turnStarted=frame;lifeHoldoff=frame+120;
- entriesPush({kind:'handoff',actor:leaving.name,to:people[active].name,frame,game_root:gameRoot,verified,reason});
+ entriesPush({kind:'handoff',actor:leaving.name,to:people[active].name,frame,game_root:gameRoot,verified,reason,player_state:transfer});
  // Do not reset NES; only update which policy schedule controls Player 1.
  setProfile();coach?.setEnabled(coachEnabled&&active===0);$('handoffs').textContent=handoffs;
- status(leaving.name+' → '+people[active].name+' · '+reason+' · same NES state');
+ status(leaving.name+' → '+people[active].name+' · '+transfer.trials+' recalled trials · '+transfer.watched+' watch records'+(transfer.saved?'':' · outgoing state retained in memory only'));
  return true;
 }
 function readLife(){
@@ -281,6 +282,20 @@ async function init(){
   for(const [source,replacement] of senseHooks){if(!html.includes(source))throw Error('AV-105 sensory hook missing: '+source);html=html.replace(source,replacement)}
   const forkCode=`window.JANE_SENSE_FORK=async function(sequences,gap){const source=window.JANE_FORK_SOURCE.capture();if(!source)return {error:'Await neutral running boundary'};if(!Array.isArray(sequences)||sequences.length!==3||!Number.isInteger(gap)||gap<1||gap>30)return {error:'Invalid fork plan'};const allowed=['UP','DOWN','LEFT','RIGHT','A','B'];if(sequences.some(s=>typeof s!=='string'||s.split('>').length>2||s.split('>').some(b=>!allowed.includes(b))))return {error:'Invalid controller sequence'};const senses=window.parent.JaneSense;const copy=x=>JSON.parse(JSON.stringify(x));const meta={root:'fork',rom:source.rom,frame:source.frame};let results=[];const horizon=48;for(let j=-1;j<3;j++){const keys=j<0?[]:sequences[j].split('>');let pixels=null;const audio=senses.audioMeter();const em=new jsnes.NES({onFrame:p=>{pixels=new Uint32Array(p)},onAudioSample:(l,r)=>audio.ingest(l,r),sampleRate:44100});em.loadROM(source.romData);em.fromJSON(copy(source.state));const before=senses.snapshot(em,meta,null);let timeline=[];for(let t=0;t<horizon;t++){const key=keys[t===0?0:t===gap?1:-1];if(key)em.buttonDown(1,jsnes.Controller['BUTTON_'+key]);for(let k=0;k<keys.length;k++){const start=k===0?0:gap;if(t===start+Math.min(4,gap))em.buttonUp(1,jsnes.Controller['BUTTON_'+keys[k]])}em.frame();if(t%8===7)timeline.push({frame:t+1,audio:audio.take()});if(t%8===7)await new Promise(resolve=>setTimeout(resolve,0))}const after=senses.snapshot(em,{...meta,frame:source.frame+horizon},null);let h=2166136261;for(const p of pixels||[])h=Math.imul(h^p,16777619);results.push({arm:j<0?'QUIET':'ABC'[j],sequence:keys.join('>')||'NONE',rom:source.rom,hash:source.contextHash,ram:senses.difference(before.ram,after.ram),ppu_changes:senses.difference(before.ppu,after.ppu)?.length??null,oam_changes:senses.difference(before.oam,after.oam)?.length??null,screen_hash:(h>>>0).toString(16),timeline})}return {schema:'jane.fork.av105',rom:source.rom,frame:source.frame,horizon,gap,results,claim:'isolated same serialized core state; not verified benefit'}};`;
   html=html.replace(anchor,forkCode+anchor);
+  const handoffCode=`let arenaActor='JANE';
+  const arenaBanks=new Map();
+  function arenaBankKey(actor){return 'jane.av106.player.'+romID+'.'+actor}
+  function arenaFresh(){return {schema:'jane.perception.v1',game:romID,created:date(),cells:Array.from({length:216},()=>({n:0,novelty:0,last:0})),lanes:Array(16).fill(0),work:[0,0,0,0],scenes:[],models:{},trials:[],events:[],nextID:1}}
+  function arenaSave(){if(!romID)return;const key=arenaBankKey(arenaActor);arenaBanks.set(key,memory);try{localStorage.setItem(key,JSON.stringify(memory));return true}catch(e){return false}}
+  function arenaGet(actor){const key=arenaBankKey(actor);if(arenaBanks.has(key))return arenaBanks.get(key);let m;try{m=JSON.parse(localStorage.getItem(key)||'null')}catch(e){}if(!m||m.game!==romID||m.schema!=='jane.perception.v1'||m.cells?.length!==216||m.lanes?.length!==16||!Array.isArray(m.trials)||!Array.isArray(m.scenes)||!m.models)m=arenaFresh();arenaBanks.set(key,m);return m}
+  window.JANE_PLAYER_STATE={switchTo(actor,watch){if(!nes||!romID||!['JANE','TOPH','PATRICIA'].includes(actor))return {ok:false};const next=arenaGet(actor);const interrupted=action?{id:action.id,button:action.button,started:action.started}:null;release();action=null;window.__senseBefore=null;const saved=arenaSave();arenaActor=actor;memory=next;labelCurrent=null;for(const o of (watch||[]).slice(-100)){if(!o||!o.trial_id)continue;const key='watch:'+o.source_root+':'+o.trial_id+':'+o.frame;if(memory.events.some(x=>x.watchKey===key))continue;memory.events.push({type:'WATCH_EVIDENCE',watchKey:key,observation:o,at:date()})}memory.events=memory.events.slice(-600);perception=readFrame();priorPerception=perception;nextActionFrame=frame+1;running=true;autoplay=true;pausedByHuman=false;window.__janeMenuNav=null;paintStats();refreshMemory();refreshEvidence();return {ok:true,actor,frame,rom:romID,trials:memory.trials.length,scenes:memory.scenes.length,watched:memory.events.filter(x=>x.type==='WATCH_EVIDENCE').length,saved,interrupted}},status:()=>({actor:arenaActor,frame,rom:romID,trials:memory.trials.length,scenes:memory.scenes.length}),save:arenaSave};`;
+  // Bank memory by cartridge and actor; retain legacy Jane memory for migration only.
+  html=html.replace('function loadMemory(){','function loadMemory(){arenaActor="JANE";');
+  html=html.replace("localStorage.getItem(STORAGE_PREFIX+romID)||'null'","localStorage.getItem(arenaBankKey(arenaActor))||localStorage.getItem(STORAGE_PREFIX+romID)||'null'");
+  html=html.replace('localStorage.setItem(STORAGE_PREFIX+romID,JSON.stringify(memory))','arenaSave()');
+  html=html.replace('function loadROM(bytes,name){release();','function loadROM(bytes,name){arenaSave();release();');
+  html=html.replace('romName=name;loadMemory();','romName=name;loadMemory();arenaBanks.set(arenaBankKey(arenaActor),memory);');
+  html=html.replace(anchor,handoffCode+anchor);
   const frameClock='accum+=delta;let steps=0;while(accum>=1000/60&&steps++<6)';
   if(!html.includes(frameClock))throw Error('NES frame-clock hook missing; speed control cannot safely initialize');
   html=html.replace(frameClock,'accum+=delta*(window.JANE_ARENA_SPEED||1);let steps=0;while(accum>=1000/60&&steps++<32)');
@@ -344,7 +359,7 @@ $('mute').onclick=()=>{muted=!muted;audioEnabled=!muted;setVolume()};
 $('confirmDeath').onclick=()=>switchTurn('human-confirmed life loss',true);
 $('undo').onclick=()=>{
  if(!entries.length||entries.at(-1)?.kind!=='handoff'){status('Undo requires most recent event to be a handoff.');return}
- const last=entries.at(-1);active=(active+2)%3;handoffs=Math.max(0,handoffs-1);people[active].turns=Math.max(0,people[active].turns-1);
+ const last=entries.at(-1);const next=(active+2)%3;const transfer=w().JANE_PLAYER_STATE?.switchTo(people[next].name,people[next].observations);if(!transfer?.ok){status('Undo blocked: state unavailable');return}window.JANE_ABC?.abort();active=next;lastTrials=transfer.trials;seenTrialIds.clear();for(const t of w().JANE_PERCEPTION?.diagnostics?.().recentTrials||[])seenTrialIds.add(String(t.id)+'|'+String(t.started||t.startFrame||0)+'|'+String(t.preHash||''));coach?.setEnabled(coachEnabled&&active===0);handoffs=Math.max(0,handoffs-1);people[active].turns=Math.max(0,people[active].turns-1);
  lifeHoldoff=0;setProfile();$('handoffs').textContent=handoffs;
  entriesPush({kind:'correction',actor:people[active].name,frame:Number(observer()?.frame)||0,reason:'manual handoff correction; original handoff remains in append-only history',game_root:gameRoot});
  status('Handoff corrected; same NES continues.');
