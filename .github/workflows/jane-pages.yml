@@ -89,6 +89,9 @@ jobs:
       - name: Test AV-138 synchronization
         run: node tests/av138_sync.test.cjs
 
+      - name: Test AV-139 phase-lock timing
+        run: node tests/av139_phase_lock.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
