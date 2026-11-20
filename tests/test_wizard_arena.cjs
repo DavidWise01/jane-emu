@@ -10,7 +10,7 @@ test('Jane remains the default player and Toph watches',()=>{
  assert.match(html,/let active=0,/);assert.ok(html.includes("TOPH → JANE"));
 });
 test('Toph teaching follows the same cartridge and screen context',()=>{
- assert.ok(html.includes("av080_coach.js"));assert.ok(html.includes('function chooseAction(){const coaching='));
+ assert.ok(html.includes("av080_coach.js"));assert.ok(html.includes('av125_collective.js') && html.includes('window.JANE_NEURAL_RECEIVE'));
 });
 test('one real NES RAM death sensor retained',()=>{
  assert.ok(html.includes('JANE_ARENA_RAM'));assert.ok(html.includes('lifeCandidate.count>=3'));

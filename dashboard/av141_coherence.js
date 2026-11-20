@@ -1,0 +1,12 @@
+/* AV-141 Neural Coherence: longitudinal, ancestry-aware stability across game roots. Advisory only. */
+(function(g){'use strict';
+const copy=x=>JSON.parse(JSON.stringify(x)),valid=x=>x&&x.id&&x.root&&x.rom&&x.hash&&Number.isSafeInteger(x.frame)&&['RESONANT','DISSONANT','PARTIAL','SILENT'].includes(x.status)&&Array.isArray(x.choices);
+function create(seed=[]){const rows=[],ids=new Set();let latest=null;for(const x of Array.isArray(seed)?seed:[]){if(valid(x)&&!ids.has(x.id)){rows.push(copy(x));ids.add(x.id)}}function ingest(x){if(!valid(x)||ids.has(x.id))return false;rows.push(copy(x));ids.add(x.id);latest=copy(x);if(rows.length>1000){const z=rows.shift();ids.delete(z.id)}return true}
+function assess(rom,hash,button){if(!rom||!hash||!button)return null;
+const match=rows.filter(x=>x.rom===rom&&x.hash===hash).sort((a,b)=>a.root.localeCompare(b.root)||a.frame-b.frame||a.id.localeCompare(b.id));const roots=new Map();
+for(const x of match){if(!roots.has(x.root))roots.set(x.root,[]);roots.get(x.root).push(x)}
+const witnesses=[];let conflicting=0;for(const [root,observations] of roots){const first=observations[0],last=observations.at(-1),conflict=observations.some(x=>x.status==='DISSONANT'||x.status==='RESONANT'&&x.choices[0]!==button),good=observations.filter(x=>x.status==='RESONANT'&&x.qualified===true&&x.choices.length===1&&x.choices[0]===button),span=good.length>1?good.at(-1).frame-good[0].frame:0,stable=!conflict&&good.length>=2&&span>=600;const item={root,samples:observations.length,good:good.length,span,conflict,stable,firstFrame:first.frame,lastFrame:last.frame};witnesses.push(item);if(conflict)conflicting++}
+const stableRoots=witnesses.filter(x=>x.stable).length,qualified=stableRoots>=3&&conflicting===0,status=conflicting?'RESISTANCE':qualified?'COHERENT':stableRoots?'CALIBRATING':'UNPROVEN';
+return {rom,hash,button,status,qualified,stableRoots,totalRoots:roots.size,conflictingRoots:conflicting,observations:match.length,witnesses,ancestry:'one shared owned-corpus surface per independent live game root; actor votes not separate roots',policy:'two supported observations at least 600 frames apart on each of three distinct live roots; zero contradictions'}}
+function state(){return copy({latest,history:rows})}return {ingest,assess,state}}
+g.JaneCoherence={create};})(typeof window==='undefined'?globalThis:window);
