@@ -41,17 +41,19 @@ jobs:
           page = pathlib.Path('index.html')
           assert page.is_file(), 'Missing index.html'
           index = page.read_text(encoding='utf-8')
-          match = re.search(r'url=\./(releases/[^"<>\s]+\.html)', index)
-          assert match, 'index.html must link to latest release'
-          release = pathlib.Path(match.group(1))
-          assert release.is_file(), f'Missing playable release: {release}'
-          content = release.read_text(encoding='utf-8')
-          assert '<canvas' in content and 'nesCanvas' in content, 'Missing NES canvas'
-          assert 'data:image/jpeg;base64,' in content, 'Missing embedded JPEG story'
-          assert 'jp59ThemePicker' in content, 'Missing skin hangar'
-          print(f'Playable release validated: {release} ({release.stat().st_size:,} bytes)')
+          match = re.search(r'url=\./(dashboard/arena\.html)', index)
+          assert match, 'index.html must link to the current arcade'
+          entry = pathlib.Path(match.group(1))
+          assert entry.is_file(), f'Missing arcade: {entry}'
+          content = entry.read_text(encoding='utf-8')
+          assert 'id="game"' in content and 'JANE_SYNC' in content, 'Missing arcade or AV-138 synchronization'
+          assert pathlib.Path('dashboard/av138_sync.js').is_file(), 'Missing AV-138 clock engine'
+          # Legacy embedded-JPEG release is retained and checked independently.
+          legacy = pathlib.Path('releases/Janes_Perception_v71_Mission_Control_Embedded_JPG_Story_NES.html')
+          assert legacy.is_file() and 'data:image/jpeg;base64,' in legacy.read_text(encoding='utf-8'), 'Missing preserved embedded JPG release'
+          print(f'Current arcade validated: {entry} ({entry.stat().st_size:,} bytes)')
           with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
-              print(f'entry={release}', file=f)
+              print(f'entry={entry}', file=f)
           PY
 
       - name: Check AV-075 experiment policy
@@ -83,6 +85,9 @@ jobs:
 
       - name: Verify AV-081 preregistered teaching effect
         run: node tests/test_av081_effect.cjs
+
+      - name: Test AV-138 synchronization
+        run: node tests/av138_sync.test.cjs
 
       - name: Assemble offline-playable web artifact
         shell: bash
