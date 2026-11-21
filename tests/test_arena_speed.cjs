@@ -14,6 +14,6 @@ check('speed updates iframe without cartridge reload',()=>{
  assert.ok(!part.includes('romInput'));
 });
 check('advanced death sensor stays collapsed',()=>assert.ok(html.includes('<details id="advancedSensor"')));
-check('single shared-game rotation still preserved',()=>assert.ok(html.includes('active=(active+1)%3')));
+check('single shared-game rotation still preserved',()=>assert.ok(html.includes('const next=(active+1)%3')));
 check('speaker volume and mute retained',()=>{assert.ok(html.includes('id="volume"'));assert.ok(html.includes('id="mute"'))});
 console.log('AV-080 minimal speed arena source checks passed');
