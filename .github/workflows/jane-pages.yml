@@ -134,6 +134,9 @@ jobs:
       - name: Test AV-153 bounded attention queue
         run: node tests/av153_attention.test.cjs
 
+      - name: Test AV-154 dual-role attention routing
+        run: node tests/av154_attention_routing.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
