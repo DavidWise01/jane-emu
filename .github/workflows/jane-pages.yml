@@ -128,6 +128,9 @@ jobs:
       - name: Test AV-151 sensory predictive coding
         run: node tests/av151_predictive_coding.test.cjs
 
+      - name: Test AV-152 cross-root surprise regulation
+        run: node tests/av152_surprise.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
