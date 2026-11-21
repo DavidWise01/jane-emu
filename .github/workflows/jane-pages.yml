@@ -98,6 +98,9 @@ jobs:
       - name: Test AV-141 cross-root coherence
         run: node tests/av141_coherence.test.cjs
 
+      - name: Test AV-142 reversible plasticity
+        run: node tests/av142_plasticity.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
