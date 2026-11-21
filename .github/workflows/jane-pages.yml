@@ -152,6 +152,9 @@ jobs:
       - name: Test AV-159 selective 48-feature attribution
         run: node tests/av159_selective_attention.test.cjs
 
+      - name: Test AV-160 empirical feature-to-screen association
+        run: node tests/av160_spatial_attention.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
