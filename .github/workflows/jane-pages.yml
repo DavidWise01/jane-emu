@@ -176,6 +176,9 @@ jobs:
       - name: Test AV-167 prospective cross-ROM motion transfer
         run: node tests/av167_motion_transfer.test.cjs
 
+      - name: Test AV-168 transfer failure diagnosis and conservative fallback
+        run: node tests/av168_transfer_diagnosis.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
