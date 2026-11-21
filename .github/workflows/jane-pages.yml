@@ -158,6 +158,9 @@ jobs:
       - name: Test AV-161 motion continuity and scene-change rejection
         run: node tests/av161_motion_continuity.test.cjs
 
+      - name: Test AV-162 bounded motion permanence
+        run: node tests/av162_object_permanence.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
