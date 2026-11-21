@@ -26,7 +26,7 @@ if(!pending&&m.status==='TRACKED'&&m.track.length>=3&&!m.global){const valid=m.t
 if(a&&b&&b.frame>a.frame){const x=xy(a.region),y=xy(b.region),dx=Math.sign(y.x-x.x),dy=Math.sign(y.y-x.y);
 if(dx||dy){const candidates={CONTINUE:index(y.x+dx,y.y+dy),HOLD:b.region,REVERSE:index(y.x-dx,y.y-dy)};
 const pick=select(m.root,candidates);
-if(pick.model!=='NONE')pending={id:'AV165:'+m.id,root:m.root,issuedFrame:m.frame,source:m.id,from:b.region,velocity:{dx,dy},candidates,selected:pick.model,selectionReason:pick.reason,selectionRoots:pick.roots,horizon:HORIZON,immutable:true}}}}
+if(pick.model!=='NONE')pending={id:'AV165:'+m.id,root:m.root,rom:m.rom||null,issuedFrame:m.frame,source:m.id,from:b.region,velocity:{dx,dy},candidates,selected:pick.model,selectionReason:pick.reason,selectionRoots:pick.roots,horizon:HORIZON,immutable:true}}}}
 return cp({completed,forecast:pending})}
 return {observe,evidence,select,state:()=>cp({history,pending,latest:history.at(-1)||null})}}
 g.JaneAdaptiveMotion={create};})(typeof window==='undefined'?globalThis:window);

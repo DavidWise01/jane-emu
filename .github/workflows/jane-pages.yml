@@ -173,6 +173,9 @@ jobs:
       - name: Test AV-166 unseen-root motion generalization
         run: node tests/av166_motion_generalization.test.cjs
 
+      - name: Test AV-167 prospective cross-ROM motion transfer
+        run: node tests/av167_motion_transfer.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
