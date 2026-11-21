@@ -8,7 +8,7 @@ function create(seed=[]){const history=[],ids=new Set();for(const x of Array.isA
 function assess(h){if(!valid(h)||ids.has(h.id))return null;
 const scoped=history.filter(x=>x.rom===h.rom&&x.hash===h.hash&&x.button===h.button&&x.root!==h.root&&x.verified),latest=new Map();
 for(const x of scoped){const old=latest.get(x.root);if(!old||x.frame>old.frame)latest.set(x.root,x)}
-const distinct=[...latest.values()],awake=distinct.filter(x=>x.state==='REAWAKENED'),calm=distinct.filter(x=>x.state==='FAMILIAR');
+const distinct=[...latest.values()],awake=distinct.filter(x=>x.sourceState==='REAWAKENED'),calm=distinct.filter(x=>x.sourceState==='FAMILIAR');
 let state='OBSERVE',factor=1,reason='Insufficient distinct-root evidence for temporary sensitization';
 if(h.verified&&h.state==='REAWAKENED'&&awake.length>=1){state='SENSITIZED';factor=1;reason='Two verified reawakenings from separate roots; full attention for this event'}
 else if(h.verified&&h.state==='FAMILIAR'&&calm.length>=1){state='RECOVERING';factor=0.35;reason='Two separate familiar roots; reduce attention toward habituated baseline'}

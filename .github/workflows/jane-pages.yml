@@ -146,6 +146,9 @@ jobs:
       - name: Test AV-157 bounded sensitization and recovery
         run: node tests/av157_sensitization.test.cjs
 
+      - name: Test AV-158 neural equilibrium and bounded gain
+        run: node tests/av158_equilibrium.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
