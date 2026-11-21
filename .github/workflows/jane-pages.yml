@@ -161,6 +161,9 @@ jobs:
       - name: Test AV-162 bounded motion permanence
         run: node tests/av162_object_permanence.test.cjs
 
+      - name: Test AV-163 prospective trajectory prediction
+        run: node tests/av163_motion_prediction.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
