@@ -131,6 +131,9 @@ jobs:
       - name: Test AV-152 cross-root surprise regulation
         run: node tests/av152_surprise.test.cjs
 
+      - name: Test AV-153 bounded attention queue
+        run: node tests/av153_attention.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
