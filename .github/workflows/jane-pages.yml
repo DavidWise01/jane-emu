@@ -113,6 +113,9 @@ jobs:
       - name: Test AV-146 criticality and sandbox eligibility
         run: node tests/av146_criticality.test.cjs
 
+      - name: Test AV-147 developmental trajectory
+        run: node tests/av147_homeorhesis.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
