@@ -7,7 +7,7 @@ test('rotates Jane Toph Patricia using a single active index',()=>{
  assert.match(html,/name:'JANE',mode:'fast'/);
  assert.match(html,/name:'TOPH',mode:'careful'/);
  assert.match(html,/name:'PATRICIA',mode:'balanced'/);
- assert.match(html,/active=\(active\+1\)%3/);
+ assert.match(html,/const next=\(active\+1\)%3/);
 });
 test('handoff never resets NES',()=>{
  const slice=html.slice(html.indexOf('function switchTurn('),html.indexOf('function readLife('));
