@@ -182,6 +182,9 @@ jobs:
       - name: Test AV-169 target-root recovery and conservative reinstatement
         run: node tests/av169_transfer_recovery.test.cjs
 
+      - name: Test AV-170 root-wise recovery hysteresis
+        run: node tests/av170_recovery_stability.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
