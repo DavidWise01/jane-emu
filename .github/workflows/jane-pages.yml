@@ -101,6 +101,9 @@ jobs:
       - name: Test AV-142 reversible plasticity
         run: node tests/av142_plasticity.test.cjs
 
+      - name: Test AV-143 adaptation with independent live roots
+        run: node tests/av143_adaptation.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |

@@ -1,0 +1,15 @@
+/* AV-143 Neural Adaptation — live-trial comparisons from immutable transfer verdicts.
+ * A candidate is never installed automatically; decisions are advisory.
+ * Source ancestry, cartridge, scene and goal are strict gates.
+ */
+(function(g){'use strict';
+const copy=x=>JSON.parse(JSON.stringify(x)),goals=['PROTECT_MAC','DAMAGE_OPPONENT','ADVANCE_GAME'],buttons=['UP','DOWN','LEFT','RIGHT','A','B'];
+function create(){let latest=null;function evaluate(experiments,records,goal){if(!goals.includes(goal))return [];const results=[];for(const e of experiments||[]){const w=e?.world;if(!w||w.mode!=='ISOLATED_EMULATION'||!w.root||!w.rom||!w.hash||!w.initialRAM||w.hold!==6||!buttons.includes(e.baseline)||!buttons.includes(e.mutation)||e.baseline===e.mutation||w.branches?.length!==2)continue;
+function assess(button){const source=JSON.stringify([w.root,w.rom,w.actor,w.frame,button]),unique=new Map();for(const r of records||[]){if(r?.source!==source||r.root===w.root||r.rom!==w.rom||r.hash!==w.hash||r.ram!==w.initialRAM||r.button!==button||r.goal!==goal||r.hold!==6||r.state!=='EXECUTED'||!['SUCCESS','FAILURE'].includes(r.verdict)||!Number.isSafeInteger(r.frame)||!Number.isSafeInteger(r.end)||r.end<r.frame||r.trial!==JSON.stringify([r.root,r.rom,r.actor,r.frame,button]))continue;const prior=unique.get(r.root);if(prior){prior.verdicts.add(r.verdict);prior.trials.push(r.trial)}else unique.set(r.root,{verdicts:new Set([r.verdict]),trials:[r.trial]})}
+const roots=[...unique],conflicts=roots.filter(([,r])=>r.verdicts.size>1).map(([root])=>root),wins=roots.filter(([,r])=>r.verdicts.size===1&&r.verdicts.has('SUCCESS')).map(([root])=>root),losses=roots.filter(([,r])=>r.verdicts.has('FAILURE')).map(([root])=>root);return {button,roots:roots.map(([root])=>root),wins,losses,conflicts,trials:roots.flatMap(([,r])=>r.trials)}}
+const baseline=assess(e.baseline),mutation=assess(e.mutation),overlap=baseline.roots.filter(root=>mutation.roots.includes(root));
+let decision='REEXAMINE',reason='Await three distinct roots for each arm';if(overlap.length||baseline.conflicts.length||mutation.conflicts.length){reason='Root overlap or contradictory verdicts';}else if(baseline.roots.length>=3&&mutation.roots.length>=3){if(mutation.losses.length>0){decision='REJECT_CANDIDATE';reason='Candidate failed a qualified live trial'}else if(mutation.wins.length>=3&&baseline.losses.length>0){decision='RETAIN_CANDIDATE';reason='Candidate succeeded on 3 roots; baseline encountered resistance'}else{reason='Both arms persist; no superiority established'}}
+results.push({id:e.id,rom:w.rom,hash:w.hash,goal,baseline,mutation,overlap,decision,reason,origin:w.root,world:copy(w),automaticPromotion:false})}
+latest=results.at(-1)||null;return copy(results)}
+return {evaluate,state:()=>copy({latest})}}
+g.JaneAdaptation={create};})(typeof window==='undefined'?globalThis:window);
