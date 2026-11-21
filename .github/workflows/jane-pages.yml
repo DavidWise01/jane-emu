@@ -122,6 +122,9 @@ jobs:
       - name: Test AV-149 three-fork forecast
         run: node tests/av149_anticipation.test.cjs
 
+      - name: Test AV-150 predictive calibration and immutable history
+        run: node tests/av150_predictive_homeostasis.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
