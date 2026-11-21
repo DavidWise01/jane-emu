@@ -119,6 +119,9 @@ jobs:
       - name: Test AV-148 allostatic preflight budget
         run: node tests/av148_allostasis.test.cjs
 
+      - name: Test AV-149 three-fork forecast
+        run: node tests/av149_anticipation.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
