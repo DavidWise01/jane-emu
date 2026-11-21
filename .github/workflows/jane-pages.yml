@@ -170,6 +170,9 @@ jobs:
       - name: Test AV-165 three-model prospective motion comparison
         run: node tests/av165_adaptive_motion.test.cjs
 
+      - name: Test AV-166 unseen-root motion generalization
+        run: node tests/av166_motion_generalization.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
