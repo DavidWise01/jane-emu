@@ -185,6 +185,9 @@ jobs:
       - name: Test AV-170 root-wise recovery hysteresis
         run: node tests/av170_recovery_stability.test.cjs
 
+      - name: Test AV-171 confidence-weighted recovery intervals
+        run: node tests/av171_confidence_recovery.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
