@@ -125,6 +125,9 @@ jobs:
       - name: Test AV-150 predictive calibration and immutable history
         run: node tests/av150_predictive_homeostasis.test.cjs
 
+      - name: Test AV-151 sensory predictive coding
+        run: node tests/av151_predictive_coding.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
