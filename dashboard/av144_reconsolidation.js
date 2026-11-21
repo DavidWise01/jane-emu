@@ -1,0 +1,9 @@
+/* AV-144 Neural Memory Reconsolidation — append-only conclusions, immutable ancestry.
+ * An observed verdict revision never overwrites the prior belief or original trial.
+ */
+(function(g){'use strict';
+const copy=x=>JSON.parse(JSON.stringify(x)),valid=x=>x&&x.id&&x.rom&&x.hash&&x.goal&&['REEXAMINE','RETAIN_CANDIDATE','REJECT_CANDIDATE'].includes(x.decision)&&x.baseline&&x.mutation,canon=x=>JSON.stringify(x);
+function create(seed=[]){const events=[],seen=new Set(),last=new Map();for(const e of Array.isArray(seed)?seed:[]){if(!e?.key||!e?.id||!e?.decision||!e?.signature||seen.has(e.id))continue;const row=copy(e);events.push(row);seen.add(row.id);last.set(row.key,row)}
+function observe(decisions){let added=0;for(const x of decisions||[]){if(!valid(x))continue;const key=canon([x.id,x.rom,x.hash,x.goal]),evidence=Array.from(new Set([...(x.baseline.trials||[]),...(x.mutation.trials||[])])).sort(),roots=Array.from(new Set([...(x.baseline.roots||[]),...(x.mutation.roots||[])])).sort(),signature=canon([x.decision,x.reason,evidence,roots]);const prior=last.get(key);if(prior?.signature===signature)continue;const id=canon([key,signature]);if(seen.has(id))continue;const state=prior?(prior.decision===x.decision?'RECONFIRMED':'RECONSIDERED'):'BASELINE_CAPTURED';const row={id,key,rom:x.rom,hash:x.hash,goal:x.goal,decision:x.decision,reason:x.reason,signature,revision:prior?prior.revision+1:1,previousId:prior?.id||null,initialId:prior?.initialId||id,originalDecision:prior?.originalDecision||x.decision,state,sourceExperiment:x.id,roots,evidence,sourceAncestry:'one trial per distinct gameplay root; shared observations not counted as independent agents',automaticPromotion:false};events.push(row);last.set(key,row);seen.add(id);added++}return added}
+function state(){return copy({events,latest:events.at(-1)||null,keys:last.size})}
+return {observe,state}}g.JaneReconsolidation={create};})(typeof window==='undefined'?globalThis:window);

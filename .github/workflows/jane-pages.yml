@@ -104,6 +104,9 @@ jobs:
       - name: Test AV-143 adaptation with independent live roots
         run: node tests/av143_adaptation.test.cjs
 
+      - name: Test AV-144 append-only reconsolidation
+        run: node tests/av144_reconsolidation.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
