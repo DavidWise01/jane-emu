@@ -8,10 +8,10 @@
 (function(g){'use strict';const clone=x=>JSON.parse(JSON.stringify(x)),CAP=256;
 const scored=x=>x?.id&&x.root&&Number.isSafeInteger(x.issuedFrame)&&Number.isSafeInteger(x.observedFrame)&&x.observedFrame>x.issuedFrame&&['HIT','NEAR','MISS','INVALIDATED','EXPIRED'].includes(x.outcome);
 const dir=x=>x?.velocity&&Number.isInteger(x.velocity.dx)&&Number.isInteger(x.velocity.dy)?[x.velocity.dx,x.velocity.dy]:null;
-function create(seed=[]){const log=[],ids=new Set();for(const x of Array.isArray(seed)?seed:[]){if(x?.id&&x.root&&Number.isSafeInteger(x.issuedFrame)&&!ids.has(x.id)){log.push(clone(x));ids.add(x.id)}}let lastRoot=null,lastDirection=null;
+function create(seed=[]){const log=[],ids=new Set();for(const x of Array.isArray(seed)?seed:[]){if(x?.id&&x.root&&Number.isSafeInteger(x.issuedFrame)&&!ids.has(x.id)){log.push(clone(x));ids.add(x.id)}}const directions=new Map();
 function record(p){if(!scored(p)||ids.has(p.id))return null;
-const v=dir(p),changed=lastRoot===p.root&&lastDirection&&v?(lastDirection[0]!==v[0]||lastDirection[1]!==v[1]):null;
-if(lastRoot!==p.root){lastRoot=p.root;lastDirection=null}if(v)lastDirection=v;
+const v=dir(p),prevDirection=directions.get(p.root),changed=prevDirection&&v?(prevDirection[0]!==v[0]||prevDirection[1]!==v[1]):null;
+if(v)directions.set(p.root,v);
 const valid=['HIT','NEAR','MISS'].includes(p.outcome),correct=p.outcome==='HIT',near=p.outcome==='NEAR';
 const row={id:p.id,root:p.root,issuedFrame:p.issuedFrame,observedFrame:p.observedFrame,expectedRegion:p.expectedRegion,observedRegion:p.observedRegion??null,outcome:p.outcome,velocity:v,changeDetected:changed,valid,hit:correct,near,source:p.source,sourceObservation:p.sourceObservation??null,reward:false,authority:false,ancestry:'one emulator root; role observations share ancestry'};
 log.push(row);ids.add(row.id);return clone(row)}
