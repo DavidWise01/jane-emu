@@ -143,6 +143,9 @@ jobs:
       - name: Test AV-156 habituation and renewed attention
         run: node tests/av156_habituation.test.cjs
 
+      - name: Test AV-157 bounded sensitization and recovery
+        run: node tests/av157_sensitization.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
