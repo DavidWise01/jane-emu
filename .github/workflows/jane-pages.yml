@@ -155,6 +155,9 @@ jobs:
       - name: Test AV-160 empirical feature-to-screen association
         run: node tests/av160_spatial_attention.test.cjs
 
+      - name: Test AV-161 motion continuity and scene-change rejection
+        run: node tests/av161_motion_continuity.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
