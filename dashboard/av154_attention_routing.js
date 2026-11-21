@@ -8,7 +8,7 @@ const copy=x=>JSON.parse(JSON.stringify(x)),ROLES=['JANE','TOPH','PATRICIA'],fin
 function create(seed=[]){const events=[],ids=new Set();for(const e of Array.isArray(seed)?seed:[]){if(e&&e.id&&['INVESTIGATED','CHECKED','ACKNOWLEDGED'].includes(e.kind)&&!ids.has(e.id)){events.push(copy(e));ids.add(e.id)}}
 function add(row){if(ids.has(row.id))return false;events.push(copy(row));ids.add(row.id);return true}
 function route(item,surpriseRows,codingRows){if(!item?.source||!item.root||!item.rom||!item.hash||!ROLES.includes(item.assigned)||ids.has('INVESTIGATED:'+item.source))return false;
-const investigator=item.assigned,checker=ROLES.find(x=>x!==item.actor&&x!==investigator)||ROLES.find(x=>x!==investigator);
+const investigator=item.assigned,playingActor=(surpriseRows||[]).find(x=>x.id===item.source)?.actor,checker=ROLES.find(x=>x!==playingActor&&x!==investigator)||ROLES.find(x=>x!==investigator);
 const surprise=(surpriseRows||[]).find(x=>x.id===item.source&&x.root===item.root&&x.rom===item.rom&&x.hash===item.hash);
 const observed=(codingRows||[]).find(x=>x.id===item.source&&x.root===item.root&&x.rom===item.rom&&x.hash===item.hash);
 const lineage=!!surprise&&!!observed&&surprise.attention===true&&surprise.status==='SURPRISE'&&observed.status==='SCORED'&&finite(surprise.error)&&finite(surprise.threshold)&&surprise.threshold>0&&Math.abs(surprise.error-observed.meanAbsoluteError)<1e-8;
