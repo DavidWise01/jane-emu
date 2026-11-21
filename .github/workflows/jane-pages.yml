@@ -116,6 +116,9 @@ jobs:
       - name: Test AV-147 developmental trajectory
         run: node tests/av147_homeorhesis.test.cjs
 
+      - name: Test AV-148 allostatic preflight budget
+        run: node tests/av148_allostasis.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
