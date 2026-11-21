@@ -110,6 +110,9 @@ jobs:
       - name: Test AV-145 learning eligibility
         run: node tests/av145_metaplasticity.test.cjs
 
+      - name: Test AV-146 criticality and sandbox eligibility
+        run: node tests/av146_criticality.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
