@@ -140,6 +140,9 @@ jobs:
       - name: Test AV-155 cross-root persistence and settling
         run: node tests/av155_attention_persistence.test.cjs
 
+      - name: Test AV-156 habituation and renewed attention
+        run: node tests/av156_habituation.test.cjs
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
