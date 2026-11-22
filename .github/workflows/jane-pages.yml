@@ -9,6 +9,8 @@ on:
       - 'releases/**'
       - 'dashboard/**'
       - 'tests/**'
+      - 'docs/**'
+      - 'scripts/build_av174_pdf.py'
       - 'memory/curation/**'
       - '.github/workflows/jane-pages.yml'
   workflow_dispatch:
@@ -194,6 +196,12 @@ jobs:
       - name: Test AV-172 distribution-shift confidence holdout
         run: node tests/av172_shift_confidence.test.cjs
 
+      - name: Build AV-174 PDF evidence report
+        run: |
+          python3 -m pip install --disable-pip-version-check reportlab
+          python3 scripts/build_av174_pdf.py
+          test -s docs/AV-174-playability-verification.pdf
+
       - name: Assemble offline-playable web artifact
         shell: bash
         run: |
@@ -201,6 +209,8 @@ jobs:
           cp index.html _site/index.html
           cp -R releases _site/releases
           cp -R dashboard _site/dashboard
+          mkdir -p _site/docs
+          cp docs/AV-174-playability-verification.md docs/AV-174-playability-verification.pdf _site/docs/
           if [ -d memory/curation ]; then mkdir -p _site/memory; cp -R memory/curation _site/memory/curation; fi
           if [ -d assets ]; then cp -R assets _site/assets; fi
           printf 'Jane EMU release: %s\nCommit: %s\n' '${{ steps.verify.outputs.entry }}' "$GITHUB_SHA" > _site/BUILD.txt
