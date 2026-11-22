@@ -12,6 +12,7 @@ on:
       - 'docs/**'
       - 'data/phase2-progress.json'
       - 'data/phase3-progress.json'
+      - 'data/phase4-progress.json'
       - 'scripts/build_av174_pdf.py'
       - 'memory/curation/**'
       - '.github/workflows/jane-pages.yml'
@@ -240,6 +241,9 @@ jobs:
       - name: Test AV-188 full integration and fail-closed phase freeze
         run: node tests/av188_acceptance.test.cjs
 
+      - name: Test AV-189 original NES fallback and runtime diagnostics
+        run: node tests/av189_runtime.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
@@ -254,10 +258,11 @@ jobs:
           cp -R releases _site/releases
           cp -R dashboard _site/dashboard
           mkdir -p _site/docs
-          cp docs/AV-174-playability-verification.md docs/AV-174-playability-verification.pdf docs/PHASE-2-AV177-184.md docs/PHASE-3-AV185-188.md _site/docs/
+          cp docs/AV-174-playability-verification.md docs/AV-174-playability-verification.pdf docs/PHASE-2-AV177-184.md docs/PHASE-3-AV185-188.md docs/PHASE-4-AV189-192.md _site/docs/
           mkdir -p _site/data
           cp data/phase2-progress.json _site/data/phase2-progress.json
           cp data/phase3-progress.json _site/data/phase3-progress.json
+          cp data/phase4-progress.json _site/data/phase4-progress.json
           if [ -d memory/curation ]; then mkdir -p _site/memory; cp -R memory/curation _site/memory/curation; fi
           if [ -d assets ]; then cp -R assets _site/assets; fi
           printf 'Jane EMU release: %s\nCommit: %s\n' '${{ steps.verify.outputs.entry }}' "$GITHUB_SHA" > _site/BUILD.txt
