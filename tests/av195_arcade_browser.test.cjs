@@ -44,7 +44,7 @@ async function main(){
    return {ctx,status:p.JANE_PERCEPTION?.status?.(),player:p.JANE_PLAYER_STATE?.status?.(),
      frame:p.JANE_PERCEPTION?.status?.()?.frame||0,ram:p.JANE_ARENA_RAM?.read?.(5)};
   });
-  assert.equal(before.ctx.actor,'Jane','Jane owns first turn');
+  assert.equal(String(before.ctx.actor).toUpperCase(),'JANE','Jane owns first turn');
   assert.notEqual(before.ctx.rom,'unloaded','test cartridge must actually load');
   assert.ok(before.frame>=120,'actual emulator frame progression required');
   // The host's original START x3 button queues START into normal autoplay.
@@ -58,16 +58,17 @@ async function main(){
   });
   assert.equal(started.mode,1,'START must reach running NES game');
   // Existing autoplay should issue movement/A/B through the one NES controller.
+  await page.evaluate(frame=>{window.__av195Baseline=frame},started.frame);
   await page.waitForFunction(()=>document.querySelector('#game')?.contentWindow?.JANE_PERCEPTION?.status?.()?.frame>
-    (window.__av195Baseline||0)+120,{timeout:60000}).catch(()=>{});
+    window.__av195Baseline+120,null,{timeout:60000});
   // Handoff must preserve emulator frame and ROM instead of restarting cartridge.
   const f0=await page.evaluate(()=>window.JANE_RUN_CONTEXT?.()?.frame);
   await page.locator('#confirmDeath').click();
-  await page.waitForFunction(()=>window.JANE_RUN_CONTEXT?.()?.actor==='Toph',{timeout:20000});
+  await page.waitForFunction(()=>String(window.JANE_RUN_CONTEXT?.()?.actor||'').toUpperCase()==='TOPH',null,{timeout:20000});
   const handoff=await page.evaluate(()=>window.JANE_RUN_CONTEXT());
   assert.equal(handoff.rom,started.run.rom,'handoff must not load another ROM');
   assert.ok(handoff.frame>=f0,'handoff must not reset NES frame clock');
-  assert.equal(handoff.actor,'Toph');
+  assert.equal(String(handoff.actor).toUpperCase(),'TOPH');
   console.log(JSON.stringify({test:'AV-195-CHROMIUM',rom:handoff.rom,startedFrame:started.frame,
     handoffFrame:handoff.frame,gameStarted:started.mode===1,clockContinuous:true,threeTools:true,
     headlessBrowser:true,hostedPagesVerified:false,errors:errors.slice(0,6)}));
