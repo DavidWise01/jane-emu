@@ -45,9 +45,17 @@
     {
       "id": "AV-195",
       "title": "Real button effects, survival and player handoff",
-      "status": "pending",
+      "status": "chromium_arcade_test_added_browser_result_pending",
       "targetPercent": 75,
-      "verified": false
+      "verified": false,
+      "ciEvidence": "tests/av195_arcade_browser.test.cjs",
+      "liveEvidence": null,
+      "fixes": [
+        "Chromium integration test loads original PLAY TEST ROM through arena event and iframe",
+        "Tests START execution, emulator frame progression, and one-emulator player handoff",
+        "Fixed live Jane/Toph/Patricia case mismatch in AV-187 handoff telemetry",
+        "Pinned GitHub Actions runner to supported Ubuntu 24.04"
+      ]
     },
     {
       "id": "AV-196",
@@ -59,5 +67,5 @@
   ],
   "evidenceRule": "ROM construction and small 6502 harness tests are not proof of jsnes gameplay in a browser.",
   "updatedAt": "2026-11-22",
-  "notes": "AV-194 exact JSNES 256x240 PPU pixel-frame changes passed in CI. This is actual emulator framebuffer evidence, but no end-to-end GitHub Pages browser arcade UI confirmation. Phase 5 live-browser credit stays 0%; four gate phases are distinct."
+  "notes": "AV-195 actual Chromium browser arcade integration gate introduced. Initial CI blocked by unsupported Ubuntu 26.04 Playwright runner and fixed by Ubuntu 24.04 pin. Full browser pass is pending. Phase 5 remains 0% verified; no promotion from instrumented/headless tests."
 }
