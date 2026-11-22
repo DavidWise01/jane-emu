@@ -4,8 +4,8 @@
   "title": "Autonomous Playability",
   "baseline": "AV-176",
   "totalTurns": 8,
-  "completedTurns": 4,
-  "percent": 50,
+  "completedTurns": 5,
+  "percent": 62.5,
   "rule": "hegemonic-diodic-one-best-eligible-action",
   "hardStop": [
     "independent-witness-adjudication",
@@ -89,8 +89,19 @@
       "id": "AV-181",
       "title": "Defeat and recovery",
       "targetPercent": 62.5,
-      "status": "pending",
-      "verified": false
+      "status": "verified-ci",
+      "verified": true,
+      "evidence": {
+        "run": "https://github.com/DavidWise01/jane-emu/actions/runs/45041269352",
+        "checks": [
+          "AV-181 bounded recovery",
+          "AV-180",
+          "AV-179",
+          "AV-178",
+          "AV-177"
+        ],
+        "scope": "synthetic CI regression; real NES game-over recovery unverified"
+      }
     },
     {
       "id": "AV-182",
@@ -115,5 +126,5 @@
     }
   ],
   "updatedAt": "2026-11-22",
-  "notes": "AV-180 selector gate passed CI; policy opt-in, existing chooseAction owns input; actual ROM gameplay remains unverified. Next AV-181 defeat/recovery."
+  "notes": "AV-181 recovery tests passed in CI. Live browser ROM recovery unverified. Next AV-182 one-controller three-player handoff."
 }
