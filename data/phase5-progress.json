@@ -4,8 +4,8 @@
   "title": "Game-First Runtime Proof",
   "baseline": "AV-192",
   "totalTurns": 4,
-  "completedTurns": 1,
-  "percent": 25,
+  "completedTurns": 2,
+  "percent": 50,
   "verification": "headless-Chromium local-arcade accepted for first gate; hosted Pages verification remains outstanding",
   "mode": "one NES controller; PLAY LEARN VERIFY; no additional panels",
   "turns": [
@@ -33,9 +33,9 @@
     {
       "id": "AV-194",
       "title": "Live emulator cartridge boot and START scene change",
-      "status": "jsnes_framebuffer_and_chromium_start_verified_visible_canvas_pending",
+      "status": "verified_local_chromium_visible_start_sprite",
       "targetPercent": 50,
-      "verified": false,
+      "verified": true,
       "ciEvidence": "tests/av194_jsnes_framebuffer.test.cjs",
       "headlessCiEvidence": "https://github.com/DavidWise01/jane-emu/actions/runs/45072131630",
       "headlessChecks": [
@@ -46,14 +46,15 @@
         "B produces separate visible color change"
       ],
       "browserChecks": [
-        "Actual Chromium test observes START moving homebrew NES game from mode 0 to 1",
-        "Visible canvas pixels not yet measured inside browser"
-      ]
+        "START reveals an actual 8x8 NES canvas sprite (64 changed pixels, sprite X120-127 Y115-122)",
+        "Genuine Chromium page with embedded iNES ROM and continuous frame counter"
+      ],
+      "liveEvidence": "https://github.com/DavidWise01/jane-emu/actions/runs/45084123984"
     },
     {
       "id": "AV-195",
       "title": "Real button effects, survival and player handoff",
-      "status": "browser_handoff_verified_full_gameplay_pending",
+      "status": "partial_manual_owner_rotation_no_defeat_or_ab_delivery",
       "targetPercent": 75,
       "verified": false,
       "ciEvidence": "tests/av195_arcade_browser.test.cjs",
@@ -65,21 +66,38 @@
         "Pinned GitHub Actions runner to supported Ubuntu 24.04"
       ],
       "browserChecks": [
-        "NES frame 135 after START",
-        "Same ROM identity and advancing frame 266 after Jane to Toph handoff",
-        "Three tools present and zero page console errors",
-        "No proof of actual life-loss event or A/B effects in hosted arcade"
+        "Manual handoff Jane to Toph to Patricia to Jane on same ROM, frames 253 382 512",
+        "Original Play Learn Verify tabs retained",
+        "A/B original action scheduling not verified, manual handoff not proof of real-life-loss"
       ]
     },
     {
       "id": "AV-196",
       "title": "Real browser endurance proof and phase freeze",
-      "status": "pending",
+      "status": "implemented_verified_browser_smoke_but_endurance_gate_unearned",
       "targetPercent": 100,
-      "verified": false
+      "verified": false,
+      "ciEvidence": "tests/av196_canvas_rotation_browser.test.cjs",
+      "liveEvidence": "https://github.com/DavidWise01/jane-emu/actions/runs/45084123984",
+      "browserChecks": [
+        "64-pixel sprite rendered in actual iframe nesCanvas",
+        "Full 3-player manual rotation preserved single loaded cartridge and frame clock up to frame 512",
+        "No browser page errors",
+        "Not a genuine life loss, not verified production A/B keyboard or long endurance"
+      ]
     }
   ],
   "evidenceRule": "ROM construction and small 6502 harness tests are not proof of jsnes gameplay in a browser.",
   "updatedAt": "2026-11-22",
-  "notes": "First live-browser gate earned: original arcade and test ROM load in Chromium with advancing frames. START and Jane-to-Toph controller transfer also pass, but AV194/195 full acceptance remains blocked by direct browser canvas visual/A-B and real life-loss evidence. Phase 5 25% verified (1/4)."
+  "notes": "AV-196 production arcade browser screenshot-equivalent pixel data proves visible NES sprite and full manual 3-player owner rotation in local Chromium. AV-193 and AV-194 gates earned 50%. AV-195 real A/B autonomous input and genuine life-loss gates NOT earned; AV-196 long-endurance graduation NOT earned. Temporary localhost controller test fixtures fully removed. Phase 5 frozen at 50%.",
+  "phaseClosed": true,
+  "outcome": "closed_partial_at_50_percent",
+  "frozenAt": "2026-11-22",
+  "nextPhase": {
+    "id": 6,
+    "start": "AV-197",
+    "name": "Gameplay Scheduler and Manual Input Repair",
+    "percent": 0,
+    "objective": "Repair live keyboard focus freezing NES frame clock and bounded autonomous A/B action scheduling; test real browser sprite movement and palette changes through supported UI, then prove actual life-loss detection before phase graduation"
+  }
 }
