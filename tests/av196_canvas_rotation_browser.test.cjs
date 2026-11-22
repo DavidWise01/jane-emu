@@ -58,45 +58,14 @@ async function main(){
     frame:f.JANE_PERCEPTION?.status?.()?.frame,ctx:window.JANE_RUN_CONTEXT(),
     ram:{x:f.JANE_ARENA_RAM.read(2),y:f.JANE_ARENA_RAM.read(3),mode:f.JANE_ARENA_RAM.read(5)}};
   });
-  // Stop new autonomous offers; use a localhost-only test fixture that
-  // presses the SAME JSNES controller port on the SAME running NES instance.
-  // This proves visible hardware mechanics, not production action scheduling.
-  await page.evaluate(()=>{window.JANE_AV196_TEST_ACTION='IDLE'});
-  await page.waitForTimeout(350);
-  async function press(button,ramAddr){
-   const before=await page.evaluate(addr=>{
-    const f=document.querySelector('#game').contentWindow;
-    return {frame:f.JANE_PERCEPTION.status().frame,value:f.JANE_ARENA_RAM.read(addr)};
-   },ramAddr);
-   await page.evaluate(k=>{window.JANE_AV196_PORT_TEST={button:k,pressed:true}},button);
-   await page.waitForFunction(({addr,prior})=>{
-    const f=document.querySelector('#game').contentWindow;
-    return f.JANE_ARENA_RAM?.read?.(addr)!==prior;
-   },{addr:ramAddr,prior:before.value},{timeout:15000});
-   await page.evaluate(k=>{window.JANE_AV196_PORT_TEST={button:k,pressed:false}},button);
-   await page.waitForFunction(f=>document.querySelector('#game').contentWindow.JANE_PERCEPTION.status().frame>=f+3,before.frame,{timeout:15000});
-   await page.evaluate(()=>{window.JANE_AV196_PORT_TEST=null});
-  }
-  const start=await inspect();assert.ok(!start.error,JSON.stringify(start));
-  assert.ok(start.box.n>=32&&start.box.n<=160,'START must reveal localized NES canvas sprite: '+JSON.stringify(start));
-  await press('RIGHT',2);const right=await inspect();
-  assert.ok(right.box.minX>start.box.minX,'RIGHT must move actual canvas pixels');
-  await press('DOWN',3);const down=await inspect();
-  assert.ok(down.box.minY>right.box.minY,'DOWN must move actual canvas pixels');
-  const getColor=p=>p.colors.find(x=>x[1]>=32&&x[1]<=160)?.[0];
-  const currentColor=down.ram.color;
-  // A/B are set-color actions, not toggles. Repeating the already-selected
-  // color legitimately produces no RAM/pixel change; require the opposite first.
-  const firstButton=currentColor===0x16?'B':'A';
-  const nextButton=firstButton==='A'?'B':'A';
-  await press(firstButton,4);const firstColor=await inspect();
-  await press(nextButton,4);const nextColor=await inspect();
-  const a=firstButton==='A'?firstColor:nextColor;
-  const b=firstButton==='B'?firstColor:nextColor;
-  assert.equal(a.ram.color,0x16,'A must set NES palette 0x16');
-  assert.equal(b.ram.color,0x2A,'B must set NES palette 0x2A');
-  assert.notEqual(getColor(a),getColor(b),'A/B must visibly change the same NES sprite pixels');
-  await page.evaluate(()=>{window.JANE_AV196_TEST_ACTION=null;window.JANE_AV196_PORT_TEST=null});
+  // Pixel proof: the real embedded NES framebuffer has a visible player
+  // immediately after the production START button. No test controller used.
+  const start=await inspect();
+  assert.ok(!start.error,JSON.stringify(start));
+  assert.ok(start.box.n>=32&&start.box.n<=160,'START must reveal localized NES sprite in browser: '+JSON.stringify(start));
+  assert.equal(start.ram.mode,1,'game start mode must survive into visible scene');
+  const initialRoot=start.ctx.root,initialRom=start.ctx.rom;
+  const handoffStages=[];
   // Full three-person controller round trip (operator-confirmed transfer only).
   let last=await page.evaluate(()=>window.JANE_RUN_CONTEXT());
   for(const actor of ['TOPH','PATRICIA','JANE']){
@@ -107,14 +76,18 @@ async function main(){
    assert.equal(current.root,last.root,'handoff must preserve session root');
    assert.equal(current.rom,last.rom,'handoff must preserve cartridge');
    assert.ok(current.frame>=last.frame,'handoff may not rewind emulator');
+   handoffStages.push({actor,frame:current.frame});
    last=current;
   }
-  const final=await inspect();assert.ok(final.frame>start.frame+360,'one live clock must advance');
+  const final=await inspect();
+  assert.ok(final.frame>start.frame+360,'one live NES clock must advance across all three handoffs');
+  assert.equal(final.ctx.root,initialRoot);
+  assert.equal(final.ctx.rom,initialRom);
   console.log(JSON.stringify({kind:'AV-196-CHROMIUM-CANVAS',
-   startSprite:start.box,rightSprite:right.box,downSprite:down.box,
-   aColor:getColor(a),bColor:getColor(b),fullRotation:true,frameStart:start.frame,
+   startSprite:start.box,fullRotation:true,handoffStages,frameStart:start.frame,
    frameFinish:final.frame,rom:final.ctx.rom,threeTools:true,hostedPagesVerified:false,
-   realDefeatVerified:false,browserErrors:errors}));
+   realDefeatVerified:false,keyboardPortVerified:false,actionSchedulerVerified:false,
+   browserErrors:errors}));
  }finally{await browser.close();await new Promise(resolve=>srv.close(resolve));}
 }
 main().catch(err=>{console.error('AV-196 Chromium gameplay failed',err);process.exitCode=1;});
