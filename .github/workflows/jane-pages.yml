@@ -31,7 +31,7 @@ concurrency:
 jobs:
   package:
     name: Validate and package playable Jane
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       entry: ${{ steps.verify.outputs.entry }}
     steps:
@@ -320,7 +320,7 @@ jobs:
   deploy:
     name: Deploy live Jane
     needs: package
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
