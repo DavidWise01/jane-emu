@@ -446,7 +446,7 @@ async function init(){
   // path; this gated fixture is inaccessible from public GitHub Pages.
   if(!html.includes('function chooseAction(){const nav='))throw Error('AV-196 gameplay dispatcher anchor missing');
   html=html.replace('function chooseAction(){const nav=',
-    "function chooseAction(){const local=window.parent?.location?.hostname==='127.0.0.1'?window.parent?.JANE_AV196_TEST_ACTION:null;if(local==='IDLE')return null;if(local&&ACTIONS.includes(local))return local;const nav=");
+    "function chooseAction(){const local=window.parent?.location?.hostname==='127.0.0.1'?window.parent?.JANE_AV196_TEST_ACTION:null;if(local&&local!=='IDLE')window.parent.JANE_AV196_LAST_CHOICE={requested:local,allowed:ACTIONS.includes(local),frame,stage:titleLesson?.stage};if(local==='IDLE')return null;if(local&&ACTIONS.includes(local))return local;const nav=");
   html=html.replace('if(steps>=6)accum=0','if(steps>=32)accum=0');
   $('game').addEventListener('load',()=>{
    try{
