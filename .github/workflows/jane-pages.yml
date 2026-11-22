@@ -206,6 +206,9 @@ jobs:
       - name: Test AV-177 motion-aware scene detector
         run: node tests/av177_motion_scenes.test.cjs
 
+      - name: Test AV-178 deterministic bounded START gate
+        run: node tests/av178_start_gate.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
