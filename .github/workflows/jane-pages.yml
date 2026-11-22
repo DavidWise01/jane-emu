@@ -276,6 +276,13 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" "$RUNNER_TEMP/jane-browser/node_modules/.bin/playwright" install --with-deps chromium
           NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av195_arcade_browser.test.cjs
 
+      - name: Test AV-196 visible Chromium NES canvas and full player rotation
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/jane-browser" playwright@1.56.1
+          PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" "$RUNNER_TEMP/jane-browser/node_modules/.bin/playwright" install chromium
+          NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av196_canvas_rotation_browser.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
