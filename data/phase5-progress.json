@@ -12,11 +12,19 @@
     {
       "id": "AV-193",
       "title": "Original NES controller test cartridge in existing arcade",
-      "status": "implemented_pending_live_jsnes",
+      "status": "headless_jsnes_verified_browser_pending",
       "targetPercent": 25,
       "verified": false,
       "ciEvidence": "tests/av193_controller_rom.test.cjs",
-      "liveEvidence": null
+      "liveEvidence": null,
+      "headlessCiEvidence": "https://github.com/DavidWise01/jane-emu/actions/runs/45070505487",
+      "headlessChecks": [
+        "NROM loaded by jsnes@2.1.0",
+        "START changes game mode",
+        "RIGHT/DOWN update sprite coordinates",
+        "A/B palette effects",
+        "SELECT recenter"
+      ]
     },
     {
       "id": "AV-194",
@@ -42,5 +50,5 @@
   ],
   "evidenceRule": "ROM construction and small 6502 harness tests are not proof of jsnes gameplay in a browser.",
   "updatedAt": "2026-11-22",
-  "notes": "AV-193 supplies an original legal iNES NROM controller cartridge generated locally in browser. No binary ROM bytes collected or commercial ROM needed. Live jsnes output remains unverified."
+  "notes": "AV-193 original test cart now executes in the actual JSNES 2.1.0 core under CI. Both minimal CPU harness and JSNES tests passed. This does not prove the hosted browser's integrated emulator canvas; Phase 5 credited live browser progress remains 0%."
 }
