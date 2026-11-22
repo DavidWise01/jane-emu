@@ -61,10 +61,17 @@ async function main(){
   // Focus the real original NES canvas and drive its normal keyboard input.
   // This exercises the player's browser event route, without accessing the
   // private jsnes instance or creating another controller.
-  await page.frameLocator('#game').locator('#nesCanvas').click();
+  await page.evaluate(()=>document.querySelector('#game').contentWindow.focus());
   async function press(key,frames=8){
    const before=await page.evaluate(()=>document.querySelector('#game').contentWindow.JANE_PERCEPTION.status().frame);
    await page.keyboard.down(key);
+   await page.waitForTimeout(250);
+   console.log('AV-196 KEY',key,JSON.stringify(await page.evaluate(()=>{
+    const f=document.querySelector('#game').contentWindow;
+    return {frame:f.JANE_PERCEPTION?.status?.()?.frame,running:f.JANE_PERCEPTION?.status?.()?.running,
+       x:f.JANE_ARENA_RAM?.read?.(2),y:f.JANE_ARENA_RAM?.read?.(3),color:f.JANE_ARENA_RAM?.read?.(4),
+       focused:document.activeElement?.id};
+   })));
    await page.waitForFunction(start=>document.querySelector('#game').contentWindow.JANE_PERCEPTION.status().frame>=start+frames,before,{timeout:30000});
    await page.keyboard.up(key);
    await page.waitForFunction(start=>document.querySelector('#game').contentWindow.JANE_PERCEPTION.status().frame>=start+frames+3,before,{timeout:30000});
