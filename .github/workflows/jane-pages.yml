@@ -231,6 +231,9 @@ jobs:
       - name: Test AV-185 ROM boot and executed START evidence
         run: node tests/av185_boot_start.test.cjs
 
+      - name: Test AV-186 three-tool arcade consolidation
+        run: node tests/av186_three_tools.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
