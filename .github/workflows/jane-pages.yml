@@ -11,6 +11,7 @@ on:
       - 'tests/**'
       - 'docs/**'
       - 'data/phase2-progress.json'
+      - 'data/phase3-progress.json'
       - 'scripts/build_av174_pdf.py'
       - 'memory/curation/**'
       - '.github/workflows/jane-pages.yml'
