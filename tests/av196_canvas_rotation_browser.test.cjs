@@ -1,8 +1,9 @@
 'use strict';
 /* AV-196: real Chromium screen-canvas and three-player rotation.
  * Loads the original local homebrew cartridge through the production arcade.
- * Inputs are directed to the SAME JSNES instance embedded by the cabinet.
- * Manual life-loss buttons test handoff plumbing, NOT actual game defeats.
+ * START and actual canvas pixels are observed without a second emulator.
+ * Operator-confirmed handoffs test owner rotation, NOT real game defeats.
+ * Keyboard/D-pad and A/B action delivery are explicitly not verified here.
  */
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
