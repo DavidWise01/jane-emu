@@ -37,8 +37,8 @@
       if(!had){
         append('recorder_attached',{note:'Monitoring began; earlier gameplay not evidenced'},s);
       } else {
-        if(s.root&&s.root!==had.root)append('session_changed',{previousRoot:had.root},s);
-        if(s.rom!==had.rom)append('cartridge_changed',{previousRom:had.rom},s);
+        if(s.root&&s.root!==had.root){bootCount=0;append('session_changed',{previousRoot:had.root},s);}
+        if(s.rom!==had.rom){bootCount=0;append('cartridge_changed',{previousRom:had.rom},s);}
         if(s.actor&&s.actor!==had.actor)append('handoff_observed',{previousActor:had.actor},s);
         if(s.frame!==null&&had.frame!==null&&s.frame<had.frame)append('frame_reset_observed',{previousFrame:had.frame},s);
         if(loaded&&s.frame!==null&&had.frame!==null&&s.frame>had.frame&&s.rom===had.rom){
