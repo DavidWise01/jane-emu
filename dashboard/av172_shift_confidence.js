@@ -25,7 +25,7 @@ if(epoch.calibration.length<N){epoch.calibration.push(point);if(signature!==null
 else if(signature===null)epoch.unknown.push(point);
 else if(epoch.signatures.has(signature))epoch.familiar.push(point);
 else if(epoch.shifted.length<N)epoch.shifted.push(point);
-}}
+}
 if(!epoch)return cp({rom,status:'NO_EPOCH',calibrationRoots:0,shiftRoots:0,required:N,shiftLower:null,advisoryOnly:true});
 const n=epoch.shifted.length,wins=epoch.shifted.filter(x=>x.gain>0).length,losses=epoch.shifted.filter(x=>x.gain<0).length,avg=n?epoch.shifted.reduce((s,x)=>s+x.gain,0)/n:null,lb=n?lower(wins,n):null;
 const baselineConfirmed=confidence?.rom===rom&&confidence.status==='CONFIDENCE_SUPPORTED';

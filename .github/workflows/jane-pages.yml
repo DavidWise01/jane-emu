@@ -188,6 +188,9 @@ jobs:
       - name: Test AV-171 confidence-weighted recovery intervals
         run: node tests/av171_confidence_recovery.test.cjs
 
+      - name: Verify NES startup and every dashboard script syntax
+        run: node tests/test_nes_startup_preflight.cjs
+
       - name: Test AV-172 distribution-shift confidence holdout
         run: node tests/av172_shift_confidence.test.cjs
 
