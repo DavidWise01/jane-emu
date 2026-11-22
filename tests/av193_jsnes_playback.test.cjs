@@ -9,7 +9,7 @@ async function main(){
  // JSNES 2.1.0 is a native ESM package. Its UMD CommonJS entry can return
  // an empty namespace in Node 24; load the package's actual ESM source.
  const packageEntry=require.resolve('jsnes');
- const sourceEntry=packageEntry.replace(/dist[\\/]jsnes\\.js$/,'src/index.js');
+ const sourceEntry=require('node:path').resolve(require('node:path').dirname(packageEntry),'../src/index.js');
  assert.notEqual(sourceEntry,packageEntry,'JSNES package ESM source must exist');
  const jsnes=await import(pathToFileURL(sourceEntry).href);
  assert.equal(typeof jsnes.NES,'function','JSNES ESM NES constructor absent');
