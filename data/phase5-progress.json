@@ -4,19 +4,19 @@
   "title": "Game-First Runtime Proof",
   "baseline": "AV-192",
   "totalTurns": 4,
-  "completedTurns": 0,
-  "percent": 0,
-  "verification": "actual-browser-NES-ROM",
+  "completedTurns": 1,
+  "percent": 25,
+  "verification": "headless-Chromium local-arcade accepted for first gate; hosted Pages verification remains outstanding",
   "mode": "one NES controller; PLAY LEARN VERIFY; no additional panels",
   "turns": [
     {
       "id": "AV-193",
       "title": "Original NES controller test cartridge in existing arcade",
-      "status": "headless_jsnes_verified_browser_pending",
+      "status": "verified_chromium_local_arcade_rom_boot",
       "targetPercent": 25,
-      "verified": false,
+      "verified": true,
       "ciEvidence": "tests/av193_controller_rom.test.cjs",
-      "liveEvidence": null,
+      "liveEvidence": "https://github.com/DavidWise01/jane-emu/actions/runs/45079079440",
       "headlessCiEvidence": "https://github.com/DavidWise01/jane-emu/actions/runs/45070505487",
       "headlessChecks": [
         "NROM loaded by jsnes@2.1.0",
@@ -24,12 +24,16 @@
         "RIGHT/DOWN update sprite coordinates",
         "A/B palette effects",
         "SELECT recenter"
+      ],
+      "browserChecks": [
+        "Actual Chromium loads dashboard/arena.html and PLAY TEST ROM via existing input route",
+        "Real NES frame counter advances and the loaded ROM identity is present"
       ]
     },
     {
       "id": "AV-194",
       "title": "Live emulator cartridge boot and START scene change",
-      "status": "headless_jsnes_framebuffer_verified_browser_pending",
+      "status": "jsnes_framebuffer_and_chromium_start_verified_visible_canvas_pending",
       "targetPercent": 50,
       "verified": false,
       "ciEvidence": "tests/av194_jsnes_framebuffer.test.cjs",
@@ -40,21 +44,31 @@
         "DOWN shifts rendered sprite vertically",
         "A changes visible sprite palette",
         "B produces separate visible color change"
+      ],
+      "browserChecks": [
+        "Actual Chromium test observes START moving homebrew NES game from mode 0 to 1",
+        "Visible canvas pixels not yet measured inside browser"
       ]
     },
     {
       "id": "AV-195",
       "title": "Real button effects, survival and player handoff",
-      "status": "chromium_arcade_test_added_browser_result_pending",
+      "status": "browser_handoff_verified_full_gameplay_pending",
       "targetPercent": 75,
       "verified": false,
       "ciEvidence": "tests/av195_arcade_browser.test.cjs",
-      "liveEvidence": null,
+      "liveEvidence": "https://github.com/DavidWise01/jane-emu/actions/runs/45079079440",
       "fixes": [
         "Chromium integration test loads original PLAY TEST ROM through arena event and iframe",
         "Tests START execution, emulator frame progression, and one-emulator player handoff",
         "Fixed live Jane/Toph/Patricia case mismatch in AV-187 handoff telemetry",
         "Pinned GitHub Actions runner to supported Ubuntu 24.04"
+      ],
+      "browserChecks": [
+        "NES frame 135 after START",
+        "Same ROM identity and advancing frame 266 after Jane to Toph handoff",
+        "Three tools present and zero page console errors",
+        "No proof of actual life-loss event or A/B effects in hosted arcade"
       ]
     },
     {
@@ -67,5 +81,5 @@
   ],
   "evidenceRule": "ROM construction and small 6502 harness tests are not proof of jsnes gameplay in a browser.",
   "updatedAt": "2026-11-22",
-  "notes": "AV-195 actual Chromium browser arcade integration gate introduced. Initial CI blocked by unsupported Ubuntu 26.04 Playwright runner and fixed by Ubuntu 24.04 pin. Full browser pass is pending. Phase 5 remains 0% verified; no promotion from instrumented/headless tests."
+  "notes": "First live-browser gate earned: original arcade and test ROM load in Chromium with advancing frames. START and Jane-to-Toph controller transfer also pass, but AV194/195 full acceptance remains blocked by direct browser canvas visual/A-B and real life-loss evidence. Phase 5 25% verified (1/4)."
 }
