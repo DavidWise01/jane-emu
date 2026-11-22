@@ -29,10 +29,12 @@
     },
     {
       "id": "AV-191",
-      "title": "Real defeat recovery and rotated player controls",
+      "title": "Goal-directed NES button ranking, stall avoidance and completed-trial feedback",
       "targetPercent": 75,
-      "status": "pending",
-      "verified": false
+      "status": "implemented_pending_live_rom",
+      "verified": false,
+      "ciEvidence": "tests/av191_goals.test.cjs",
+      "liveEvidence": null
     },
     {
       "id": "AV-192",
@@ -58,5 +60,5 @@
     }
   },
   "updatedAt": "2026-11-22",
-  "notes": "AV-190 implements deterministic real NES input selection (UP/DOWN/LEFT/RIGHT/A/B) through the existing authoritative chooseAction path and learns from completed trials. No live ROM observation verified; Phase 4 remains 0%."
+  "notes": "AV-191 uses bounded action biases from actual completed trial pixel-change feedback to de-prioritize stalled inputs, reward changing frames, and isolate player/cartridge sessions. This does not confirm actual game objectives or ROM play; Phase 4 0% live verified."
 }
