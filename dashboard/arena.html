@@ -464,7 +464,7 @@ async function init(){
   },{once:true});
   // AV-173: Validate the actual modified emulator script, not only the parent page.
   // If an optional injection corrupts JS, use the preserved original cartridge UI.
-  const embedded=[...html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)];
+  const embedded=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
   const gameScript=embedded.find(x=>x[2].includes('function startAction()'));
   if(!gameScript)throw Error('NES play logic missing after injection');
   try{new Function(gameScript[2])}
