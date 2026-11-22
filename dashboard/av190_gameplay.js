@@ -46,7 +46,8 @@
        // Ranking is deterministic, with stable button order tie-break.
        const score=stats.trials===0?1:(stats.total/stats.trials);
        const explore=stats.offers===0?3:0;
-       return {button,i,score:score+explore};
+       const bias=Number.isFinite(x.bias?.[button])?Math.max(-4,Math.min(2,x.bias[button])):0;
+       return {button,i,score:score+explore+bias};
      });
      candidates.sort((a,b)=>b.score-a.score||a.i-b.i);
      const selected=candidates[0].button;
