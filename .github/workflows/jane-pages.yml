@@ -215,6 +215,9 @@ jobs:
       - name: Test AV-180 deterministic best-action arbitration
         run: node tests/av180_best_action.test.cjs
 
+      - name: Test AV-181 bounded defeat recovery
+        run: node tests/av181_recovery.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
