@@ -10,6 +10,15 @@ Jane is an experimental autonomous NES player and pixel-perception laboratory. T
 - Check ROM initialization, advancing frames, START input and recovery after game over in an actual browser session; use Cabinet view if Canvas fails.
 - Static syntax checks and a successful Pages deployment are **not** proof of live ROM playability. Record browser observations before marking AV-174 passed.
 
+
+## AV-176 — Screen transition candidates (non-invasive)
+
+- [Open the live arena](./dashboard/arena.html), enable the existing screen tracer, and expand **AV-175 Playability Evidence** then **AV-176 Screen Transitions**.
+- Three consecutive identical screen hashes produce a **candidate stable-screen transition**. The operator can label a visibly confirmed title, gameplay, game-over, or recovery screen.
+- The label is scoped to the cartridge identifier and is reset appropriately when a session changes. Repeated matched screens receive the saved manual label, not an independently inferred claim.
+- Export local append-only JSON evidence. No ROM bytes are sent or bundled. No automatic START, NES input injection, or alteration to role handoff is introduced.
+- **Limit:** animated screens may never have three identical hashes. AV-176 does not establish real ROM playability or autonomous semantic classification; live browser testing is still required.
+
 ## Interface
 
 - Left 50%: NES emulator and Player 1 controller.
