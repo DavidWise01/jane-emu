@@ -224,6 +224,9 @@ jobs:
       - name: Test AV-183 continuous-play endurance
         run: node tests/av183_endurance.test.cjs
 
+      - name: Test AV-184 integration evidence and fail-closed freeze
+        run: node tests/av184_integration.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
