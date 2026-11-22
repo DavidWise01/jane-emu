@@ -17,6 +17,10 @@ assert.equal(result.steps.length,3);assert.equal(result.fullRotationObserved,tru
 assert.equal(result.actualGameplayVerified,false);
 assert.equal(result.phaseGateVerified,false);
 assert.equal(handoff('JANE','TOPH',280,1400).accepted,false,'no duplicate cycle evidence');
+const caseFold=create({minAdvance:60,timeoutMs:1500});
+caseFold.observe({root:'mixed',rom:'demo.nes',actor:'Jane',frame:1,at:1,running:true});
+assert.equal(caseFold.accepted({ok:true,root:'mixed',rom:'demo.nes',from:'Jane',to:'Toph',actor:'Toph',frame:1,at:2}).accepted,true,'actual arena title-case handoff accepted');
+assert.equal(caseFold.observe({root:'mixed',rom:'demo.nes',actor:'Toph',frame:61,at:120,running:true}).steps.length,1,'real mixed-case handoff frame continuity');
 const separate=create({minAdvance:60,timeoutMs:1500});
 separate.observe({root:'r1',rom:'demo.nes',actor:'JANE',frame:0,at:0,running:true});
 assert.equal(separate.accepted({ok:true,root:'r2',rom:'demo.nes',actor:'TOPH',from:'JANE',to:'TOPH',frame:0,at:10}).accepted,false,'reject different root');
