@@ -1,0 +1,60 @@
+{
+  "schema": "jane.phase-tracker.v1",
+  "phase": 4,
+  "title": "Playable Runtime Validation",
+  "baseline": "AV-188",
+  "totalTurns": 4,
+  "completedTurns": 0,
+  "percent": 0,
+  "verification": "real-browser-rom-required",
+  "rule": "one-NES-controller-three-tools-append-only",
+  "turns": [
+    {
+      "id": "AV-189",
+      "title": "Repaired NES cabinet fallback and frame progression diagnostics",
+      "targetPercent": 25,
+      "status": "implemented_pending_live_rom",
+      "verified": false,
+      "ciEvidence": "tests/av189_runtime.test.cjs",
+      "liveEvidence": null
+    },
+    {
+      "id": "AV-190",
+      "title": "Observe real ROM START delivery and visual scene change",
+      "targetPercent": 50,
+      "status": "pending",
+      "verified": false
+    },
+    {
+      "id": "AV-191",
+      "title": "Real defeat recovery and rotated player controls",
+      "targetPercent": 75,
+      "status": "pending",
+      "verified": false
+    },
+    {
+      "id": "AV-192",
+      "title": "Sustained real-game acceptance and controlled freeze",
+      "targetPercent": 100,
+      "status": "pending",
+      "verified": false
+    }
+  ],
+  "threeTools": [
+    "PLAY",
+    "LEARN",
+    "VERIFY"
+  ],
+  "priorPhases": {
+    "phase2": {
+      "percent": 87.5,
+      "outcome": "closed_blocked_live_rom"
+    },
+    "phase3": {
+      "percent": 0,
+      "outcome": "closed_blocked_live_rom"
+    }
+  },
+  "updatedAt": "2026-11-22",
+  "notes": "AV-189 repairs the original cabinet fallback load path and instruments actual frames. Synthetic CI cannot validate real playable NES ROM; no Phase 4 credit until a live session is demonstrated."
+}
