@@ -23,7 +23,7 @@
    const interval=Number.isSafeInteger(opts.interval)?Math.max(6,opts.interval):18;
    const key=x=>String(x.root||'')+'|'+String(x.rom||'')+'|'+String(x.actor||'');
    function reset(x){identity=key(x);ledger=Object.create(null);
-     for(const button of ORDER)ledger[button]={trials:0,total:0,lastFrame:-1};
+     for(const button of ORDER)ledger[button]={trials:0,total:0,offers:0,lastFrame:-1};
      lastChoice=null;epoch=0;results=0;}
    function eligible(x){
      return x&&x.root&&x.rom&&x.rom!=='unloaded'&&ACTORS.includes(x.actor)&&
@@ -45,11 +45,12 @@
        // Reward visible changed regions; prioritize underserved actions.
        // Ranking is deterministic, with stable button order tie-break.
        const score=stats.trials===0?1:(stats.total/stats.trials);
-       const explore=stats.trials===0?2:0;
+       const explore=stats.offers===0?3:0;
        return {button,i,score:score+explore};
      });
      candidates.sort((a,b)=>b.score-a.score||a.i-b.i);
      const selected=candidates[0].button;
+     ledger[selected].offers++;
      lastChoice={button:selected,frame:x.frame,slot,root:x.root,rom:x.rom,actor:x.actor};
      epoch++;
      return selected;
@@ -66,7 +67,7 @@
    }
    function snapshot(){return {schema:SCHEMA,enabled,identity,epoch,results,
       lastChoice:lastChoice?{...lastChoice}:null,
-      actions:Object.fromEntries(ORDER.map(b=>[b,{...ledger[b]||{trials:0,total:0,lastFrame:-1}}])),
+      actions:Object.fromEntries(ORDER.map(b=>[b,{...ledger[b]||{trials:0,total:0,offers:0,lastFrame:-1}}])),
       meaning:'Observed pixel/region change only; game objectives remain unverified'};}
    return {offer,result,snapshot,setEnabled:v=>{enabled=v===true;return enabled}};
  }
