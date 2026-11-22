@@ -250,6 +250,9 @@ jobs:
       - name: Test AV-191 NES goal feedback and stall avoidance
         run: node tests/av191_goals.test.cjs
 
+      - name: Test AV-192 bounded NES gameplay input timing
+        run: node tests/av192_timing.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
