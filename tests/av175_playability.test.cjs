@@ -17,7 +17,7 @@ assert.ok(log.snapshot().events.some(e=>e.kind==='operator_start_sent'));
 assert.throws(()=>log.annotate('definitely_passed'));
 const serialized=log.exportJSON();
 assert.equal(JSON.parse(serialized).schema,api.SCHEMA);
-assert.equal(serialized.includes('ROM bytes'),true);
+assert.equal(JSON.parse(serialized).caution.includes('not independently verified'),true);
 const original=log.snapshot().events.length;
 log.snapshot().events.push({fake:true});
 assert.equal(log.snapshot().events.length,original);
