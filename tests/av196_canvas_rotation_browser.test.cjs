@@ -82,8 +82,17 @@ async function main(){
   await press('DOWN',3);const down=await inspect();
   assert.ok(down.box.minY>right.box.minY,'DOWN must move actual canvas pixels');
   const getColor=p=>p.colors.find(x=>x[1]>=32&&x[1]<=160)?.[0];
-  await press('A',4);const a=await inspect();
-  await press('B',4);const b=await inspect();
+  const currentColor=down.ram.color;
+  // A/B are set-color actions, not toggles. Repeating the already-selected
+  // color legitimately produces no RAM/pixel change; require the opposite first.
+  const firstButton=currentColor===0x16?'B':'A';
+  const nextButton=firstButton==='A'?'B':'A';
+  await press(firstButton,4);const firstColor=await inspect();
+  await press(nextButton,4);const nextColor=await inspect();
+  const a=firstButton==='A'?firstColor:nextColor;
+  const b=firstButton==='B'?firstColor:nextColor;
+  assert.equal(a.ram.color,0x16,'A must set NES palette 0x16');
+  assert.equal(b.ram.color,0x2A,'B must set NES palette 0x2A');
   assert.notEqual(getColor(a),getColor(b),'A/B must visibly change the same NES sprite pixels');
   await page.evaluate(()=>{window.JANE_AV196_TEST_ACTION=null});
   // Full three-person controller round trip (operator-confirmed transfer only).
