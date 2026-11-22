@@ -146,10 +146,31 @@
       "id": "AV-184",
       "title": "Integration and freeze",
       "targetPercent": 100,
-      "status": "pending",
-      "verified": false
+      "status": "closed_missing_live_rom",
+      "verified": false,
+      "evidence": {
+        "script": "tests/av184_integration.test.cjs",
+        "browserReview": "dashboard/av184_integration.js",
+        "scope": "CI tests do not prove real NES ROM operation; final live acceptance gate not satisfied"
+      }
     }
   ],
   "updatedAt": "2026-11-22",
-  "notes": "AV-183 CI regression passed. Real-browser multi-turn NES endurance is not verified; AV-184 integration and evidence freeze remains."
+  "notes": "Phase 2 is closed at 87.5%; seven CI gates passed, AV-184 live browser ROM acceptance not demonstrated. Do not retroactively award the final 12.5%.",
+  "phaseClosed": true,
+  "outcome": "closed_blocked_live_rom",
+  "frozenAt": "2026-11-22",
+  "nextPhase": {
+    "id": 3,
+    "name": "Real ROM Gameplay Acceptance",
+    "start": "AV-185",
+    "totalTurns": 4,
+    "percent": 0,
+    "turns": [
+      "AV-185 ROM boot+START",
+      "AV-186 defeat+recovery",
+      "AV-187 full 3-player handoff",
+      "AV-188 endurance proof+graduation"
+    ]
+  }
 }
