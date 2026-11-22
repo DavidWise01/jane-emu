@@ -212,6 +212,9 @@ jobs:
       - name: Test AV-179 gameplay idle and stall classifier
         run: node tests/av179_playstate.test.cjs
 
+      - name: Test AV-180 deterministic best-action arbitration
+        run: node tests/av180_best_action.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
