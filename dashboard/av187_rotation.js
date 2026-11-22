@@ -14,6 +14,7 @@
  'use strict';
  const SCHEMA='jane.av187.full-rotation.v1';
  const ORDER=['JANE','TOPH','PATRICIA','JANE'];
+ const normal=x=>typeof x==='string'?x.trim().toUpperCase():'';
  function create(config={}){
    const minAdvance=Number.isInteger(config.minAdvance)?Math.max(1,config.minAdvance):60;
    const timeoutMs=Number.isFinite(config.timeoutMs)?Math.max(1000,config.timeoutMs):7000;
@@ -33,6 +34,7 @@
      Number.isSafeInteger(x.frame)&&x.frame>=0&&Number.isFinite(x.at)&&x.at>=0&&
      ORDER.includes(x.actor);}
    function observe(x={}){
+     x={...x,actor:normal(x.actor)};
      if(!valid(x))return snapshot();
      if(!session||x.root!==session.root||x.rom!==session.rom||x.frame<frame){
        reset(x,'first-frame-or-session-reset');return snapshot();
@@ -63,6 +65,7 @@
      return snapshot();
    }
    function accepted(x={}){
+     x={...x,actor:normal(x.actor),from:normal(x.from),to:normal(x.to)};
      if(!session||!x.ok||!valid(x)||x.root!==session.root||x.rom!==session.rom||
        pending!==null||failed||x.frame<frame||x.actor!==x.to||x.from!==session.actor)
        return {accepted:false,reason:'handoff-session-or-actor-mismatch'};
