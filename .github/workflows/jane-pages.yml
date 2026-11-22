@@ -237,6 +237,9 @@ jobs:
       - name: Test AV-187 full three-player rotation
         run: node tests/av187_rotation.test.cjs
 
+      - name: Test AV-188 full integration and fail-closed phase freeze
+        run: node tests/av188_acceptance.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
