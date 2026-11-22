@@ -3,13 +3,17 @@
  * This is a headless real-emulator test, not visual browser acceptance.
  */
 const assert=require('node:assert/strict');
-const imported=require('jsnes');
-const jsnes=typeof imported?.NES==='function'?imported:
- typeof imported?.default?.NES==='function'?imported.default:
- typeof imported?.jsnes?.NES==='function'?imported.jsnes:imported;
-assert.equal(typeof jsnes.NES,'function','JSNES missing NES constructor; exports='+Object.keys(imported).join(','));
 const {buildROM}=require('../dashboard/av193_test_rom.js');
-const emulator=new jsnes.NES({emulateSound:false,onFrame:()=>{}});
+const {pathToFileURL}=require('node:url');
+async function main(){
+ // JSNES 2.1.0 is a native ESM package. Its UMD CommonJS entry can return
+ // an empty namespace in Node 24; load the package's actual ESM source.
+ const packageEntry=require.resolve('jsnes');
+ const sourceEntry=packageEntry.replace(/dist[\\/]jsnes\\.js$/,'src/index.js');
+ assert.notEqual(sourceEntry,packageEntry,'JSNES package ESM source must exist');
+ const jsnes=await import(pathToFileURL(sourceEntry).href);
+ assert.equal(typeof jsnes.NES,'function','JSNES ESM NES constructor absent');
+ const emulator=new jsnes.NES({emulateSound:false,onFrame:()=>{}});
 emulator.loadROM(Buffer.from(buildROM()).toString('binary'));
 assert.ok(emulator.rom&&emulator.rom.valid,'valid NROM recognized by JSNES');
 function frames(count){for(let i=0;i<count;i++)emulator.frame();}
@@ -35,3 +39,6 @@ press('SELECT',3);
 assert.equal(emulator.cpu.mem[0x02],120,'SELECT centered sprite');
 assert.equal(emulator.cpu.mem[0x03],108);
 console.log('AV-193 original homebrew cartridge executed in JSNES: START D-pad A B SELECT passed');
+
+}
+main().catch(error=>{console.error(error);process.exitCode=1});
