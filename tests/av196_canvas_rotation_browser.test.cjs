@@ -68,10 +68,16 @@ async function main(){
     return {frame:f.JANE_PERCEPTION.status().frame,value:f.JANE_ARENA_RAM.read(addr)};
    },ramAddr);
    await page.evaluate(k=>{window.JANE_AV196_TEST_ACTION=k},button);
+   await page.waitForTimeout(400);
+   console.log('AV-196 ACTION',button,JSON.stringify(await page.evaluate(addr=>{
+     const f=document.querySelector('#game').contentWindow;
+     return {choice:window.JANE_AV196_LAST_CHOICE,frame:f.JANE_PERCEPTION?.status?.()?.frame,
+       value:f.JANE_ARENA_RAM?.read?.(addr),scene:f.JANE_PERCEPTION?.status?.()?.scene,actor:window.JANE_RUN_CONTEXT?.()?.actor};
+   },ramAddr)));
    await page.waitForFunction(({addr,prior})=>{
     const f=document.querySelector('#game').contentWindow;
     return f.JANE_ARENA_RAM?.read?.(addr)!==prior;
-   },{addr:ramAddr,prior:before.value},{timeout:20000});
+   },{addr:ramAddr,prior:before.value},{timeout:10000});
    await page.evaluate(()=>{window.JANE_AV196_TEST_ACTION='IDLE'});
    await page.waitForFunction(f=>document.querySelector('#game').contentWindow.JANE_PERCEPTION.status().frame>=f+3,before.frame,{timeout:20000});
   }
