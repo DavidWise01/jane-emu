@@ -196,6 +196,9 @@ jobs:
       - name: Test AV-172 distribution-shift confidence holdout
         run: node tests/av172_shift_confidence.test.cjs
 
+      - name: Test AV-175 read-only playability recorder
+        run: node tests/av175_playability.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
