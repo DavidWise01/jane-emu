@@ -199,6 +199,9 @@ jobs:
       - name: Test AV-175 read-only playability recorder
         run: node tests/av175_playability.test.cjs
 
+      - name: Test AV-176 screen-transition detector
+        run: node tests/av176_transitions.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
