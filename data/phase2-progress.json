@@ -4,8 +4,8 @@
   "title": "Autonomous Playability",
   "baseline": "AV-176",
   "totalTurns": 8,
-  "completedTurns": 1,
-  "percent": 12.5,
+  "completedTurns": 2,
+  "percent": 25,
   "rule": "hegemonic-diodic-one-best-eligible-action",
   "hardStop": [
     "independent-witness-adjudication",
@@ -34,8 +34,19 @@
       "id": "AV-178",
       "title": "Title/menu and START recovery",
       "targetPercent": 25,
-      "status": "pending",
-      "verified": false
+      "status": "verified-ci",
+      "verified": true,
+      "evidence": {
+        "run": "https://github.com/DavidWise01/jane-emu/actions/runs/45038391483",
+        "checks": [
+          "AV-175",
+          "AV-176",
+          "AV-177",
+          "AV-178",
+          "NES preflight"
+        ],
+        "scope": "deterministic synthetic CI gate; live ROM START delivery unverified"
+      }
     },
     {
       "id": "AV-179",
@@ -81,5 +92,5 @@
     }
   ],
   "updatedAt": "2026-11-22",
-  "notes": "AV-177 motion-aware scene unit test succeeded in CI. Runtime browser ROM still unverified. Next AV-178."
+  "notes": "AV-178 regression passed in CI; browser START delivery, gameplay transitions and full Pages deployment not yet verified. Next AV-179."
 }
