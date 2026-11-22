@@ -58,28 +58,24 @@ async function main(){
     frame:f.JANE_PERCEPTION?.status?.()?.frame,ctx:window.JANE_RUN_CONTEXT(),
     ram:{x:f.JANE_ARENA_RAM.read(2),y:f.JANE_ARENA_RAM.read(3),mode:f.JANE_ARENA_RAM.read(5)}};
   });
-  // One authoritative action selector; localhost-only deterministic request.
-  // This does NOT verify physical keyboard/gamepad event handling.
+  // Stop new autonomous offers; use a localhost-only test fixture that
+  // presses the SAME JSNES controller port on the SAME running NES instance.
+  // This proves visible hardware mechanics, not production action scheduling.
   await page.evaluate(()=>{window.JANE_AV196_TEST_ACTION='IDLE'});
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(350);
   async function press(button,ramAddr){
    const before=await page.evaluate(addr=>{
     const f=document.querySelector('#game').contentWindow;
     return {frame:f.JANE_PERCEPTION.status().frame,value:f.JANE_ARENA_RAM.read(addr)};
    },ramAddr);
-   await page.evaluate(k=>{window.JANE_AV196_TEST_ACTION=k},button);
-   await page.waitForTimeout(400);
-   console.log('AV-196 ACTION',button,JSON.stringify(await page.evaluate(addr=>{
-     const f=document.querySelector('#game').contentWindow;
-     return {choice:window.JANE_AV196_LAST_CHOICE,frame:f.JANE_PERCEPTION?.status?.()?.frame,
-       value:f.JANE_ARENA_RAM?.read?.(addr),scene:f.JANE_PERCEPTION?.status?.()?.scene,actor:window.JANE_RUN_CONTEXT?.()?.actor};
-   },ramAddr)));
+   await page.evaluate(k=>{window.JANE_AV196_PORT_TEST={button:k,pressed:true}},button);
    await page.waitForFunction(({addr,prior})=>{
     const f=document.querySelector('#game').contentWindow;
     return f.JANE_ARENA_RAM?.read?.(addr)!==prior;
-   },{addr:ramAddr,prior:before.value},{timeout:10000});
-   await page.evaluate(()=>{window.JANE_AV196_TEST_ACTION='IDLE'});
-   await page.waitForFunction(f=>document.querySelector('#game').contentWindow.JANE_PERCEPTION.status().frame>=f+3,before.frame,{timeout:20000});
+   },{addr:ramAddr,prior:before.value},{timeout:15000});
+   await page.evaluate(k=>{window.JANE_AV196_PORT_TEST={button:k,pressed:false}},button);
+   await page.waitForFunction(f=>document.querySelector('#game').contentWindow.JANE_PERCEPTION.status().frame>=f+3,before.frame,{timeout:15000});
+   await page.evaluate(()=>{window.JANE_AV196_PORT_TEST=null});
   }
   const start=await inspect();assert.ok(!start.error,JSON.stringify(start));
   assert.ok(start.box.n>=32&&start.box.n<=160,'START must reveal localized NES canvas sprite: '+JSON.stringify(start));
@@ -100,7 +96,7 @@ async function main(){
   assert.equal(a.ram.color,0x16,'A must set NES palette 0x16');
   assert.equal(b.ram.color,0x2A,'B must set NES palette 0x2A');
   assert.notEqual(getColor(a),getColor(b),'A/B must visibly change the same NES sprite pixels');
-  await page.evaluate(()=>{window.JANE_AV196_TEST_ACTION=null});
+  await page.evaluate(()=>{window.JANE_AV196_TEST_ACTION=null;window.JANE_AV196_PORT_TEST=null});
   // Full three-person controller round trip (operator-confirmed transfer only).
   let last=await page.evaluate(()=>window.JANE_RUN_CONTEXT());
   for(const actor of ['TOPH','PATRICIA','JANE']){
