@@ -4,8 +4,8 @@
   "title": "Autonomous Playability",
   "baseline": "AV-176",
   "totalTurns": 8,
-  "completedTurns": 2,
-  "percent": 25,
+  "completedTurns": 3,
+  "percent": 37.5,
   "rule": "hegemonic-diodic-one-best-eligible-action",
   "hardStop": [
     "independent-witness-adjudication",
@@ -52,8 +52,20 @@
       "id": "AV-179",
       "title": "Gameplay and idle recognition",
       "targetPercent": 37.5,
-      "status": "pending",
-      "verified": false
+      "status": "verified-ci",
+      "verified": true,
+      "evidence": {
+        "run": "https://github.com/DavidWise01/jane-emu/actions/runs/45038881929",
+        "checks": [
+          "AV-175",
+          "AV-176",
+          "AV-177",
+          "AV-178",
+          "AV-179",
+          "NES preflight"
+        ],
+        "scope": "synthetic CI pass and packaging; real ROM gameplay and state detection unverified"
+      }
     },
     {
       "id": "AV-180",
@@ -92,5 +104,5 @@
     }
   ],
   "updatedAt": "2026-11-22",
-  "notes": "AV-178 regression passed in CI; browser START delivery, gameplay transitions and full Pages deployment not yet verified. Next AV-179."
+  "notes": "AV-179 classifier CI regression passed; live NES ROM gameplay and real browser detection unverified. Next AV-180 deterministic single best action."
 }
