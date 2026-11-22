@@ -37,8 +37,17 @@
       "id": "AV-187",
       "title": "Real three-player frame-continuous handoff",
       "targetPercent": 75,
-      "status": "pending",
-      "verified": false
+      "status": "implemented_pending_live_rom",
+      "verified": false,
+      "ciEvidence": "tests/av187_rotation.test.cjs",
+      "liveEvidence": null,
+      "features": [
+        "same-session-ROM accepted handoff",
+        "60 subsequent frames per player",
+        "ordered Jane to Toph to Patricia to Jane",
+        "timeout and reset fail-closed",
+        "read-only evidence export"
+      ]
     },
     {
       "id": "AV-188",
@@ -48,7 +57,7 @@
       "verified": false
     }
   ],
-  "notes": "AV-186 three-tool layout implemented and CI-gated. Actual ROM defeat/recovery acceptance not verified; Phase 3 remains 0%.",
+  "notes": "AV-187 rotation instrumentation committed. Synthetic handoff CI does not verify live ROM gameplay; Phase 3 remains 0%. The PLAY/LEARN/VERIFY three-tool layout stays intact.",
   "updatedAt": "2026-11-22",
   "layout": {
     "topLevelTools": [
