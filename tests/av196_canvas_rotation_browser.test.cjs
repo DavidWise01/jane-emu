@@ -40,7 +40,7 @@ async function main(){
     jsnesType:typeof f.jsnes,nesType:typeof f.nes,
     lexicalType:f.eval('typeof nes')};
   });
-  assert.notEqual(details.lexicalType,'undefined','embedded NES instance unavailable: '+JSON.stringify(details));
+  assert.ok(details.canvases.some(c=>c.id==='nesCanvas'&&c.w===256&&c.h===240),'actual 256x240 NES canvas missing: '+JSON.stringify(details));
   const inspect=()=>page.evaluate(()=>{
    const f=document.querySelector('#game').contentWindow;
    const canvas=f.document.getElementById('nesCanvas')||[...f.document.querySelectorAll('canvas')].find(c=>c.width===256&&c.height===240);
@@ -58,33 +58,26 @@ async function main(){
     frame:f.JANE_PERCEPTION?.status?.()?.frame,ctx:window.JANE_RUN_CONTEXT(),
     ram:{x:f.JANE_ARENA_RAM.read(2),y:f.JANE_ARENA_RAM.read(3),mode:f.JANE_ARENA_RAM.read(5)}};
   });
-  // Hold a real button on the original jsnes gamepad for a few live frames.
-  async function press(name,frames=8){
+  // Focus the real original NES canvas and drive its normal keyboard input.
+  // This exercises the player's browser event route, without accessing the
+  // private jsnes instance or creating another controller.
+  await page.frameLocator('#game').locator('#nesCanvas').click();
+  async function press(key,frames=8){
    const before=await page.evaluate(()=>document.querySelector('#game').contentWindow.JANE_PERCEPTION.status().frame);
-   await page.evaluate(key=>{
-    const f=document.querySelector('#game').contentWindow;
-    const n=f.eval('nes'),j=f.eval('jsnes');
-    n.buttonDown(1,j.Controller['BUTTON_'+key]);
-   },name);
-   await page.waitForFunction(start=>document.querySelector('#game').contentWindow.JANE_PERCEPTION.status().frame>=start+8,before,{timeout:30000});
-   await page.evaluate(key=>{
-    const f=document.querySelector('#game').contentWindow;
-    f.eval('nes').buttonUp(1,f.eval('jsnes').Controller['BUTTON_'+key]);
-   },name);
-   await page.waitForFunction(start=>document.querySelector('#game').contentWindow.JANE_PERCEPTION.status().frame>=start+3,before+frames,{timeout:30000});
+   await page.keyboard.down(key);
+   await page.waitForFunction(start=>document.querySelector('#game').contentWindow.JANE_PERCEPTION.status().frame>=start+frames,before,{timeout:30000});
+   await page.keyboard.up(key);
+   await page.waitForFunction(start=>document.querySelector('#game').contentWindow.JANE_PERCEPTION.status().frame>=start+frames+3,before,{timeout:30000});
   }
-  // Hold the autonomous policy while testing manual input on same NES. Resume
-  // naturally on first player handoff (the production switchTo API does this).
-  await page.evaluate(()=>document.querySelector('#game').contentWindow.eval('autoplay=false'));
   const start=await inspect();assert.ok(!start.error,JSON.stringify(start));
   assert.ok(start.box.n>=32&&start.box.n<=160,'START must reveal localized NES canvas sprite: '+JSON.stringify(start));
-  await press('RIGHT');const right=await inspect();
+  await press('ArrowRight');const right=await inspect();
   assert.ok(right.box.minX>start.box.minX,'RIGHT must move actual canvas pixels');
-  await press('DOWN');const down=await inspect();
+  await press('ArrowDown');const down=await inspect();
   assert.ok(down.box.minY>right.box.minY,'DOWN must move actual canvas pixels');
   const getColor=p=>p.colors.find(x=>x[1]>=32&&x[1]<=160)?.[0];
-  await press('A');const a=await inspect();
-  await press('B');const b=await inspect();
+  await press('z');const a=await inspect();
+  await press('x');const b=await inspect();
   assert.notEqual(getColor(a),getColor(b),'A/B must visibly change the same NES sprite pixels');
   // Full three-person controller round trip (operator-confirmed transfer only).
   let last=await page.evaluate(()=>window.JANE_RUN_CONTEXT());
