@@ -244,6 +244,9 @@ jobs:
       - name: Test AV-189 original NES fallback and runtime diagnostics
         run: node tests/av189_runtime.test.cjs
 
+      - name: Test AV-190 authoritative NES gameplay mechanics
+        run: node tests/av190_gameplay.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
