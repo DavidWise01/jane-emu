@@ -20,10 +20,12 @@
     },
     {
       "id": "AV-190",
-      "title": "Observe real ROM START delivery and visual scene change",
+      "title": "Deterministic NES movement, A/B attack and completed-trial adaptation",
       "targetPercent": 50,
-      "status": "pending",
-      "verified": false
+      "status": "gameplay_mechanics_committed_pending_live_rom",
+      "verified": false,
+      "ciEvidence": "tests/av190_gameplay.test.cjs",
+      "liveEvidence": null
     },
     {
       "id": "AV-191",
@@ -56,5 +58,5 @@
     }
   },
   "updatedAt": "2026-11-22",
-  "notes": "AV-189 repairs the original cabinet fallback load path and instruments actual frames. Synthetic CI cannot validate real playable NES ROM; no Phase 4 credit until a live session is demonstrated."
+  "notes": "AV-190 implements deterministic real NES input selection (UP/DOWN/LEFT/RIGHT/A/B) through the existing authoritative chooseAction path and learns from completed trials. No live ROM observation verified; Phase 4 remains 0%."
 }
