@@ -1,0 +1,46 @@
+{
+  "schema": "jane.phase-tracker.v1",
+  "phase": 5,
+  "title": "Game-First Runtime Proof",
+  "baseline": "AV-192",
+  "totalTurns": 4,
+  "completedTurns": 0,
+  "percent": 0,
+  "verification": "actual-browser-NES-ROM",
+  "mode": "one NES controller; PLAY LEARN VERIFY; no additional panels",
+  "turns": [
+    {
+      "id": "AV-193",
+      "title": "Original NES controller test cartridge in existing arcade",
+      "status": "implemented_pending_live_jsnes",
+      "targetPercent": 25,
+      "verified": false,
+      "ciEvidence": "tests/av193_controller_rom.test.cjs",
+      "liveEvidence": null
+    },
+    {
+      "id": "AV-194",
+      "title": "Live emulator cartridge boot and START scene change",
+      "status": "pending",
+      "targetPercent": 50,
+      "verified": false
+    },
+    {
+      "id": "AV-195",
+      "title": "Real button effects, survival and player handoff",
+      "status": "pending",
+      "targetPercent": 75,
+      "verified": false
+    },
+    {
+      "id": "AV-196",
+      "title": "Real browser endurance proof and phase freeze",
+      "status": "pending",
+      "targetPercent": 100,
+      "verified": false
+    }
+  ],
+  "evidenceRule": "ROM construction and small 6502 harness tests are not proof of jsnes gameplay in a browser.",
+  "updatedAt": "2026-11-22",
+  "notes": "AV-193 supplies an original legal iNES NROM controller cartridge generated locally in browser. No binary ROM bytes collected or commercial ROM needed. Live jsnes output remains unverified."
+}
