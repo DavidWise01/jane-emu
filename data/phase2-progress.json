@@ -1,0 +1,76 @@
+{
+  "schema": "jane.phase-tracker.v1",
+  "phase": 2,
+  "title": "Autonomous Playability",
+  "baseline": "AV-176",
+  "totalTurns": 8,
+  "completedTurns": 0,
+  "percent": 0,
+  "rule": "hegemonic-diodic-one-best-eligible-action",
+  "hardStop": [
+    "independent-witness-adjudication",
+    "byzantine-consensus",
+    "distributed-authority-voting",
+    "leader-election"
+  ],
+  "turns": [
+    {
+      "id": "AV-177",
+      "title": "Motion-aware scene recognition",
+      "targetPercent": 12.5,
+      "status": "pending",
+      "verified": false
+    },
+    {
+      "id": "AV-178",
+      "title": "Title/menu and START recovery",
+      "targetPercent": 25,
+      "status": "pending",
+      "verified": false
+    },
+    {
+      "id": "AV-179",
+      "title": "Gameplay and idle recognition",
+      "targetPercent": 37.5,
+      "status": "pending",
+      "verified": false
+    },
+    {
+      "id": "AV-180",
+      "title": "Single best-action selection",
+      "targetPercent": 50,
+      "status": "pending",
+      "verified": false
+    },
+    {
+      "id": "AV-181",
+      "title": "Defeat and recovery",
+      "targetPercent": 62.5,
+      "status": "pending",
+      "verified": false
+    },
+    {
+      "id": "AV-182",
+      "title": "Three-player handoff",
+      "targetPercent": 75,
+      "status": "pending",
+      "verified": false
+    },
+    {
+      "id": "AV-183",
+      "title": "Continuous-play endurance",
+      "targetPercent": 87.5,
+      "status": "pending",
+      "verified": false
+    },
+    {
+      "id": "AV-184",
+      "title": "Integration and freeze",
+      "targetPercent": 100,
+      "status": "pending",
+      "verified": false
+    }
+  ],
+  "updatedAt": "2026-11-22",
+  "notes": "Progress only increases after validated acceptance gate; live ROM gameplay remains unverified."
+}
