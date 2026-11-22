@@ -28,8 +28,10 @@
       "id": "AV-186",
       "title": "Real game-over and recovery",
       "targetPercent": 50,
-      "status": "pending",
-      "verified": false
+      "status": "three_tool_ui_committed_live_recovery_pending",
+      "verified": false,
+      "ciEvidence": "tests/av186_three_tools.test.cjs",
+      "liveEvidence": null
     },
     {
       "id": "AV-187",
@@ -46,6 +48,15 @@
       "verified": false
     }
   ],
-  "notes": "AV-185 source code and synthetic regression do not establish live NES ROM boot, START delivery, or gameplay. Credit stays 0% until an actual browser ROM session is verified.",
-  "updatedAt": "2026-11-22"
+  "notes": "AV-186 three-tool layout implemented and CI-gated. Actual ROM defeat/recovery acceptance not verified; Phase 3 remains 0%.",
+  "updatedAt": "2026-11-22",
+  "layout": {
+    "topLevelTools": [
+      "PLAY",
+      "LEARN",
+      "VERIFY"
+    ],
+    "preserves": "existing NES iframe, ROM input, START recovery, life-loss handoff, underlying instruments",
+    "scope": "UI consolidation only; no live recovery demonstrated"
+  }
 }
