@@ -202,7 +202,7 @@ body[data-plasma-live=true][data-plasma-combat=OPEN] .strike-unit{border-color:#
 <label for="speed">Speed <select id="speed" aria-label="NES emulation speed"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option></select></label>
 <button id="confirmDeath">Life lost →</button><button id="assistStart" title="Queue three spaced START presses while autoplay runs">START ×3</button>
 <button id="undo">Undo</button><button id="screenMode" aria-pressed="true" title="Toggle original emulator cabinet">Canvas only</button>
-<span id="status" role="status">Loading NES…</span>
+<span id="status" role="status" aria-live="polite">Booting NES cabinet · choose a local .nes ROM</span>
 </div>
 <div class="grid">
 <section class="panel stage-panel"><div class="row"><h2>LIVE / NES</h2><span class="pill" id="activeIndicator">JANE PLAYING</span></div>
@@ -383,6 +383,7 @@ function sample(){
  }
  if(frame%24<3)renderPlayers();
 }
+let pendingNESFile=null;
 async function init(){
  try{
   const release='../releases/Janes_Perception_v71_Mission_Control_Embedded_JPG_Story_NES.html';
@@ -456,14 +457,29 @@ async function init(){
     w().addEventListener('resize',fit);if(!flatten())status('Waiting for NES canvas; original cabinet retained.');
     timer=setInterval(()=>{if(mode.getAttribute('aria-pressed')==='true')flatten()},500);
 
-    w().JANE_ARENA_SPEED=speed;setProfile();setVolume();status('One NES ready · Jane plays first.');
+    w().JANE_ARENA_SPEED=speed;setProfile();setVolume();status('NES cabinet ready · choose a .nes ROM to start Jane.');
+    if(pendingNESFile){const cartridge=pendingNESFile;pendingNESFile=null;setTimeout(()=>load(cartridge),0)}
+
    }catch(e){status('NES setup problem: '+e.message)}
   },{once:true});
+  // AV-173: Validate the actual modified emulator script, not only the parent page.
+  // If an optional injection corrupts JS, use the preserved original cartridge UI.
+  const embedded=[...html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)];
+  const gameScript=embedded.find(x=>x[2].includes('function startAction()'));
+  if(!gameScript)throw Error('NES play logic missing after injection');
+  try{new Function(gameScript[2])}
+  catch(error){throw Error('Injected NES script invalid: '+error.message)}
   $('game').srcdoc=html;
- }catch(e){status('Shared game initialization failed: '+e.message)}
+ }catch(e){
+   status('NES fallback cabinet: '+e.message+' · load a .nes cartridge below');
+   try{$('screenMode').setAttribute('aria-pressed','false');$('screenMode').textContent='Cabinet view';$('game').removeAttribute('srcdoc');$('game').src='../releases/Janes_Perception_v71_Mission_Control_Embedded_JPG_Story_NES.html'}
+   catch(fallback){status('NES fallback failed: '+fallback.message)}
+ }
 }
 async function load(file){
- if(!ready||!file)return;chain.cancel('cartridge load');
+ if(!file)return;
+ if(!ready){pendingNESFile=file;status('ROM queued: '+file.name+' · waiting for NES cabinet');return}
+ chain.cancel('cartridge load');
  if(window.JANE_ABC?.owner?.()&&window.JANE_ABC.owner()!=='JANE')window.JANE_ABC.cancel();else window.JANE_ABC?.abort();
  if(!/\.nes$/i.test(file.name)||file.size>5e6){status('Choose a valid local .nes ROM under 5 MB.');return}
  try{
