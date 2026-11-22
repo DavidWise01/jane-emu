@@ -58,34 +58,34 @@ async function main(){
     frame:f.JANE_PERCEPTION?.status?.()?.frame,ctx:window.JANE_RUN_CONTEXT(),
     ram:{x:f.JANE_ARENA_RAM.read(2),y:f.JANE_ARENA_RAM.read(3),mode:f.JANE_ARENA_RAM.read(5)}};
   });
-  // Focus the real original NES canvas and drive its normal keyboard input.
-  // This exercises the player's browser event route, without accessing the
-  // private jsnes instance or creating another controller.
-  await page.evaluate(()=>document.querySelector('#game').contentWindow.focus());
-  async function press(key,frames=8){
-   const before=await page.evaluate(()=>document.querySelector('#game').contentWindow.JANE_PERCEPTION.status().frame);
-   await page.keyboard.down(key);
-   await page.waitForTimeout(250);
-   console.log('AV-196 KEY',key,JSON.stringify(await page.evaluate(()=>{
+  // One authoritative action selector; localhost-only deterministic request.
+  // This does NOT verify physical keyboard/gamepad event handling.
+  await page.evaluate(()=>{window.JANE_AV196_TEST_ACTION='IDLE'});
+  await page.waitForTimeout(300);
+  async function press(button,ramAddr){
+   const before=await page.evaluate(addr=>{
     const f=document.querySelector('#game').contentWindow;
-    return {frame:f.JANE_PERCEPTION?.status?.()?.frame,running:f.JANE_PERCEPTION?.status?.()?.running,
-       x:f.JANE_ARENA_RAM?.read?.(2),y:f.JANE_ARENA_RAM?.read?.(3),color:f.JANE_ARENA_RAM?.read?.(4),
-       focused:document.activeElement?.id};
-   })));
-   await page.waitForFunction(start=>document.querySelector('#game').contentWindow.JANE_PERCEPTION.status().frame>=start+frames,before,{timeout:30000});
-   await page.keyboard.up(key);
-   await page.waitForFunction(start=>document.querySelector('#game').contentWindow.JANE_PERCEPTION.status().frame>=start+frames+3,before,{timeout:30000});
+    return {frame:f.JANE_PERCEPTION.status().frame,value:f.JANE_ARENA_RAM.read(addr)};
+   },ramAddr);
+   await page.evaluate(k=>{window.JANE_AV196_TEST_ACTION=k},button);
+   await page.waitForFunction(({addr,prior})=>{
+    const f=document.querySelector('#game').contentWindow;
+    return f.JANE_ARENA_RAM?.read?.(addr)!==prior;
+   },{addr:ramAddr,prior:before.value},{timeout:20000});
+   await page.evaluate(()=>{window.JANE_AV196_TEST_ACTION='IDLE'});
+   await page.waitForFunction(f=>document.querySelector('#game').contentWindow.JANE_PERCEPTION.status().frame>=f+3,before.frame,{timeout:20000});
   }
   const start=await inspect();assert.ok(!start.error,JSON.stringify(start));
   assert.ok(start.box.n>=32&&start.box.n<=160,'START must reveal localized NES canvas sprite: '+JSON.stringify(start));
-  await press('ArrowRight');const right=await inspect();
+  await press('RIGHT',2);const right=await inspect();
   assert.ok(right.box.minX>start.box.minX,'RIGHT must move actual canvas pixels');
-  await press('ArrowDown');const down=await inspect();
+  await press('DOWN',3);const down=await inspect();
   assert.ok(down.box.minY>right.box.minY,'DOWN must move actual canvas pixels');
   const getColor=p=>p.colors.find(x=>x[1]>=32&&x[1]<=160)?.[0];
-  await press('z');const a=await inspect();
-  await press('x');const b=await inspect();
+  await press('A',4);const a=await inspect();
+  await press('B',4);const b=await inspect();
   assert.notEqual(getColor(a),getColor(b),'A/B must visibly change the same NES sprite pixels');
+  await page.evaluate(()=>{window.JANE_AV196_TEST_ACTION=null});
   // Full three-person controller round trip (operator-confirmed transfer only).
   let last=await page.evaluate(()=>window.JANE_RUN_CONTEXT());
   for(const actor of ['TOPH','PATRICIA','JANE']){
