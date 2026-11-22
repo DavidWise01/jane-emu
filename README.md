@@ -20,6 +20,14 @@ Jane is an experimental autonomous NES player and pixel-perception laboratory. T
 - **Limit:** animated screens may never have three identical hashes. AV-176 does not establish real ROM playability or autonomous semantic classification; live browser testing is still required.
 
 
+## Phase 3 — Real ROM Gameplay Acceptance (AV-185–AV-188)
+
+- [Open the Jane EMU Arcade](https://davidwise01.github.io/jane-emu/)
+- [Four-turn Phase 3 acceptance plan](./docs/PHASE-3-AV185-188.md)
+- [Phase 3 progress JSON](./data/phase3-progress.json)
+- AV-185 adds read-only NES boot, actual START completed-action, and post-START frame observation with JSON export.
+- **0/4 live-ROM gates verified** at phase launch. Passing synthetic CI tests does not prove the NES played a real cartridge; Phase 2 remains frozen at 87.5%.
+
 ## Phase 2 — Autonomous Playability (AV-177–AV-184)
 
 - [Eight-turn roadmap and verified percentage ledger](./docs/PHASE-2-AV177-184.md)
