@@ -257,6 +257,12 @@ jobs:
       - name: Test AV-193 original NES controller cartridge via 6502 harness
         run: node tests/av193_controller_rom.test.cjs
 
+      - name: Test AV-193 cartridge inside actual JSNES emulation core
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/jane-jsnes" jsnes@2.1.0
+          NODE_PATH="$RUNNER_TEMP/jane-jsnes/node_modules" node tests/av193_jsnes_playback.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
