@@ -62,6 +62,9 @@
      frame:x=>{const out=detector.frame({...x,at:Date.now()});paint();return out;},
      snapshot:detector.snapshot,exportJSON:detector.exportJSON
    };
+   // The iframe may become ready before this external script finishes loading.
+   // Replay only the most recent diagnostic state, never controller input.
+   if(window.JANE_RUNTIME_LAST)window.JANE_AV189_RUNTIME.notice(window.JANE_RUNTIME_LAST);
    paint();
  }
  return {SCHEMA,STATES,create,mount};
