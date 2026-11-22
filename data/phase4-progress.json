@@ -38,10 +38,12 @@
     },
     {
       "id": "AV-192",
-      "title": "Sustained real-game acceptance and controlled freeze",
+      "title": "Bounded NES movement and attack timing with completed-trial adaptation; controlled phase freeze",
       "targetPercent": 100,
-      "status": "pending",
-      "verified": false
+      "status": "implemented_pending_live_rom",
+      "verified": false,
+      "ciEvidence": "tests/av192_timing.test.cjs",
+      "liveEvidence": null
     }
   ],
   "threeTools": [
@@ -60,5 +62,15 @@
     }
   },
   "updatedAt": "2026-11-22",
-  "notes": "AV-191 uses bounded action biases from actual completed trial pixel-change feedback to de-prioritize stalled inputs, reward changing frames, and isolate player/cartridge sessions. This does not confirm actual game objectives or ROM play; Phase 4 0% live verified."
+  "notes": "AV-189–AV-192 source-level and synthetic test implementation completed. Neither running a real NES cartridge nor actual game progress/survival has been verified in the browser. Phase 4 frozen at 0% live acceptance; no synthetic CI credit.",
+  "phaseClosed": true,
+  "outcome": "closed_blocked_live_rom",
+  "frozenAt": "2026-11-22",
+  "nextPhase": {
+    "id": 5,
+    "name": "Game-First Runtime Proof",
+    "start": "AV-193",
+    "percent": 0,
+    "objective": "Run a legitimate test NES ROM in a browser, verify action input delivery and game-state transitions, and fix observed gameplay blockers. Avoid creating further observation panels until a real ROM boots and responds."
+  }
 }
