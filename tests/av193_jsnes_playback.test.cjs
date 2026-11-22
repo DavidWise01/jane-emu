@@ -3,7 +3,11 @@
  * This is a headless real-emulator test, not visual browser acceptance.
  */
 const assert=require('node:assert/strict');
-const jsnes=require('jsnes');
+const imported=require('jsnes');
+const jsnes=typeof imported?.NES==='function'?imported:
+ typeof imported?.default?.NES==='function'?imported.default:
+ typeof imported?.jsnes?.NES==='function'?imported.jsnes:imported;
+assert.equal(typeof jsnes.NES,'function','JSNES missing NES constructor; exports='+Object.keys(imported).join(','));
 const {buildROM}=require('../dashboard/av193_test_rom.js');
 const emulator=new jsnes.NES({emulateSound:false,onFrame:()=>{}});
 emulator.loadROM(Buffer.from(buildROM()).toString('binary'));
