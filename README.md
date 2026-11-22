@@ -19,6 +19,14 @@ Jane is an experimental autonomous NES player and pixel-perception laboratory. T
 - Export local append-only JSON evidence. No ROM bytes are sent or bundled. No automatic START, NES input injection, or alteration to role handoff is introduced.
 - **Limit:** animated screens may never have three identical hashes. AV-176 does not establish real ROM playability or autonomous semantic classification; live browser testing is still required.
 
+
+## Phase 2 — Autonomous Playability (AV-177–AV-184)
+
+- [Eight-turn roadmap and verified percentage ledger](./docs/PHASE-2-AV177-184.md)
+- [Machine-readable progress](./data/phase2-progress.json)
+- Baseline AV-176; **0 / 8 verified turns = 0%** at phase initialization.
+- Single authoritative NES input controller, deterministic best-eligible action, append-only evidence, no witness/Byzantine work inside this phase. Such work triggers a phase freeze and handoff, even if progress is below 100%.
+
 ## Interface
 
 - Left 50%: NES emulator and Player 1 controller.
