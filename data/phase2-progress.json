@@ -4,8 +4,8 @@
   "title": "Autonomous Playability",
   "baseline": "AV-176",
   "totalTurns": 8,
-  "completedTurns": 5,
-  "percent": 62.5,
+  "completedTurns": 6,
+  "percent": 75,
   "rule": "hegemonic-diodic-one-best-eligible-action",
   "hardStop": [
     "independent-witness-adjudication",
@@ -107,8 +107,20 @@
       "id": "AV-182",
       "title": "Three-player handoff",
       "targetPercent": 75,
-      "status": "pending",
-      "verified": false
+      "status": "verified-ci",
+      "verified": true,
+      "evidence": {
+        "run": "https://github.com/DavidWise01/jane-emu/actions/runs/45043226228",
+        "checks": [
+          "AV-182 three-player handoff continuity",
+          "AV-181",
+          "AV-180",
+          "AV-179",
+          "AV-178",
+          "AV-177"
+        ],
+        "scope": "synthetic CI gate; live ROM handoff and frame continuation not yet verified"
+      }
     },
     {
       "id": "AV-183",
@@ -126,5 +138,5 @@
     }
   ],
   "updatedAt": "2026-11-22",
-  "notes": "AV-181 recovery tests passed in CI. Live browser ROM recovery unverified. Next AV-182 one-controller three-player handoff."
+  "notes": "AV-182 handoff continuity tests passed in CI; real browser ROM handoff unverified. Next AV-183 endurance."
 }
