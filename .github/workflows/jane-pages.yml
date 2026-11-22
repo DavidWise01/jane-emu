@@ -263,6 +263,12 @@ jobs:
           npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/jane-jsnes" jsnes@2.1.0
           NODE_PATH="$RUNNER_TEMP/jane-jsnes/node_modules" node tests/av193_jsnes_playback.test.cjs
 
+      - name: Test AV-194 visible sprite and movement in actual JSNES PPU framebuffer
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/jane-jsnes" jsnes@2.1.0
+          NODE_PATH="$RUNNER_TEMP/jane-jsnes/node_modules" node tests/av194_jsnes_framebuffer.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
