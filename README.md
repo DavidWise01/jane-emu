@@ -2,6 +2,14 @@
 
 Jane is an experimental autonomous NES player and pixel-perception laboratory. This repository holds standalone HTML builds with an embedded JPG story of each iteration.
 
+
+## AV-174 — Playability verification (emulator-first)
+
+- [Download the AV-174 PDF verification report](./docs/AV-174-playability-verification.pdf) (generated and published by Pages CI).
+- [Read the source verification protocol](./docs/AV-174-playability-verification.md).
+- Check ROM initialization, advancing frames, START input and recovery after game over in an actual browser session; use Cabinet view if Canvas fails.
+- Static syntax checks and a successful Pages deployment are **not** proof of live ROM playability. Record browser observations before marking AV-174 passed.
+
 ## Interface
 
 - Left 50%: NES emulator and Player 1 controller.
