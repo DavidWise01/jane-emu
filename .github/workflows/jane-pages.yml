@@ -218,6 +218,9 @@ jobs:
       - name: Test AV-181 bounded defeat recovery
         run: node tests/av181_recovery.test.cjs
 
+      - name: Test AV-182 three-player handoff continuity
+        run: node tests/av182_handoff.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
