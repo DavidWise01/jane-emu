@@ -1,0 +1,51 @@
+{
+  "schema": "jane.phase-tracker.v1",
+  "phase": 3,
+  "title": "Real ROM Gameplay Acceptance",
+  "baseline": "AV-184",
+  "totalTurns": 4,
+  "completedTurns": 0,
+  "percent": 0,
+  "verification": "live-browser-rom-required",
+  "operatingRule": "hegemonic-diodic-single-owner",
+  "phase2Reference": "data/phase2-progress.json",
+  "hardStop": [
+    "distributed-input-ownership",
+    "byzantine-consensus",
+    "witness-voting"
+  ],
+  "turns": [
+    {
+      "id": "AV-185",
+      "title": "ROM boot, completed START, post-START frame observation",
+      "targetPercent": 25,
+      "status": "implemented_pending_live_rom",
+      "verified": false,
+      "ciEvidence": "tests/av185_boot_start.test.cjs",
+      "liveEvidence": null
+    },
+    {
+      "id": "AV-186",
+      "title": "Real game-over and recovery",
+      "targetPercent": 50,
+      "status": "pending",
+      "verified": false
+    },
+    {
+      "id": "AV-187",
+      "title": "Real three-player frame-continuous handoff",
+      "targetPercent": 75,
+      "status": "pending",
+      "verified": false
+    },
+    {
+      "id": "AV-188",
+      "title": "Multi-turn endurance and controlled acceptance",
+      "targetPercent": 100,
+      "status": "pending",
+      "verified": false
+    }
+  ],
+  "notes": "AV-185 source code and synthetic regression do not establish live NES ROM boot, START delivery, or gameplay. Credit stays 0% until an actual browser ROM session is verified.",
+  "updatedAt": "2026-11-22"
+}
