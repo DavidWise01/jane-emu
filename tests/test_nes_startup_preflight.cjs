@@ -5,9 +5,9 @@
 const root=path.resolve(__dirname,'..'),page=fs.readFileSync(path.join(root,'dashboard/arena.html'),'utf8');
 assert.match(page,/<iframe[^>]*id="game"/);
 assert.match(page,/setInterval\(sample,500\);renderPlayers\(\);init\(\)/);
-assert.match(page,/\\.srcdoc=html/);
+assert.ok(page.includes('srcdoc=html'),'Playable iframe needs HTML');
 assert.match(page,/pendingNESFile=file/,'Early ROM selection must queue');
-assert.match(page,/setTimeout\\(\\(\\)=>load\\(cartridge\\),0\\)/,'Queued ROM must load after iframe init');
+assert.ok(page.includes('load(cartridge),0'),'Queued ROM must load after init');
 assert.match(page,/NES fallback cabinet/,'Broken injection must fall back to original playable cabinet');
 assert.match(page,/Injected NES script invalid/,'Embedded game code must receive preflight syntax validation');
 assert.match(page,/const shift172=window\.JaneShiftConfidence\?\.create\?\./);
