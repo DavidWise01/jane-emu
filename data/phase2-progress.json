@@ -4,8 +4,8 @@
   "title": "Autonomous Playability",
   "baseline": "AV-176",
   "totalTurns": 8,
-  "completedTurns": 3,
-  "percent": 37.5,
+  "completedTurns": 4,
+  "percent": 50,
   "rule": "hegemonic-diodic-one-best-eligible-action",
   "hardStop": [
     "independent-witness-adjudication",
@@ -71,8 +71,19 @@
       "id": "AV-180",
       "title": "Single best-action selection",
       "targetPercent": 50,
-      "status": "pending",
-      "verified": false
+      "status": "verified-ci",
+      "verified": true,
+      "evidence": {
+        "run": "https://github.com/DavidWise01/jane-emu/actions/runs/45039219025",
+        "checks": [
+          "AV-180 deterministic best-action arbitration",
+          "AV-179",
+          "AV-178",
+          "AV-177",
+          "AV-176"
+        ],
+        "scope": "synthetic CI acceptance; runtime best-action value and ROM gameplay unverified"
+      }
     },
     {
       "id": "AV-181",
@@ -104,5 +115,5 @@
     }
   ],
   "updatedAt": "2026-11-22",
-  "notes": "AV-179 classifier CI regression passed; live NES ROM gameplay and real browser detection unverified. Next AV-180 deterministic single best action."
+  "notes": "AV-180 selector gate passed CI; policy opt-in, existing chooseAction owns input; actual ROM gameplay remains unverified. Next AV-181 defeat/recovery."
 }
