@@ -127,6 +127,7 @@
      armed,root:bootRoot,rom:gameRom,
      gate:gate?.snapshot()||null,observations:observations.slice(),
      cycles:cycles.map(x=>({...x})),completedCycles:cycles.filter(x=>x.transfer&&x.restart&&x.resumed).length,
+     av219Chain:window.JaneAV219?.audit?.(cycles,bootRoot,gameRom)||null,
      recoveryRequests:recoveryIds.size,clockStalls:stalls,
      av213Faults:faultIsolator?.snapshot?.()||null,
      note:'Actual NES RAM mode on purpose-built homebrew ROM; not a commercial cartridge proof.'}),
