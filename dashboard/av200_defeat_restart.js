@@ -10,9 +10,9 @@
  const SCHEMA='jane.av200.defeat-restart-gate.v1';
  const norm=x=>typeof x==='string'?x.trim().toUpperCase():'';
  function create(){
-  let session=null,events=[],defeat=null,start=null,resumed=null;
+  let session=null,events=[],defeat=null,start=null,resumed=null,completed=[];
   const copy=x=>JSON.parse(JSON.stringify(x));
-  function reset(x){session={root:x.root,rom:x.rom,actor:x.actor,frame:x.frame};events=[];defeat=null;start=null;resumed=null;}
+  function reset(x){session={root:x.root,rom:x.rom,actor:x.actor,frame:x.frame};events=[];defeat=null;start=null;resumed=null;completed=[];}
   function observe(x={}){
    if(!x||!x.root||!x.rom||x.rom==='unloaded'||!Number.isSafeInteger(x.frame)||x.frame<0)return snapshot();
    if(!session||session.root!==x.root||session.rom!==x.rom||x.frame<session.frame)reset(x);
@@ -24,8 +24,15 @@
      x.defeat?.verified===true && x.defeat?.gameOver===true &&
      x.defeat?.rom===session.rom && x.defeat?.root===session.root &&
      x.defeat?.frame===x.frame;
-   if(!defeat&&observedDefeat){
+   const nextEpisode=observedDefeat&&(
+     !defeat||(resumed&&x.frame>resumed.frame&&x.defeat.evidenceId&&
+       x.defeat.evidenceId!==defeat.evidenceId));
+   if(nextEpisode){
+    // A new defeat opens only after the previous episode fully recovered.
+    // Preserve the old certificate; never let stale START prove this episode.
+    if(resumed)completed.push({defeat:{...defeat},start:{...start},resumed:{...resumed}});
     defeat={frame:x.frame,actor:x.actor,evidenceId:x.defeat.evidenceId||null};
+    start=null;resumed=null;
     events.push({kind:'DEFEAT_OBSERVED',...defeat});
    }
    // START must have been completed on the real controller, after defeat.
@@ -48,7 +55,8 @@
    return snapshot();
   }
   function snapshot(){return copy({schema:SCHEMA,session,defeat,start,resumed,
-    events,verifiedRecovery:!!(defeat&&start&&resumed),
+    events,completed,completedCount:completed.length+(defeat&&start&&resumed?1:0),
+    verifiedRecovery:!!(defeat&&start&&resumed),
     manualHandoffCountsAsDefeat:false,phase5FrozenPercent:50,
     note:'Only cartridge-specific observed defeat, completed START and 60 advancing post-START frames can pass.'});}
   return {observe,snapshot};
