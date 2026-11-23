@@ -3,13 +3,13 @@
   "date": "2026-11-23",
   "phase": 9,
   "turnsPlanned": 8,
-  "turnsImplemented": 3,
-  "implementationPercent": 37.5,
+  "turnsImplemented": 4,
+  "implementationPercent": 50,
   "liveGameplayAcceptance": {
     "verifiedGates": 0,
     "earnedPercent": 0
   },
-  "latest": "AV-223",
+  "latest": "AV-224",
   "priorPhase": {
     "phase": 8,
     "implementedPercent": 100,
@@ -30,11 +30,11 @@
     "originalPlayfield": true
   },
   "evidence": {
-    "verifiedSourceDefect": "AV-201 ROM used unbounded 8-bit INC/DEC for X/Y; holding D-pad could move sprite offscreen or wrap through 0/255",
-    "repair": "Original 6502 D-pad handlers now clamp X 8..247 and Y 8..231 without host RAM writes or changing NES canvas",
-    "controlledTest": "AV-223 executes generated 6502 ROM and passes left, right, up, down edge and held-direction checks; AV-222 restart regression also passed after repair",
-    "browser": "AV-223 Chromium test checking actual NES sprite RGB pixels against background committed; passing browser result not independently verified",
+    "verifiedSourceDefect": "Homebrew START enabled NES sprite rendering ($2001=$14) before palette $3F11 and OAM $2003/$2004 were updated for the new life, permitting stale sprite state",
+    "repair": "6502 ROM now commits current-life palette and OAM before re-enabling PPU sprites; observed game-over still disables rendering",
+    "controlledTest": "AV-224 executes generated 6502 ROM with recorded PPU palette/OAM bus writes and verifies staged sprite state before enable; AV-222 and AV-223 ROM regressions passed",
+    "browser": "AV-224 frame-matched Chromium NES sprite RGB pixel diagnostic committed; independently passing browser results not reviewed",
     "hostedPages": "Publishing configuration committed; latest deployment unverified"
   },
-  "next": "AV-224 inspect and repair next observed rendering or controller behavior, confirm live Chromium after source fixes"
+  "next": "AV-225 examine visible PPU sprite animation / palette changes and controller frame timing with actual browser evidence; fix first reproduced failure"
 }
