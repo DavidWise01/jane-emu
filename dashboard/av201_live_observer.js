@@ -3,7 +3,7 @@
  * controller trials; never writes RAM, synthesizes START or changes owner.
  */
 (function(){'use strict';
- let armed=false,bootRoot=null,gameRom=null,gate=null,seen=new Set(),observations=[],lastMode=null,defeatCount=0,rotationIds=new Set(),recoveryIds=new Set(),cycles=[],frameLast=-1,stalls=0,lastPlaying=-1;
+ let faultIsolator=null,armed=false,bootRoot=null,gameRom=null,gate=null,seen=new Set(),observations=[],lastMode=null,defeatCount=0,rotationIds=new Set(),recoveryIds=new Set(),cycles=[],frameLast=-1,stalls=0,lastPlaying=-1;
  const context=()=>window.JANE_RUN_CONTEXT?.();
  function reset(){gate=window.JaneAV200?.create?.()||null;seen.clear();observations=[];bootRoot=null;gameRom=null;lastMode=null;defeatCount=0;rotationIds.clear();recoveryIds.clear();cycles=[];frameLast=-1;stalls=0;lastPlaying=-1;}
  function record(row){observations.push(row);if(observations.length>256)observations.shift();}
@@ -87,6 +87,14 @@
     }
     lastPlaying=frame;
   }
+  // AV-213 samples only the already-running NES and its existing receipts.
+  // Never infer a passing game from these fault-candidate classifications.
+  faultIsolator??=window.JaneAV213?.create?.()||null;
+  faultIsolator?.ingest?.({root:c.root,rom:c.rom,actor:c.actor,frame,mode,
+    nowMs:performance.now(),
+    startPolicy:window.JANE_AV205_START_STATUS?.()||null,
+    gameplay:window.JANE_AV208_GAMEPLAY_STATUS?.()||null,
+    monitor:{observations:observations.slice()}});
   const x={root:c.root,rom:c.rom,actor:c.actor,frame};
   if(mode===2)x.defeat={source:'cartridge-observed',verified:true,gameOver:true,
     root:c.root,rom:c.rom,frame,evidenceId:'av201-ram-0005-'+frame};
@@ -112,6 +120,7 @@
      gate:gate?.snapshot()||null,observations:observations.slice(),
      cycles:cycles.map(x=>({...x})),completedCycles:cycles.filter(x=>x.transfer&&x.restart&&x.resumed).length,
      recoveryRequests:recoveryIds.size,clockStalls:stalls,
+     av213Faults:faultIsolator?.snapshot?.()||null,
      note:'Actual NES RAM mode on purpose-built homebrew ROM; not a commercial cartridge proof.'}),
    stop:()=>{clearInterval(timer);armed=false;}
  };
