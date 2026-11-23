@@ -51,6 +51,7 @@
    if(!x||key!==ident(x)||!Number.isSafeInteger(x.frame)||
       x.frame<pending.startFrame){cancel('context-or-clock-changed');return false;}
    const age=x.frame-pending.startFrame;
+   if(x.mode!==1){cancel('not-playing');return false;}
    if(age<90)return true;
    const old=pending;pending=null;missingReceipts++;
    // This is a DELIVERY-UNKNOWN event, not a failed gameplay action.
