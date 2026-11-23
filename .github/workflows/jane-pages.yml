@@ -17,6 +17,7 @@ on:
       - 'data/phase6-progress.json'
       - 'data/phase7-progress.json'
       - 'data/phase7-freeze.json'
+      - 'data/phase8-progress.json'
       - 'scripts/build_av174_pdf.py'
       - 'memory/curation/**'
       - '.github/workflows/jane-pages.yml'
@@ -453,6 +454,7 @@ jobs:
           cp data/phase6-progress.json _site/data/phase6-progress.json
           cp data/phase7-progress.json _site/data/phase7-progress.json
           cp data/phase7-freeze.json _site/data/phase7-freeze.json
+          cp data/phase8-progress.json _site/data/phase8-progress.json
           if [ -d memory/curation ]; then mkdir -p _site/memory; cp -R memory/curation _site/memory/curation; fi
           if [ -d assets ]; then cp -R assets _site/assets; fi
           printf 'Jane EMU release: %s\nCommit: %s\n' '${{ steps.verify.outputs.entry }}' "$GITHUB_SHA" > _site/BUILD.txt
