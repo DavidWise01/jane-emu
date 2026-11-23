@@ -353,6 +353,33 @@ window.JANE_AV202_DEFEAT_HANDOFF=packet=>{
       to:people[active].name,frame:c.frame,evidenceId:packet.evidenceId}}));}
   return {ok,reason:ok?'cartridge-defeat-accepted':'existing-handoff-rejected'};
 };
+// AV-203: route original homebrew boot/defeat recovery through the
+// EXISTING reciprocal START scheduler. This does not press a second NES port.
+const av203RecoveryQueued=new Set();
+window.JANE_AV203_QUEUE_RECOVERY=packet=>{
+  const c=window.JANE_RUN_CONTEXT?.();
+  const mode=w().JANE_ARENA_RAM?.read?.(5);
+  if(!packet||packet.source!=='av201-cartridge-observed'||
+    packet.root!==gameRoot||packet.root!==c?.root||
+    packet.rom!==safeRoot()||packet.rom!==c?.rom||
+    packet.actor!==c?.actor||!Number.isSafeInteger(packet.frame)||
+    packet.frame>c.frame||c.frame-packet.frame>20||
+    ![0,2].includes(mode)||mode!==packet.mode||
+    !packet.evidenceId||av203RecoveryQueued.has(packet.evidenceId))
+    return {ok:false,reason:'invalid-boot-or-defeat-evidence'};
+  if(mode===2){
+    // For actual losses, owner must already have changed via AV-202.
+    const transfers=window.JANE_AV201_MONITOR?.snapshot?.()?.observations||[];
+    if(!transfers.some(x=>x.kind==='AV202_REAL_DEFEAT_HANDOFF'&&
+        x.evidenceId===packet.defeatId&&x.to===c.actor))
+      return {ok:false,reason:'await-cartridge-handoff'};
+  }
+  // Existing reciprocal controller executes START at a neutral action boundary.
+  window.__assistManual=true;
+  window.JANE_RECIPROCAL.request(c);
+  av203RecoveryQueued.add(packet.evidenceId);
+  return {ok:true,reason:'queued-existing-start-scheduler',actor:c.actor,frame:c.frame};
+};
 function readLife(){
  if(!monitor)return null;
  try{
