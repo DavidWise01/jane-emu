@@ -349,6 +349,17 @@ jobs:
       - name: Verify AV-205 bounded production START priority and owner isolation
         run: node tests/av205_priority_start.test.cjs
 
+      - name: Verify AV-206 START offers and original-action completion receipts
+        run: node tests/av206_start_receipt.test.cjs
+
+      - name: Diagnose AV-206 automatic browser START and first real recovery
+        continue-on-error: true # No acceptance credit without actual passing Chromium logs.
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/jane-browser" playwright@1.56.1
+          PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" "$RUNNER_TEMP/jane-browser/node_modules/.bin/playwright" install chromium
+          NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av206_browser_autostart_recovery.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
