@@ -20,6 +20,7 @@ on:
       - 'data/phase8-progress.json'
       - 'data/phase8-freeze.json'
       - 'data/phase9-progress.json'
+      - 'data/phase9-freeze.json'
       - 'scripts/build_av174_pdf.py'
       - 'memory/curation/**'
       - '.github/workflows/jane-pages.yml'
@@ -579,6 +580,17 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" "$RUNNER_TEMP/jane-browser/node_modules/.bin/playwright" install chromium
           NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av227_browser_retained_effects.test.cjs
 
+      - name: Verify AV-228 Phase 9 freeze, one original NES and evidence policy
+        run: node tests/av228_phase9_freeze.test.cjs
+
+      - name: Diagnose AV-228 full original NES gameplay acceptance in Chromium
+        continue-on-error: true # Unreviewed browser output never earns acceptance.
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/jane-browser" playwright@1.56.1
+          PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" "$RUNNER_TEMP/jane-browser/node_modules/.bin/playwright" install chromium
+          NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av228_browser_phase9_acceptance.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
@@ -593,7 +605,7 @@ jobs:
           cp -R releases _site/releases
           cp -R dashboard _site/dashboard
           mkdir -p _site/docs
-          cp docs/AV-174-playability-verification.md docs/AV-174-playability-verification.pdf docs/PHASE-2-AV177-184.md docs/PHASE-3-AV185-188.md docs/PHASE-4-AV189-192.md docs/PHASE-5-AV193-196.md docs/PHASE-6-AV197-204.md docs/PHASE-7-AV205-212.md docs/PHASE-8-AV213-220.md docs/AV-221-chromium-nes-serialization-repair.md docs/AV-222-nes-restart-state.md docs/AV-223-visible-nes-sprite-bounds.md docs/AV-224-nes-ppu-staging.md docs/AV-225-nes-playing-mode-palette.md docs/AV-226-per-life-nes-input-effects.md docs/AV-227-nes-effect-retention.md _site/docs/
+          cp docs/AV-174-playability-verification.md docs/AV-174-playability-verification.pdf docs/PHASE-2-AV177-184.md docs/PHASE-3-AV185-188.md docs/PHASE-4-AV189-192.md docs/PHASE-5-AV193-196.md docs/PHASE-6-AV197-204.md docs/PHASE-7-AV205-212.md docs/PHASE-8-AV213-220.md docs/AV-221-chromium-nes-serialization-repair.md docs/AV-222-nes-restart-state.md docs/AV-223-visible-nes-sprite-bounds.md docs/AV-224-nes-ppu-staging.md docs/AV-225-nes-playing-mode-palette.md docs/AV-226-per-life-nes-input-effects.md docs/AV-227-nes-effect-retention.md docs/PHASE-9-AV221-228.md _site/docs/
           mkdir -p _site/data
           cp data/phase2-progress.json _site/data/phase2-progress.json
           cp data/phase3-progress.json _site/data/phase3-progress.json
@@ -605,6 +617,7 @@ jobs:
           cp data/phase8-progress.json _site/data/phase8-progress.json
           cp data/phase8-freeze.json _site/data/phase8-freeze.json
           cp data/phase9-progress.json _site/data/phase9-progress.json
+          cp data/phase9-freeze.json _site/data/phase9-freeze.json
           if [ -d memory/curation ]; then mkdir -p _site/memory; cp -R memory/curation _site/memory/curation; fi
           if [ -d assets ]; then cp -R assets _site/assets; fi
           printf 'Jane EMU release: %s\nCommit: %s\n' '${{ steps.verify.outputs.entry }}' "$GITHUB_SHA" > _site/BUILD.txt
