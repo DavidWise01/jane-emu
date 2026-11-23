@@ -16,6 +16,7 @@ on:
       - 'data/phase5-progress.json'
       - 'data/phase6-progress.json'
       - 'data/phase7-progress.json'
+      - 'data/phase7-freeze.json'
       - 'scripts/build_av174_pdf.py'
       - 'memory/curation/**'
       - '.github/workflows/jane-pages.yml'
@@ -415,6 +416,9 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" "$RUNNER_TEMP/jane-browser/node_modules/.bin/playwright" install chromium
           NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av211_browser_action_exchange.test.cjs
 
+      - name: Verify AV-212 honest Phase 7 freeze and original NES layout
+        run: node tests/av212_phase7_freeze.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
@@ -437,6 +441,7 @@ jobs:
           cp data/phase5-progress.json _site/data/phase5-progress.json
           cp data/phase6-progress.json _site/data/phase6-progress.json
           cp data/phase7-progress.json _site/data/phase7-progress.json
+          cp data/phase7-freeze.json _site/data/phase7-freeze.json
           if [ -d memory/curation ]; then mkdir -p _site/memory; cp -R memory/curation _site/memory/curation; fi
           if [ -d assets ]; then cp -R assets _site/assets; fi
           printf 'Jane EMU release: %s\nCommit: %s\n' '${{ steps.verify.outputs.entry }}' "$GITHUB_SHA" > _site/BUILD.txt
