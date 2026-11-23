@@ -14,6 +14,10 @@
  const byte=v=>Number.isInteger(v)&&v>=0&&v<=255;
  function create(){
   let rows=[],ids=new Set(),episodes=[],active=null,boundaries=[];
+  // AV-227: first actual hardware effects for each player/control survive
+  // eviction from the 160-row live diagnostics ring. This is not a replay
+  // or an inferred action; each entry remains the original completed row.
+  let proofRows=[],proofKeys=new Set(),proofRoots=[];
   const copy=x=>({...x});
   function boundary(p){
     if(!p||!p.root||!p.rom||!Number.isSafeInteger(p.frame)||p.frame<0||
@@ -45,10 +49,30 @@
     a.mode!==1&&b.mode===1;
    const kind=a.mode!==1&&button!=='START'?'OUTSIDE_PLAY':
     changed?'NES_EFFECT_OBSERVED':'COMPLETED_WITHOUT_EXPECTED_EFFECT';
-   ids.add(id);rows.push({id,root:p.root,rom:p.rom,actor:p.actor,
+   const row={id,root:p.root,rom:p.rom,actor:p.actor,
     button,startFrame:p.startFrame,endFrame:p.endFrame,
-    before:{...a},after:{...b},kind,changed});
+    before:{...a},after:{...b},kind,changed};
+   ids.add(id);rows.push(row);
    if(rows.length>160){const old=rows.shift();ids.delete(old.id);}
+   // Preserve one *first* source-linked effect of each exact button under
+   // each player in the same cartridge run. Never promote an offered,
+   // unmeasured or non-playing action to durable proof.
+   if(kind==='NES_EFFECT_OBSERVED'&&changed&&a.mode===1&&b.mode===1){
+     const rootKey=[p.root,p.rom].join('|');
+     const proofKey=[rootKey,p.actor,button].join('|');
+     if(!proofKeys.has(proofKey)){
+       if(!proofRoots.includes(rootKey))proofRoots.push(rootKey);
+       proofKeys.add(proofKey);
+       proofRows.push(row);
+       // Keep 8 cartridge runs, at most 3 actors × 7 buttons per run.
+       while(proofRoots.length>8){
+         const evicted=proofRoots.shift();
+         proofRows=proofRows.filter(x=>[x.root,x.rom].join('|')!==evicted);
+         proofKeys=new Set(proofRows.map(x=>
+           [x.root,x.rom,x.actor,x.button].join('|')));
+       }
+     }
+   }
    // AV-216: retain separate, contiguous per-owner evidence episodes.
    // No episode earns continuity until both movement and palette changes
    // were observed on completed original NES actions.
@@ -75,6 +99,8 @@
    return {kind,changed};
   }
   return {observe,boundary,snapshot:()=>({schema:SCHEMA,rows:rows.map(copy),
+    proofRows:proofRows.map(x=>({...x,before:{...x.before},after:{...x.after}})),
+    proofRootCount:proofRoots.length,
     episodes:episodes.map(copy),boundaries:boundaries.map(copy),
     qualifiedEpisodes:episodes.filter(x=>x.qualified).length,
     note:'One emulator ancestry. Contiguous completed-action effects are not causal proof of controller delivery or a gameplay win.'})};
