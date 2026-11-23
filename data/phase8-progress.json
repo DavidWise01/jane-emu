@@ -3,13 +3,13 @@
   "date": "2026-11-23",
   "phase": 8,
   "turnsPlanned": 8,
-  "turnsImplemented": 1,
-  "implementationPercent": 12.5,
+  "turnsImplemented": 2,
+  "implementationPercent": 25,
   "liveGameplayAcceptance": {
     "verifiedGates": 0,
     "earnedPercent": 0
   },
-  "latest": "AV-213",
+  "latest": "AV-214",
   "priorPhase": {
     "phase": 7,
     "implementationPercent": 100,
@@ -30,9 +30,9 @@
     "originalPlayfield": true
   },
   "evidence": {
-    "controlledFaultRegression": "passed direct functional execution",
-    "browserFaultTrace": "committed as nonblocking; live outcome not independently verified",
+    "controlledFaultRegression": "AV-214 bounded START retry and AV-205/206 backward compatibility, AV-213 exhaustion classification passed controlled functional tests",
+    "browserFaultTrace": "AV-214 original Chromium NES START retry test committed; result not independently verified",
     "hostedPages": "not independently verified"
   },
-  "next": "AV-214 use retrieved NES fault candidates to fix one identified live controller boundary, avoid expanding instrumentation"
+  "next": "AV-215: inspect live NES browser evidence and repair actual controller delivery or START edge; validate A/B and sprite"
 }
