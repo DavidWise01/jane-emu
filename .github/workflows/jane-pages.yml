@@ -513,6 +513,17 @@ jobs:
       - name: Verify AV-221 NES browser-test evidence serialization
         run: node tests/av221_browser_serialization.test.cjs
 
+      - name: Verify AV-222 actual 6502 START and sprite reset execution
+        run: node tests/av222_6502_restart_gameplay.test.cjs
+
+      - name: Diagnose AV-222 actual NES fresh-life restart in Chromium
+        continue-on-error: true # Real browser results remain separate from deterministic ROM execution.
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/jane-browser" playwright@1.56.1
+          PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" "$RUNNER_TEMP/jane-browser/node_modules/.bin/playwright" install chromium
+          NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av222_browser_restart_gameplay.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
