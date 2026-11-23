@@ -52,7 +52,7 @@ fail([...good.filter(x=>!(x.actor==='PATRICIA'&&x.button==='A')),
  'MISSING_A_OR_B_PALETTE_EFFECT_IN_LIFE');
 fail(good.map(x=>x.actor==='PATRICIA'&&x.button==='A'?
  {...x,after:{...x.after,mode:2}}:x),'MISSING_A_OR_B_PALETTE_EFFECT_IN_LIFE');
-const stale=structuredClone(cycles);
+const stale=JSON.parse(JSON.stringify(cycles));
 stale[1].startReceipt.actor='TOPH';
 fail(good,'RESTART_ANCESTRY_NOT_CONFIRMED',stale);
 assert.equal(audit([],good,root,rom).complete,false);
