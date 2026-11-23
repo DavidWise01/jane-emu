@@ -3,9 +3,9 @@
  * controller trials; never writes RAM, synthesizes START or changes owner.
  */
 (function(){'use strict';
- let armed=false,bootRoot=null,gameRom=null,gate=null,seen=new Set(),observations=[],lastMode=null,defeatCount=0,rotationIds=new Set();
+ let armed=false,bootRoot=null,gameRom=null,gate=null,seen=new Set(),observations=[],lastMode=null,defeatCount=0,rotationIds=new Set(),recoveryIds=new Set(),cycles=[],frameLast=-1,stalls=0,lastPlaying=-1;
  const context=()=>window.JANE_RUN_CONTEXT?.();
- function reset(){gate=window.JaneAV200?.create?.()||null;seen.clear();observations=[];bootRoot=null;gameRom=null;lastMode=null;defeatCount=0;rotationIds.clear();}
+ function reset(){gate=window.JaneAV200?.create?.()||null;seen.clear();observations=[];bootRoot=null;gameRom=null;lastMode=null;defeatCount=0;rotationIds.clear();recoveryIds.clear();cycles=[];frameLast=-1;stalls=0;lastPlaying=-1;}
  function record(row){observations.push(row);if(observations.length>256)observations.shift();}
  document.addEventListener('click',e=>{
    if(e.target?.closest?.('#av201-demo')){armed=true;reset();}
@@ -35,6 +35,51 @@
           from:c.actor,to:window.JANE_RUN_CONTEXT?.()?.actor,root:c.root,rom:c.rom});}
     }
   }
+  // AV-203: request only the existing controller's START scheduler.
+  // Initial title needs no defeat; later recovery requires a recorded
+  // AV-202 cartridge-specific owner transfer.
+  let recoveryId=null,defeatId=null;
+  if(mode===0)recoveryId='av203-boot-'+bootRoot;
+  if(mode===2&&defeatCount>0){
+    defeatId='av201-loss-'+bootRoot+'-'+defeatCount;
+    if(rotationIds.has(defeatId))
+      recoveryId='av203-recover-'+defeatId;
+  }
+  if(recoveryId&&!recoveryIds.has(recoveryId)){
+    const live=context();
+    const result=window.JANE_AV203_QUEUE_RECOVERY?.({
+      source:'av201-cartridge-observed',root:live?.root,rom:live?.rom,
+      actor:live?.actor,mode,frame,evidenceId:recoveryId,defeatId});
+    if(result?.ok){
+      recoveryIds.add(recoveryId);
+      record({kind:'AV203_START_QUEUED',frame,mode,evidenceId:recoveryId,
+        actor:live.actor,root:live.root,rom:live.rom,defeatId});
+    }
+  }
+  if(frameLast>=0&&frame===frameLast)stalls++;
+  if(frameLast>=0&&frame<frameLast){armed=false;return;}
+  frameLast=frame;
+  // A cycle becomes a fact only after live PLAYING resumes for 60 frames,
+  // following a distinct ROM-observed loss and successful owner transfer.
+  if(mode===2&&defeatCount>0&&!cycles.some(x=>x.defeatCount===defeatCount))
+    cycles.push({defeatCount,defeatFrame:frame,defeatId:'av201-loss-'+bootRoot+'-'+defeatCount,
+      ownerAtDefeat:c.actor,transfer:null,restart:null,resumed:null});
+  const currentCycle=cycles.at(-1);
+  if(currentCycle&&currentCycle.transfer===null){
+    const transfer=observations.find(x=>x.kind==='AV202_REAL_DEFEAT_HANDOFF'&&
+      x.evidenceId===currentCycle.defeatId);
+    if(transfer)currentCycle.transfer={frame:transfer.frame,from:transfer.from,to:transfer.to};
+  }
+  if(mode===1){
+    if(lastMode===2&&currentCycle&&currentCycle.transfer)
+      currentCycle.restart={frame,actor:c.actor};
+    if(currentCycle?.restart&&!currentCycle.resumed&&frame>=currentCycle.restart.frame+60){
+      currentCycle.resumed={frame,actor:c.actor};
+      record({kind:'AV203_RESUMED_FRAMES',frame,defeatId:currentCycle.defeatId,actor:c.actor,
+        delta:frame-currentCycle.restart.frame});
+    }
+    lastPlaying=frame;
+  }
   const x={root:c.root,rom:c.rom,actor:c.actor,frame};
   if(mode===2)x.defeat={source:'cartridge-observed',verified:true,gameOver:true,
     root:c.root,rom:c.rom,frame,evidenceId:'av201-ram-0005-'+frame};
@@ -58,6 +103,8 @@
    snapshot:()=>({schema:'jane.av201.live-cartridge-observation.v1',
      armed,root:bootRoot,rom:gameRom,
      gate:gate?.snapshot()||null,observations:observations.slice(),
+     cycles:cycles.map(x=>({...x})),completedCycles:cycles.filter(x=>x.transfer&&x.restart&&x.resumed).length,
+     recoveryRequests:recoveryIds.size,clockStalls:stalls,
      note:'Actual NES RAM mode on purpose-built homebrew ROM; not a commercial cartridge proof.'}),
    stop:()=>{clearInterval(timer);armed=false;}
  };
