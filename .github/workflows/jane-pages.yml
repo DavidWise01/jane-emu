@@ -311,6 +311,20 @@ jobs:
         shell: bash
         run: node tests/av200_defeat_restart.test.cjs
 
+      - name: Test AV-201 real 6502 loss and restart in JSNES
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/jane-jsnes" jsnes@2.1.0
+          NODE_PATH="$RUNNER_TEMP/jane-jsnes/node_modules" node tests/av201_jsnes_defeat_restart.test.cjs
+
+      - name: Diagnose AV-201 Chromium loss and restart through one NES
+        continue-on-error: true # Require a real passing hosted-browser gate before acceptance credit.
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/jane-browser" playwright@1.56.1
+          PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" "$RUNNER_TEMP/jane-browser/node_modules/.bin/playwright" install chromium
+          NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av201_browser_defeat_restart.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
