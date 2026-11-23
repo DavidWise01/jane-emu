@@ -1,6 +1,6 @@
 /* AV-201 · Original, deterministic NROM-128 controller exercise cartridge.
  * Purpose: a legal homebrew test of real 6502/PPU/controller mechanics.
- * START begins the run, D-pad moves, A/B changes palette; at 180 game frames the ROM itself sets $0005=2 (game over) and hides the sprite. A later START restarts.
+ * START begins/restarts each life from x120/y108/palette30, D-pad moves, A/B changes palette; at 180 game frames the ROM itself sets $0005=2 (game over) and hides the sprite. A later START restarts.
  * No second emulator and no fake frame reporting: load via the existing .nes path.
  */
 (function(root,factory){'use strict';
@@ -50,8 +50,17 @@
   input('A',()=>{ldaImm(0x16);staZp(0x04)});
   input('B',()=>{ldaImm(0x2A);staZp(0x04)});
   input('SELECT',()=>{ldaImm(120);staZp(0x02);ldaImm(108);staZp(0x03)});
-  input('START',()=>{ldaImm(0);staZp(0x06);ldaImm(1);staZp(0x05);
+  // AV-222: a new life must start with deterministic sprite and palette
+  // state. Holding START while already playing must not restart each frame.
+  input('START',()=>{
+   ldaZp(0x05);emit(0xC9,1);branch(0xF0,'START_no_reentry');
+   ldaImm(120);staZp(0x02);
+   ldaImm(108);staZp(0x03);
+   ldaImm(0x30);staZp(0x04);
+   ldaImm(0);staZp(0x06);
+   ldaImm(1);staZp(0x05);
    ldaImm(0x14);staAbs(0x2001); // sprites enabled, including leftmost 8px
+   label('START_no_reentry');
   });
   input('UP',()=>emit(0xC6,0x03)); // DEC Y
   input('DOWN',()=>emit(0xE6,0x03)); // INC Y
