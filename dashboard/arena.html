@@ -366,7 +366,8 @@ window.JANE_AV215_INPUT_STATUS=()=>av215Effects?.snapshot?.()||null;
 window.JANE_AV226_LIFE_EFFECTS=()=>{
  const monitor=window.JANE_AV201_MONITOR?.snapshot?.();
  const effects=av215Effects?.snapshot?.();
- return window.JaneAV226?.audit?.(monitor?.cycles||[],effects?.rows||[],
+ return window.JaneAV226?.audit?.(monitor?.cycles||[],
+   [...(effects?.proofRows||[]),...(effects?.rows||[])],
    monitor?.root,monitor?.rom)||null;
 };
 
