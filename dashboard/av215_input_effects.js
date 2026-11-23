@@ -13,10 +13,13 @@
   p.startFrame>=0&&p.endFrame>p.startFrame&&KEYS.includes(p.button);
  const byte=v=>Number.isInteger(v)&&v>=0&&v<=255;
  function create(){
-  let rows=[],ids=new Set();
+  let rows=[],ids=new Set(),episodes=[],active=null;
+  const copy=x=>({...x});
   function observe(p){
    if(!valid(p)||p.source!=='nes-completed-trial'||!p.id)return false;
-   const id=[p.root,p.rom,p.actor,p.id].join('|');
+   // The embedded NES may restart its trial counter. A completed action
+   // is identified by its actual cartridge frame span, not trial ID alone.
+   const id=[p.root,p.rom,p.actor,p.id,p.startFrame,p.endFrame].join('|');
    if(ids.has(id))return false;
    if(![p.before,p.after].every(x=>x&&[x.x,x.y,x.palette,x.mode].every(byte)))return false;
    const a=p.before,b=p.after,button=p.button;
@@ -32,10 +35,32 @@
     button,startFrame:p.startFrame,endFrame:p.endFrame,
     before:{...a},after:{...b},kind,changed});
    if(rows.length>160){const old=rows.shift();ids.delete(old.id);}
+   // AV-216: retain separate, contiguous per-owner evidence episodes.
+   // No episode earns continuity until both movement and palette changes
+   // were observed on completed original NES actions.
+   const key=[p.root,p.rom,p.actor].join('|');
+   if(!active||active.key!==key||p.startFrame<active.endFrame){
+     active={key,actor:p.actor,root:p.root,rom:p.rom,
+       firstFrame:p.startFrame,endFrame:p.endFrame,actions:0,
+       movements:0,colors:0,hasMovement:false,hasColor:false,qualified:false};
+     episodes.push(active);
+     if(episodes.length>40)episodes.shift();
+   }
+   active.endFrame=p.endFrame;active.actions++;
+   if(kind==='NES_EFFECT_OBSERVED'&&['RIGHT','LEFT','UP','DOWN'].includes(button)){
+     active.movements++;active.hasMovement=true;
+   }
+   if(kind==='NES_EFFECT_OBSERVED'&&['A','B'].includes(button)){
+     active.colors++;active.hasColor=true;
+   }
+   active.qualified=active.hasMovement&&active.hasColor&&
+     active.movements>=2&&active.colors>=2&&active.actions>=4;
    return {kind,changed};
   }
-  return {observe,snapshot:()=>({schema:SCHEMA,rows:rows.map(x=>({...x})),
-    note:'One emulator ancestry; completed action and RAM correlation is not causal proof of input delivery.'})};
+  return {observe,snapshot:()=>({schema:SCHEMA,rows:rows.map(copy),
+    episodes:episodes.map(copy),
+    qualifiedEpisodes:episodes.filter(x=>x.qualified).length,
+    note:'One emulator ancestry. Contiguous completed-action effects are not causal proof of controller delivery or a gameplay win.'})};
  }
  return {SCHEMA,create};
 });
