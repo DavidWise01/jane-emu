@@ -3,13 +3,13 @@
   "date": "2026-11-23",
   "phase": 9,
   "turnsPlanned": 8,
-  "turnsImplemented": 2,
-  "implementationPercent": 25,
+  "turnsImplemented": 3,
+  "implementationPercent": 37.5,
   "liveGameplayAcceptance": {
     "verifiedGates": 0,
     "earnedPercent": 0
   },
-  "latest": "AV-222",
+  "latest": "AV-223",
   "priorPhase": {
     "phase": 8,
     "implementedPercent": 100,
@@ -30,11 +30,11 @@
     "originalPlayfield": true
   },
   "evidence": {
-    "verifiedSourceDefect": "Original AV-201 6502 START code did not reset X/Y/palette on restart and repeatedly reset game age when START held",
-    "repair": "On START with mode not playing, 6502 restores x120/y108/palette0x30, age0, mode1 and enables sprite; active-play START is ignored",
-    "controlledTest": "AV-222 executed original generated ROM 6502 opcodes via deterministic hardware bus emulator; title, movement, A/B, gameover, reset and held START assertions passed",
-    "browser": "AV-222 original Chromium NES restart diagnostic committed; result not independently verified",
+    "verifiedSourceDefect": "AV-201 ROM used unbounded 8-bit INC/DEC for X/Y; holding D-pad could move sprite offscreen or wrap through 0/255",
+    "repair": "Original 6502 D-pad handlers now clamp X 8..247 and Y 8..231 without host RAM writes or changing NES canvas",
+    "controlledTest": "AV-223 executes generated 6502 ROM and passes left, right, up, down edge and held-direction checks; AV-222 restart regression also passed after repair",
+    "browser": "AV-223 Chromium test checking actual NES sprite RGB pixels against background committed; passing browser result not independently verified",
     "hostedPages": "Publishing configuration committed; latest deployment unverified"
   },
-  "next": "AV-223 verify real NES framebuffer and controller state directly, repair next demonstrated cartridge/gameplay fault"
+  "next": "AV-224 inspect and repair next observed rendering or controller behavior, confirm live Chromium after source fixes"
 }
