@@ -1,0 +1,30 @@
+'use strict';
+/* AV-214: no permanent one-shot START stall, no unlimited auto pressing. */
+const assert=require('node:assert/strict');
+const {create}=require('../dashboard/av205_priority_start.js');
+const p=create({maxAttempts:4,gapFrames:48,holdFrames:12,maxBatches:2,retryPauseFrames:120});
+const row=(frame,mode=0,actor='JANE')=>({root:'same-NES',rom:'loss-cartridge',actor,frame,mode});
+assert.equal(p.arm({...row(10),evidenceId:'title-boot'}).ok,true);
+for(const f of [10,58,106,154])assert.equal(p.offer(row(f))?.button,'START');
+assert.equal(p.offer(row(202)),null,'only four offers in first window');
+assert.equal(p.snapshot().pending.batch,2,'one second window is scheduled');
+assert.equal(p.offer(row(321)),null,'retry cooldown enforced');
+for(const f of [322,370,418,466])assert.equal(p.offer(row(f))?.button,'START');
+assert.equal(p.snapshot().pending.totalAttempts,8);
+assert.equal(p.offer(row(514)),null,'exhaust without infinite re-arm');
+assert.equal(p.snapshot().pending.exhausted,true);
+for(const f of [700,1200,2000])assert.equal(p.offer(row(f)),null);
+assert.equal(p.snapshot().history.filter(e=>e.event==='START_RETRY_BATCH').length,1);
+assert.equal(p.snapshot().history.filter(e=>e.event==='START_EXHAUSTED').length,1);
+assert.equal(p.snapshot().history.filter(e=>e.event==='START_OFFER').length,8);
+assert.equal(p.arm({...row(2100),evidenceId:'title-boot'}).reason,'already-armed',
+ 'same evidence must not unlock another retry cycle');
+assert.equal(p.offer(row(2110,1)),null,'observed actual NES playing clears pending');
+assert.equal(p.snapshot().pending,null);
+assert.equal(p.arm({...row(2200,2,'TOPH'),evidenceId:'defeat-1'}).ok,true);
+assert.equal(p.offer(row(2200,2,'TOPH'))?.button,'START');
+assert.equal(p.completed({...row(2213,2,'TOPH'),button:'START'}),true);
+assert.equal(p.snapshot().pending.completions,1);
+assert.equal(p.offer(row(2250,2,'PATRICIA')),null,'owner change cancels retry');
+assert.equal(p.snapshot().pending,null);
+console.log('AV-214 bounded same-evidence retry regression PASS (synthetic state; no live browser claim)');
