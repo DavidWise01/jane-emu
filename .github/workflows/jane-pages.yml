@@ -333,6 +333,14 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" "$RUNNER_TEMP/jane-browser/node_modules/.bin/playwright" install chromium
           NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av202_real_defeat_rotation_browser.test.cjs
 
+      - name: Diagnose AV-203 unassisted three-loss NES endurance in Chromium
+        continue-on-error: true # Not gameplay-accepted until a real browser run passes.
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/jane-browser" playwright@1.56.1
+          PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" "$RUNNER_TEMP/jane-browser/node_modules/.bin/playwright" install chromium
+          NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av203_unassisted_endurance_browser.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
