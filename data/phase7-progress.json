@@ -3,23 +3,23 @@
   "date": "2026-11-23",
   "phase": 7,
   "turnsPlanned": 8,
-  "turnsImplemented": 5,
-  "implementationPercent": 62.5,
+  "turnsImplemented": 6,
+  "implementationPercent": 75,
   "liveGameplayAcceptance": {
     "verifiedGates": 0,
     "earnedPercent": 0
   },
-  "latest": "AV-209",
+  "latest": "AV-210",
   "scope": "Real NES controller and gameplay mechanics; one NES, PLAY/LEARN/VERIFY, Jane-Toph-Patricia.",
   "evidence": {
-    "unitPolicyTest": "AV-209 controller serialization, 90-frame receipt timeout, delivery-unknown classification and owner reset passed direct functional test",
+    "unitPolicyTest": "AV-210 goal-stall probe and regressions AV-208/209 passed direct controlled-input functional tests",
     "arcadeInlineSyntax": "184 inline arcade scripts syntax checked",
-    "browserEndToEnd": "AV-209 NES Chromium action receipt diagnostic committed, result not independently verified",
+    "browserEndToEnd": "AV-210 real Chromium goal/probe diagnostic committed; run output not independently verified",
     "pagesDeployment": "not independently verified"
   },
   "phase6Frozen": {
     "implementedPercent": 100,
     "verifiedGameplayPercent": 0
   },
-  "next": "AV-210 inspect real Chromium errors, then improve game objective response using completed actions and preserve full NES field"
+  "next": "AV-211 make completed real NES action results improve target-reaching efficiency and validate continuity across player handoffs"
 }
