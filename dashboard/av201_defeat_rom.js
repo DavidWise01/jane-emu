@@ -62,10 +62,13 @@
    ldaImm(0x14);staAbs(0x2001); // sprites enabled, including leftmost 8px
    label('START_no_reentry');
   });
-  input('UP',()=>emit(0xC6,0x03)); // DEC Y
-  input('DOWN',()=>emit(0xE6,0x03)); // INC Y
-  input('LEFT',()=>emit(0xC6,0x02)); // DEC X
-  input('RIGHT',()=>emit(0xE6,0x02)); // INC X
+  // AV-223: keep the complete 8x8 original NES sprite inside the visible
+  // viewport. 8-bit INC/DEC otherwise wraps across the screen at 0/255.
+  // Every clamp executes as original 6502 instructions, not a host-side fix.
+  input('UP',()=>{ldaZp(0x03);emit(0xC9,8);branch(0xF0,'UP_edge');emit(0xC6,0x03);label('UP_edge');});
+  input('DOWN',()=>{ldaZp(0x03);emit(0xC9,231);branch(0xF0,'DOWN_edge');emit(0xE6,0x03);label('DOWN_edge');});
+  input('LEFT',()=>{ldaZp(0x02);emit(0xC9,8);branch(0xF0,'LEFT_edge');emit(0xC6,0x02);label('LEFT_edge');});
+  input('RIGHT',()=>{ldaZp(0x02);emit(0xC9,247);branch(0xF0,'RIGHT_edge');emit(0xE6,0x02);label('RIGHT_edge');});
   // Actual 6502 game-over transition, not a host-side label or injected RAM.
   ldaZp(0x05);emit(0xC9,1);branch(0xD0,'skip_age');
   emit(0xE6,0x06); // INC $06 once per observed PPU vblank
