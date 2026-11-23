@@ -51,21 +51,18 @@ async function main(){
     if(x<8||x>247||y<8||y>231)return false;
     const sprite=ctx.getImageData(x+4,y+4,1,1).data;
     const background=ctx.getImageData(1,1,1,1).data;
-    return sprite[0]!==background[0]||sprite[1]!==background[1]||
+    const visible=sprite[0]!==background[0]||sprite[1]!==background[1]||
       sprite[2]!==background[2];
-  },null,{timeout:60000,polling:'raf'});
-  const pixels=await page.evaluate(()=>{
-    const f=document.querySelector('#game')?.contentWindow,
-      canvas=f?.document.getElementById('nesCanvas'),
-      ctx=canvas?.getContext('2d'),ram=f?.JANE_ARENA_RAM;
-    if(!ctx||!ram)return {error:'NES_CANVAS_OR_RAM_MISSING'};
-    const x=ram.read(2),y=ram.read(3),mode=ram.read(5);
-    const sample=(px,py)=>[...ctx.getImageData(px,py,1,1).data];
-    return {mode,x,y,sprite:sample(x+4,y+4),background:sample(1,1),
-      width:canvas.width,height:canvas.height,
+    if(visible)window.__av224PixelProof={
+      mode:ram.read(5),x,y,sprite:[...sprite],background:[...background],
+      width:c.width,height:c.height,
       root:window.JANE_RUN_CONTEXT?.()?.root,
       rom:window.JANE_RUN_CONTEXT?.()?.rom};
-  });
+    return visible;
+  },null,{timeout:60000,polling:'raf'});
+  // Preserve the exact observed successful browser frame. Re-sampling later
+  // may land on a different NES frame or another life.
+  const pixels=await page.evaluate(()=>window.__av224PixelProof);
   assert.equal(pixels.width,256);
   assert.equal(pixels.height,240);
   assert.equal(pixels.root,first.root,'same original NES');
