@@ -3,23 +3,23 @@
   "date": "2026-11-23",
   "phase": 7,
   "turnsPlanned": 8,
-  "turnsImplemented": 1,
-  "implementationPercent": 12.5,
+  "turnsImplemented": 2,
+  "implementationPercent": 25,
   "liveGameplayAcceptance": {
     "verifiedGates": 0,
     "earnedPercent": 0
   },
-  "latest": "AV-205",
+  "latest": "AV-206",
   "scope": "Real NES controller and gameplay mechanics; one NES, PLAY/LEARN/VERIFY, Jane-Toph-Patricia.",
   "evidence": {
-    "unitPolicyTest": "passed direct functional evaluation with controlled inputs",
+    "unitPolicyTest": "AV-206 completion receipt and offer separation passed direct functional evaluation",
     "arcadeInlineSyntax": "182 inline scripts syntax checked",
-    "browserEndToEnd": "not independently verified",
+    "browserEndToEnd": "AV-206 real Chromium test committed but result not independently verified",
     "pagesDeployment": "not independently verified"
   },
   "phase6Frozen": {
     "implementedPercent": 100,
     "verifiedGameplayPercent": 0
   },
-  "next": "AV-206 inspect Chromium START output and verify complete unassisted homebrew ROM recovery; fix scheduling as evidenced"
+  "next": "AV-207 inspect browser results then verify sprite movement and A/B combat delivery via original controller"
 }
