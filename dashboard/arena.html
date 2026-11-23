@@ -382,6 +382,14 @@ window.JANE_AV208_ACTION_COMPLETE=p=>{
    x:ram?.read?.(2),palette:ram?.read?.(4)})||false;
 };
 window.JANE_AV208_GAMEPLAY_STATUS=()=>av208Policy?.snapshot?.()||null;
+window.JANE_AV209_ACTION_BLOCKED=p=>{
+ const run=window.JANE_RUN_CONTEXT?.(),mon=window.JANE_AV201_MONITOR?.snapshot?.();
+ if(!run?.root||!mon?.armed||run.root!==mon.root||run.rom!==mon.rom||p?.rom!==run.rom)
+   return false;
+ const ram=w().JANE_ARENA_RAM;
+ return av208Policy?.blocked?.({root:run.root,rom:run.rom,actor:run.actor,
+   frame:Number(p.frame),mode:ram?.read?.(5),x:ram?.read?.(2),palette:ram?.read?.(4)})||false;
+};
 // AV-207: read the genuine homebrew NES RAM and offer closed-loop
 // sprite movement/colors through the EXISTING chooseAction() controller.
 let av207Policy=null;
@@ -544,7 +552,7 @@ async function init(){
   if(!html.includes(frameClock))throw Error('NES frame-clock hook missing; speed control cannot safely initialize');
   html=html.replace(frameClock,'accum+=delta*(window.JANE_ARENA_SPEED||1);let steps=0;while(accum>=1000/60&&steps++<32)');
   const recHooks=[
-   ['function startAction(){if(!nes||!autoplay||action)return;','function startAction(){if(!nes||!autoplay||action)return;const arenaView=perception||readFrame();window.parent.JANE_NEURAL_RECEIVE?.({rom:romID,frame});const recovery=window.parent.JANE_AV205_START_OFFER?.({rom:romID,frame})||window.parent.JANE_ASSIST_RECOVER?.({rom:romID,frame,hash:arenaView?.hash||"",vec:arenaView?.vec||[]});const anticipatory=!recovery?window.parent.JANE_ANTICIPATE?.({rom:romID,frame,title:titleLesson.stage}):null;const counterstrike=!recovery&&!anticipatory?window.parent.JANE_COUNTERATTACK_OFFER?.({rom:romID,frame,title:titleLesson.stage}):null;let dreamTransfer=null,homeRecall=null;if(!recovery&&!anticipatory&&!counterstrike){try{let h=2166136261;for(const x of nes.cpu.mem.slice(0,2048))h=Math.imul(h^(x>>>0),16777619);dreamTransfer=window.parent.JANE_TRANSFER_OFFER?.({rom:romID,frame,title:titleLesson.stage,hash:arenaView?.hash||"",ram:(h>>>0).toString(16).padStart(8,"0")});if(!dreamTransfer)homeRecall=window.parent.JANE_HOMEOSTASIS_OFFER?.({rom:romID,frame,title:titleLesson.stage,hash:arenaView?.hash||"",ram:(h>>>0).toString(16).padStart(8,"0")})}catch(e){}}'],
+   ['function startAction(){if(!nes||!autoplay||action)return;','function startAction(){if(!nes||!autoplay||action)return;if(window.parent.JANE_AV209_ACTION_BLOCKED?.({rom:romID,frame}))return;const arenaView=perception||readFrame();window.parent.JANE_NEURAL_RECEIVE?.({rom:romID,frame});const recovery=window.parent.JANE_AV205_START_OFFER?.({rom:romID,frame})||window.parent.JANE_ASSIST_RECOVER?.({rom:romID,frame,hash:arenaView?.hash||"",vec:arenaView?.vec||[]});const anticipatory=!recovery?window.parent.JANE_ANTICIPATE?.({rom:romID,frame,title:titleLesson.stage}):null;const counterstrike=!recovery&&!anticipatory?window.parent.JANE_COUNTERATTACK_OFFER?.({rom:romID,frame,title:titleLesson.stage}):null;let dreamTransfer=null,homeRecall=null;if(!recovery&&!anticipatory&&!counterstrike){try{let h=2166136261;for(const x of nes.cpu.mem.slice(0,2048))h=Math.imul(h^(x>>>0),16777619);dreamTransfer=window.parent.JANE_TRANSFER_OFFER?.({rom:romID,frame,title:titleLesson.stage,hash:arenaView?.hash||"",ram:(h>>>0).toString(16).padStart(8,"0")});if(!dreamTransfer)homeRecall=window.parent.JANE_HOMEOSTASIS_OFFER?.({rom:romID,frame,title:titleLesson.stage,hash:arenaView?.hash||"",ram:(h>>>0).toString(16).padStart(8,"0")})}catch(e){}}'],
    ['if(window.JANE_SPINOR_V24?.shouldWait?.','if(!recovery&&!anticipatory&&!counterstrike&&!dreamTransfer&&!homeRecall&&window.JANE_SPINOR_V24?.shouldWait?.'],
    ['if(window.JANE_CAUSAL_V23?.shouldWait?.','if(!recovery&&!anticipatory&&!counterstrike&&!dreamTransfer&&!homeRecall&&window.JANE_CAUSAL_V23?.shouldWait?.'],
    ['const menuRequest=window.JANE_BOOT_V57?.recommend?.','const menuRequest=recovery||anticipatory||counterstrike||dreamTransfer||homeRecall||window.JANE_BOOT_V57?.recommend?.'],
