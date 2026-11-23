@@ -76,19 +76,22 @@
       x.evidenceId===currentCycle.defeatId);
     if(transfer)currentCycle.transfer={frame:transfer.frame,from:transfer.from,to:transfer.to};
   }
+  // AV-218: store a real, owner-matched completed START receipt as soon
+  // as the NES exposes it. recentTrials is rolling and may be pruned before
+  // the 60-frame resumed-play verification.
+  if(currentCycle?.transfer)
+    window.JaneAV218?.capture?.(currentCycle,
+      f.JANE_PERCEPTION?.diagnostics?.()?.recentTrials||[],c.root,c.rom,frame);
   if(mode===1){
     if(previousMode===2&&currentCycle&&currentCycle.transfer)
       currentCycle.restart={frame,actor:c.actor};
-    if(currentCycle?.restart&&!currentCycle.resumed&&frame>=currentCycle.restart.frame+60){
-      const completed=(f.JANE_PERCEPTION?.diagnostics?.()?.recentTrials||[])
-        .some(t=>String(t.button).toUpperCase()==='START'&&
-          Number.isSafeInteger(t.endFrame)&&
-          t.endFrame>currentCycle.defeatFrame&&t.endFrame<=frame);
-      if(completed){
-      currentCycle.resumed={frame,actor:c.actor};
-      record({kind:'AV203_RESUMED_FRAMES',frame,defeatId:currentCycle.defeatId,actor:c.actor,
+    const resumed=window.JaneAV218?.qualify?.(currentCycle,frame,c.actor);
+    if(resumed){
+      currentCycle.resumed=resumed;
+      record({kind:'AV203_RESUMED_FRAMES',frame,
+        defeatId:currentCycle.defeatId,actor:c.actor,
+        startReceiptFrame:resumed.startReceiptFrame,
         delta:frame-currentCycle.restart.frame});
-      }
     }
     lastPlaying=frame;
   }
