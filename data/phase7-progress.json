@@ -1,0 +1,25 @@
+{
+  "schema": "jane.phase7.av205-212.progress.v1",
+  "date": "2026-11-23",
+  "phase": 7,
+  "turnsPlanned": 8,
+  "turnsImplemented": 1,
+  "implementationPercent": 12.5,
+  "liveGameplayAcceptance": {
+    "verifiedGates": 0,
+    "earnedPercent": 0
+  },
+  "latest": "AV-205",
+  "scope": "Real NES controller and gameplay mechanics; one NES, PLAY/LEARN/VERIFY, Jane-Toph-Patricia.",
+  "evidence": {
+    "unitPolicyTest": "passed direct functional evaluation with controlled inputs",
+    "arcadeInlineSyntax": "182 inline scripts syntax checked",
+    "browserEndToEnd": "not independently verified",
+    "pagesDeployment": "not independently verified"
+  },
+  "phase6Frozen": {
+    "implementedPercent": 100,
+    "verifiedGameplayPercent": 0
+  },
+  "next": "AV-206 inspect Chromium START output and verify complete unassisted homebrew ROM recovery; fix scheduling as evidenced"
+}
