@@ -1,0 +1,36 @@
+'use strict';
+/* AV-209 checks pending-action ownership and missing receipt recovery. */
+const assert=require('node:assert/strict');
+const {create}=require('../dashboard/av208_adaptive_gameplay.js');
+const buttons=['RIGHT','LEFT','A','B','START'];
+const x=(frame,xval=120,palette=0x30,actor='JANE',mode=1)=>({
+ root:'one-root',rom:'av201-loss',actor,frame,mode,x:xval,palette,actions:buttons});
+const p=create();
+assert.equal(p.blocked(x(10)),false);
+assert.equal(p.offer(x(10)).button,'RIGHT');
+assert.equal(p.blocked(x(20)),true,'do not send other actions while pending');
+assert.equal(p.offer(x(20)),null);
+assert.equal(p.blocked(x(99)),true,'89 frames remains held');
+assert.equal(p.snapshot().missingReceipts,0);
+assert.equal(p.blocked(x(100)),false,'90 frames expires pending');
+assert.equal(p.snapshot().missingReceipts,1);
+assert.equal(p.snapshot().failures.RIGHT,0,'unknown delivery is not failed game action');
+assert.equal(p.snapshot().history.filter(e=>e.kind==='MISSING_RECEIPT').length,1);
+assert.equal(p.offer(x(100)).button,'RIGHT','retry same objective');
+assert.equal(p.blocked(x(103)),true);
+assert.equal(p.complete({...x(110,136),button:'RIGHT'}),true);
+assert.equal(p.blocked(x(110,136)),false,'valid completion unblocks action loop');
+assert.equal(p.offer(x(111,136)).button,'A','real position can advance goal');
+assert.equal(p.blocked(x(112,136,0x30,'TOPH')),false,'ownership change unlocks');
+assert.equal(p.snapshot().pending,null);
+assert.equal(p.offer(x(113,120,0x30,'TOPH')).button,'RIGHT');
+assert.equal(p.blocked(x(114,120,0x30,'TOPH',2)),false,'game over releases gate');
+assert.equal(p.snapshot().pending,null);
+const q=create();
+assert.equal(q.offer(x(10)).button,'RIGHT');
+assert.equal(q.blocked(x(110,140)),false,'late observed movement is not a fabricated receipt');
+assert.equal(q.snapshot().missingReceipts,1);
+assert.equal(q.snapshot().successes.RIGHT,0);
+assert.equal(q.snapshot().phase,1,'observed X can advance objective without claiming completed action');
+assert.equal(q.offer(x(111,140)).button,'A');
+console.log('AV-209 missed-receipt recovery and action serialization passed (controlled inputs only)');
