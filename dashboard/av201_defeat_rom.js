@@ -59,7 +59,8 @@
    ldaImm(0x30);staZp(0x04);
    ldaImm(0);staZp(0x06);
    ldaImm(1);staZp(0x05);
-   ldaImm(0x14);staAbs(0x2001); // sprites enabled, including leftmost 8px
+   // AV-224: leave PPU rendering disabled until palette and OAM are written
+   // for this new life. Re-enabling here could display the prior life.
    label('START_no_reentry');
   });
   // AV-223: keep the complete 8x8 original NES sprite inside the visible
@@ -85,6 +86,9 @@
   ldaImm(1);staAbs(0x2004); // CHR tile 1
   ldaImm(0);staAbs(0x2004); // sprite palette 0
   ldaZp(0x02);staAbs(0x2004); // X
+  // AV-224: all current-life sprite state is committed. NOW enable
+  // the original PPU sprite output, never before the OAM/palette writes.
+  ldaImm(0x14);staAbs(0x2001);
   label('skip_draw');jump('frame');
   for(const f of fixups){
    if(!labels.has(f.name))throw Error('Unresolved assembler label '+f.name);
