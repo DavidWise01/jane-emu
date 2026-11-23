@@ -16,7 +16,7 @@
  const ident=x=>[x.root,x.rom,x.actor].join('|');
  const reached=(i,x)=>i===0?x.x>=136:i===1?x.palette===0x16:i===2?x.x<=104:x.palette===0x2a;
  function create(){
-  let key=null,lastFrame=-1,phase=0,laps=0,pending=null,history=[];
+  let key=null,lastFrame=-1,phase=0,laps=0,pending=null,history=[],missingReceipts=0;
   let holds=Object.fromEntries(GOALS.map(g=>[g.button,8]));
   let successes=Object.fromEntries(GOALS.map(g=>[g.button,0]));
   let failures=Object.fromEntries(GOALS.map(g=>[g.button,0]));
@@ -24,9 +24,9 @@
   const reset=x=>{key=ident(x);lastFrame=-1;phase=0;laps=0;pending=null;
     holds=Object.fromEntries(GOALS.map(g=>[g.button,8]));
     successes=Object.fromEntries(GOALS.map(g=>[g.button,0]));
-    failures=Object.fromEntries(GOALS.map(g=>[g.button,0]));history=[];};
+    failures=Object.fromEntries(GOALS.map(g=>[g.button,0]));history=[];missingReceipts=0;};
   const snapshot=()=>({schema:SCHEMA,identity:key,phase,laps,pending:pending?{...pending}:null,
-   holds:{...holds},successes:{...successes},failures:{...failures},history:history.map(x=>({...x}))});
+   holds:{...holds},successes:{...successes},failures:{...failures},missingReceipts,history:history.map(x=>({...x}))});
   function offer(x){
    if(!valid(x)||!Array.isArray(x.actions))return null;
    if(key!==ident(x)||x.frame<lastFrame)reset(x);
@@ -42,6 +42,23 @@
     startFrame:x.frame,beforeX:x.x,beforePalette:x.palette};
    push({kind:'OFFER',button,hold:pending.hold,frame:x.frame,phase});
    return {button,hold:pending.hold};
+  }
+  // AV-209: do not let older strategies supply a competing action while
+  // a completed-trial receipt is outstanding. A missing callback must not
+  // permanently deadlock the original NES scheduler.
+  function blocked(x){
+   if(!pending)return false;
+   if(!x||key!==ident(x)||!Number.isSafeInteger(x.frame)||
+      x.frame<pending.startFrame){cancel('context-or-clock-changed');return false;}
+   const age=x.frame-pending.startFrame;
+   if(age<90)return true;
+   const old=pending;pending=null;missingReceipts++;
+   // This is a DELIVERY-UNKNOWN event, not a failed gameplay action.
+   push({kind:'MISSING_RECEIPT',button:old.button,frame:x.frame,
+     offeredAt:old.startFrame,age});
+   // Only a new observed state may authorize goal progression.
+   if(valid(x)&&reached(phase,x)){phase=(phase+1)%4;if(phase===0)laps++;}
+   return false;
   }
   function complete(x){
    if(!pending||!valid(x)||key!==ident(x)||x.button!==pending.button||
@@ -62,7 +79,7 @@
    return changed;
   }
   function cancel(reason='mode-change'){if(pending){push({kind:'CANCEL',reason,button:pending.button});pending=null;}}
-  return {offer,complete,cancel,snapshot};
+  return {offer,blocked,complete,cancel,snapshot};
  }
  return {SCHEMA,GOALS,create};
 });
