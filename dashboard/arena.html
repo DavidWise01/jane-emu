@@ -363,6 +363,16 @@ window.JANE_AV215_INPUT_OBSERVE=packet=>{
  return av215Effects?.observe?.(packet)||false;
 };
 window.JANE_AV215_INPUT_STATUS=()=>av215Effects?.snapshot?.()||null;
+// AV-217: split sustained input episodes only at observed cartridge RAM modes.
+// Must never synthesize a defeat or change game-controller ownership.
+window.JANE_AV217_GAME_BOUNDARY=packet=>{
+ const c=window.JANE_RUN_CONTEXT?.(),m=window.JANE_AV201_MONITOR?.snapshot?.();
+ if(!c?.root||!m?.armed||m.root!==c.root||m.rom!==c.rom||
+    packet?.root!==c.root||packet?.rom!==c.rom||
+    ![0,2].includes(packet.mode))return false;
+ return av215Effects?.boundary?.({...packet,actor:packet.actor})||false;
+};
+
 // AV-211: same-cartridge completed-action timing memory.
 // Distinct action events in one NES ancestry are not independent witnesses.
 let av211Exchange=null;
