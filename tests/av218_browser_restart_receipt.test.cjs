@@ -39,7 +39,8 @@ async function main(){
   const after=await page.evaluate(()=>({
     run:window.JANE_RUN_CONTEXT(),monitor:window.JANE_AV201_MONITOR.snapshot(),
     input:window.JANE_AV215_INPUT_STATUS?.(),
-    canvas:document.querySelector('#game')?.contentWindow?.document.getElementById('nesCanvas')
+    canvas:{width:document.querySelector('#game')?.contentWindow?.document.getElementById('nesCanvas')?.width,
+      height:document.querySelector('#game')?.contentWindow?.document.getElementById('nesCanvas')?.height}
   }));
   const firstCycle=after.monitor.cycles[0];
   assert.equal(firstCycle.transfer?.from,'JANE');
