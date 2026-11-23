@@ -1,0 +1,109 @@
+{
+  "schema": "jane.phase9.av221-228.freeze.v1",
+  "date": "2026-11-23",
+  "status": "IMPLEMENTATION_FROZEN_LIVE_BROWSER_EVIDENCE_PENDING",
+  "implementation": {
+    "plannedTurns": 8,
+    "implementedTurns": 8,
+    "percent": 100
+  },
+  "liveGameplayAcceptance": {
+    "verifiedGates": 0,
+    "totalGates": 8,
+    "earnedPercent": 0,
+    "evidencePolicy": "Source and controlled 6502 or action-ledger regressions do not certify actual Chromium NES gameplay. Only independently inspectable passing browser logs tied to the exact revision can earn live acceptance."
+  },
+  "priorPhase": {
+    "phase": 8,
+    "implementationPercent": 100,
+    "verifiedLiveBrowserPercent": 0
+  },
+  "gates": [
+    {
+      "turn": "AV-221",
+      "test": "tests/av221_browser_serialization.test.cjs",
+      "kind": "controlled-test",
+      "requirement": "Browser proof must serialize numeric original NES dimensions instead of live DOM nodes",
+      "verifiedInBrowser": false
+    },
+    {
+      "turn": "AV-222",
+      "test": "tests/av222_browser_restart_gameplay.test.cjs",
+      "kind": "chromium",
+      "requirement": "Original NES CPU START, movement, A/B, defeat and restarted life in Chromium",
+      "verifiedInBrowser": false
+    },
+    {
+      "turn": "AV-223",
+      "test": "tests/av223_browser_sprite_pixels.test.cjs",
+      "kind": "chromium",
+      "requirement": "Actual original NES sprite pixels and bounded directional movement",
+      "verifiedInBrowser": false
+    },
+    {
+      "turn": "AV-224",
+      "test": "tests/av224_browser_ppu_pixels.test.cjs",
+      "kind": "chromium",
+      "requirement": "Frame-matched original NES sprite pixels after PPU palette and OAM staging",
+      "verifiedInBrowser": false
+    },
+    {
+      "turn": "AV-225",
+      "test": "tests/av225_browser_ab_palette.test.cjs",
+      "kind": "chromium",
+      "requirement": "Both A and B completed input changes produce distinct rendered NES sprite colors",
+      "verifiedInBrowser": false
+    },
+    {
+      "turn": "AV-226",
+      "test": "tests/av226_browser_life_effects.test.cjs",
+      "kind": "chromium",
+      "requirement": "Toph and Patricia each complete movement and both palette effects in their own verified lives",
+      "verifiedInBrowser": false
+    },
+    {
+      "turn": "AV-227",
+      "test": "tests/av227_browser_retained_effects.test.cjs",
+      "kind": "chromium",
+      "requirement": "Actual completed NES effects remain available after rolling action-history eviction",
+      "verifiedInBrowser": false
+    },
+    {
+      "turn": "AV-228",
+      "test": "tests/av228_browser_phase9_acceptance.test.cjs",
+      "kind": "chromium",
+      "requirement": "One NES, complete original 256×240 playfield, three tools, true multi-life evidence and source-linked results",
+      "verifiedInBrowser": false
+    }
+  ],
+  "invariants": {
+    "originalNESIframes": 1,
+    "nesPixelFramebuffer": [
+      256,
+      240
+    ],
+    "players": [
+      "JANE",
+      "TOPH",
+      "PATRICIA"
+    ],
+    "tools": [
+      "PLAY",
+      "LEARN",
+      "VERIFY"
+    ],
+    "fullNESPlayfieldPreserved": true,
+    "evidenceReadOnly": true
+  },
+  "evidence": {
+    "githubSource": "Fetched and verified current repository code using connected GitHub",
+    "directControlledTests": "AV-222–227 regressions passed controlled execution in earlier turns; AV-228 freeze regression checked separately",
+    "githubCombinedStatuses": "AV-227 commit combined-status query returned statuses=[]: no pass or fail established",
+    "githubWorkflowLookup": "Only PR-triggered runs are covered by available commit lookup; no matching runs returned, push outcomes unknown",
+    "hostedActions": "Public page inaccessible from this environment",
+    "hostedPages": "Public GitHub Pages URL inaccessible from this environment",
+    "browserRuns": "No passing full Chromium gameplay output independently inspected",
+    "knownLimit": "AV-227 proof archive retains first effect per player/button/cartridge, not independently distinguished repeat lives for a returning player"
+  },
+  "nextPhase": "AV-229–236: verify actual Chromium playback and repair first reproducible original NES controller, timing or rendering fault before expanding policy"
+}
