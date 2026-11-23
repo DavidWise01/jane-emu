@@ -3,13 +3,13 @@
   "date": "2026-11-23",
   "phase": 8,
   "turnsPlanned": 8,
-  "turnsImplemented": 5,
-  "implementationPercent": 62.5,
+  "turnsImplemented": 6,
+  "implementationPercent": 75,
   "liveGameplayAcceptance": {
     "verifiedGates": 0,
     "earnedPercent": 0
   },
-  "latest": "AV-217",
+  "latest": "AV-218",
   "priorPhase": {
     "phase": 7,
     "implementationPercent": 100,
@@ -30,9 +30,9 @@
     "originalPlayfield": true
   },
   "evidence": {
-    "controlledFaultRegression": "AV-217 actual cartridge title/defeat boundary and long-gap episode separation, AV-215 and AV-216 tests passed direct functional execution",
-    "browserFaultTrace": "AV-217 Chromium actual defeat-to-handoff episode boundary test committed, browser result unverified",
+    "controlledFaultRegression": "AV-218 real-START-receipt retention regression passed controlled inputs; original emulator live observer and 188 inline scripts parsed",
+    "browserFaultTrace": "AV-218 Chromium original NES completed START and 60-frame resumed handoff gate committed; browser result not independently verified",
     "hostedPages": "not independently verified"
   },
-  "next": "AV-218 inspect actual NES defeat/restart and handoff actions; repair first reproducible resumed-play fault"
+  "next": "AV-219: verify full Jane→Toph→Patricia unassisted replay, fix first confirmed failure in multi-life continuity"
 }
