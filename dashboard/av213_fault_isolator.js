@@ -40,6 +40,9 @@
       priority.completions===0&&x.frame-priority.armedFrame>=120)
     push('START_NOT_COMPLETED',x,{evidenceId:priority.evidenceId,
       attempts:priority.attempts});
+   if(priority?.exhausted===true)
+    push('START_RECOVERY_EXHAUSTED',x,{evidenceId:priority.evidenceId,
+      totalAttempts:priority.totalAttempts,completed:priority.completions});
    const pending=x.gameplay?.pending;
    if(x.mode===1&&pending&&x.frame-pending.startFrame>=90&&
      !x.gameplay?.history?.some(e=>e.kind==='RESULT'&&e.frame>=pending.startFrame))
