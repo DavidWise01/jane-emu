@@ -329,6 +329,30 @@ function switchTurn(reason,verified){
  status(leaving.name+' → '+people[active].name+' · '+transfer.trials+' recalled trials · '+transfer.watched+' watch records'+(transfer.saved?'':' · outgoing state retained in memory only'));
  return true;
 }
+// AV-202: an observed homebrew defeat may rotate the SAME emulator's owner.
+ // Re-check hardware RAM at the moment of transfer; a UI label or event alone
+ // must never count as the game's loss. No change to the original controller.
+const av202Handled=new Set();
+window.JANE_AV202_DEFEAT_HANDOFF=packet=>{
+  const c=window.JANE_RUN_CONTEXT?.(),f=w();
+  if(!packet||packet.source!=='av201-cartridge-observed'||
+     packet.root!==gameRoot||packet.root!==c?.root||
+     packet.rom!==safeRoot()||packet.rom!==c?.rom||
+     packet.actor!==people[active].name||packet.actor!==c?.actor||
+     !Number.isSafeInteger(packet.frame)||packet.frame>c.frame||
+     c.frame-packet.frame>15||f.JANE_ARENA_RAM?.read?.(5)!==2)
+    return {ok:false,reason:'cartridge-evidence-mismatch'};
+  if(!packet.evidenceId||av202Handled.has(packet.evidenceId))
+    return {ok:false,reason:'already-handled-or-missing-evidence'};
+  if(c.frame<lifeHoldoff)return {ok:false,reason:'handoff-cooldown'};
+  const previous=c.actor;
+  const ok=switchTurn('AV-202 observed original cartridge game over',true);
+  if(ok){av202Handled.add(packet.evidenceId);
+    window.dispatchEvent(new CustomEvent('jane-av202-defeat-transfer',
+     {detail:{root:gameRoot,rom:c.rom,from:previous,
+      to:people[active].name,frame:c.frame,evidenceId:packet.evidenceId}}));}
+  return {ok,reason:ok?'cartridge-defeat-accepted':'existing-handoff-rejected'};
+};
 function readLife(){
  if(!monitor)return null;
  try{
