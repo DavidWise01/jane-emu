@@ -345,6 +345,9 @@ jobs:
       - name: Verify AV-204 three distinct recovery episodes and stale START rejection
         run: node tests/av204_multi_cycle_recovery.test.cjs
 
+      - name: Verify AV-205 bounded production START priority and owner isolation
+        run: node tests/av205_priority_start.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
