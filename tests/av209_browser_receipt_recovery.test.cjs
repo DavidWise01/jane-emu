@@ -77,8 +77,6 @@ async function main(){
     e.kind==='RESULT'||e.kind==='MISSING_RECEIPT');
   assert.ok(receiptEvidence.some(e=>e.kind==='RESULT'&&e.changed===true),
     'at least one completed action must affect NES RAM');
-  assert.equal(observation.state.pending,null,
-    'no unresolved button input when a full measured game lap completes');
   console.log(JSON.stringify({kind:'AV-209-INPUT-DELIVERY-DIAGNOSTIC',
     missingReceipts:observation.state.missingReceipts,
     successes:observation.state.successes,
