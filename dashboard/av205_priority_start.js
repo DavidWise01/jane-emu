@@ -17,7 +17,7 @@
    if(pending?.evidenceId===x.evidenceId)return {ok:true,reason:'already-armed'};
    pending={root:x.root,rom:x.rom,actor:x.actor,mode:x.mode,
     evidenceId:x.evidenceId,armedFrame:x.frame,nextFrame:x.frame,
-    attempts:0,completed:false};
+    attempts:0,completions:0,lastCompletedFrame:null};
    save({event:'ARMED',id:x.evidenceId,frame:x.frame,mode:x.mode});
    return {ok:true,reason:'armed'};
   }
@@ -38,8 +38,18 @@
    save({event:'START_OFFER',id:pending.evidenceId,frame:x.frame,attempt:pending.attempts});
    return {button:'START',hold:holdFrames,source:SCHEMA};
   }
+  function completed(x){
+   if(!pending||!x||!same(x,pending)||x.button!=='START'||
+      !Number.isSafeInteger(x.frame)||x.frame<pending.armedFrame||
+      !pending.attempts||pending.completions>=pending.attempts)return false;
+   pending.completions++;
+   pending.lastCompletedFrame=x.frame;
+   save({event:'START_COMPLETED',id:pending.evidenceId,frame:x.frame,
+     completed:pending.completions,attempts:pending.attempts});
+   return true;
+  }
   function snapshot(){return {schema:SCHEMA,pending:pending?{...pending}:null,history:history.map(x=>({...x}))};}
-  return {arm,offer,snapshot};
+  return {arm,offer,completed,snapshot};
  }
  return {SCHEMA,create};
 });
