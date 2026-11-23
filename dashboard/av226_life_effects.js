@@ -34,13 +34,22 @@
      Number.isSafeInteger(x.startFrame)&&Number.isSafeInteger(x.endFrame)&&
      x.endFrame>x.startFrame&&x.startFrame>=begin&&x.endFrame<end&&
      x.before?.mode===1&&x.after?.mode===1);
-   const movement=relevant.filter(x=>PAD.has(x.button));
-   const colors=relevant.filter(x=>x.button==='A'||x.button==='B');
+   // AV-227: the same original receipt may appear in the current ring and
+   // retained first-effect archive. Count it once by its source identity.
+   const unique=[],seen=new Set();
+   for(const x of relevant){
+     const key=x.id||[x.root,x.rom,x.actor,x.button,
+       x.startFrame,x.endFrame].join('|');
+     if(seen.has(key))continue;
+     seen.add(key);unique.push(x);
+   }
+   const movement=unique.filter(x=>PAD.has(x.button));
+   const colors=unique.filter(x=>x.button==='A'||x.button==='B');
    const hasA=colors.some(x=>x.button==='A'&&x.after?.palette===0x16);
    const hasB=colors.some(x=>x.button==='B'&&x.after?.palette===0x2a);
    const summary={actor,begin,end:end===Infinity?null:end,
      movement:movement.length,colorChanges:colors.length,hasA,hasB,
-     actions:relevant.length,qualified:false};
+     actions:unique.length,qualified:false};
    result.players.push(summary);
    if(movement.length<1)return fail('MISSING_COMPLETED_MOVEMENT_IN_LIFE');
    if(!hasA||!hasB)return fail('MISSING_A_OR_B_PALETTE_EFFECT_IN_LIFE');
