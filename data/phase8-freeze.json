@@ -1,0 +1,99 @@
+{
+  "schema": "jane.phase8.av213-220.freeze.v1",
+  "date": "2026-11-23",
+  "status": "IMPLEMENTATION_FROZEN_BROWSER_EVIDENCE_PENDING",
+  "implementation": {
+    "plannedTurns": 8,
+    "implementedTurns": 8,
+    "percent": 100
+  },
+  "liveGameplayAcceptance": {
+    "verifiedGates": 0,
+    "totalGates": 8,
+    "earnedPercent": 0,
+    "evidencePolicy": "Only independently reviewed passing Chromium evidence tied to a specific commit earns live gameplay acceptance; functional unit tests, syntax checks, and nonblocking CI steps cannot."
+  },
+  "priorPhase": {
+    "phase": 7,
+    "implementedPercent": 100,
+    "earnedLiveBrowserPercent": 0
+  },
+  "gates": [
+    {
+      "step": "AV-213",
+      "browserTest": "tests/av213_browser_fault_trace.test.cjs",
+      "requirement": "Original NES frame advancement and read-only failure trace",
+      "verified": false
+    },
+    {
+      "step": "AV-214",
+      "browserTest": "tests/av214_browser_start_retry.test.cjs",
+      "requirement": "Real cartridge title START and bounded retry delivery",
+      "verified": false
+    },
+    {
+      "step": "AV-215",
+      "browserTest": "tests/av215_browser_input_effects.test.cjs",
+      "requirement": "Observed completed controller movement and A/B palette RAM effects",
+      "verified": false
+    },
+    {
+      "step": "AV-216",
+      "browserTest": "tests/av216_browser_sustained_inputs.test.cjs",
+      "requirement": "Repeated movement and palette effects within one NES episode",
+      "verified": false
+    },
+    {
+      "step": "AV-217",
+      "browserTest": "tests/av217_browser_life_boundary.test.cjs",
+      "requirement": "Game-over RAM state partitions evidence and triggers actual owner handoff",
+      "verified": false
+    },
+    {
+      "step": "AV-218",
+      "browserTest": "tests/av218_browser_restart_receipt.test.cjs",
+      "requirement": "Toph completed START after Jane's defeat and 60 resumed playing frames",
+      "verified": false
+    },
+    {
+      "step": "AV-219",
+      "browserTest": "tests/av219_browser_three_player_chain.test.cjs",
+      "requirement": "Jane to Toph to Patricia consecutive original NES defeat/restart cycle",
+      "verified": false
+    },
+    {
+      "step": "AV-220",
+      "browserTest": "tests/av220_browser_acceptance.test.cjs",
+      "requirement": "Combined original NES, three tabs, chain and source-linked browser acceptance report",
+      "verified": false
+    }
+  ],
+  "invariants": {
+    "emulatorCount": 1,
+    "physicalCanvasPixels": [
+      256,
+      240
+    ],
+    "players": [
+      "JANE",
+      "TOPH",
+      "PATRICIA"
+    ],
+    "tools": [
+      "PLAY",
+      "LEARN",
+      "VERIFY"
+    ],
+    "preserveOriginalPlayArea": true
+  },
+  "evidence": {
+    "sourceFilesAndFixes": "Verified from connected GitHub repository",
+    "controlledTests": "AV213-219 individual controlled-input regressions previously passed; exact CI outcome of the latest commit is unverified",
+    "commitStatus": "latest AV219 commit combined status returned an empty statuses array; not proof of pass or failure",
+    "workflowLookup": "available connector searches pull-request-associated runs only and returned none; push workflows not assessed",
+    "publicActions": "not accessible from session",
+    "publicPages": "not accessible from session",
+    "liveBrowserOutcome": "not independently inspected"
+  },
+  "next": "Phase 9, AV-221–228: reproduce and repair an actual browser-observed NES controller/ROM gameplay fault; do not award unsupported acceptance"
+}
