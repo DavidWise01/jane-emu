@@ -1,0 +1,87 @@
+{
+  "schema": "jane.phase6.av197-204.freeze.v1",
+  "date": "2026-11-23",
+  "status": "CLOSED_PENDING_REAL_BROWSER_EVIDENCE",
+  "implementation": {
+    "turns": 8,
+    "completed": 8,
+    "percent": 100
+  },
+  "acceptance": {
+    "gates": 8,
+    "earned": 0,
+    "percent": 0,
+    "rule": "A passing live browser gate must be directly evidenced by its run logs; code commits, synthetic/unit tests, and nonblocking CI are insufficient."
+  },
+  "phase5": {
+    "status": "FROZEN",
+    "earnedPercent": 50
+  },
+  "gates": [
+    {
+      "id": "AV-197",
+      "name": "production keyboard LEFT RIGHT and frame progression",
+      "verified": false
+    },
+    {
+      "id": "AV-198",
+      "name": "production A B completed actions and visible palette",
+      "verified": false
+    },
+    {
+      "id": "AV-199",
+      "name": "held key press release without frame stall",
+      "verified": false
+    },
+    {
+      "id": "AV-200",
+      "name": "live defeat START and resumed gameplay",
+      "verified": false
+    },
+    {
+      "id": "AV-201",
+      "name": "original 6502 defeat and actual browser restart",
+      "verified": false
+    },
+    {
+      "id": "AV-202",
+      "name": "three actual defeat-triggered player handoffs",
+      "verified": false
+    },
+    {
+      "id": "AV-203",
+      "name": "three fully unassisted loss restart endurance cycles",
+      "verified": false
+    },
+    {
+      "id": "AV-204",
+      "name": "verified final integrated browser acceptance",
+      "verified": false
+    }
+  ],
+  "unitRegression": {
+    "id": "AV-204",
+    "status": "passed controlled-input functional check",
+    "countsForGameplayAcceptance": false
+  },
+  "deployment": {
+    "githubCommitConfirmed": true,
+    "hostedPagesVerified": false
+  },
+  "constraints": {
+    "oneNES": true,
+    "ownerSequence": [
+      "JANE",
+      "TOPH",
+      "PATRICIA",
+      "JANE"
+    ],
+    "tools": [
+      "PLAY",
+      "LEARN",
+      "VERIFY"
+    ],
+    "romBytesUploaded": false
+  },
+  "nextPhase": "Phase 7: corrective gameplay mechanics first; promote gates individually from verified browser evidence"
+}
