@@ -24,7 +24,15 @@
   const reset=x=>{key=ident(x);lastFrame=-1;phase=0;laps=0;pending=null;
     holds=Object.fromEntries(GOALS.map(g=>[g.button,8]));
     successes=Object.fromEntries(GOALS.map(g=>[g.button,0]));
-    failures=Object.fromEntries(GOALS.map(g=>[g.button,0]));history=[];missingReceipts=0;streak=0;probes=0;probeNext=false;};
+    failures=Object.fromEntries(GOALS.map(g=>[g.button,0]));history=[];missingReceipts=0;streak=0;probes=0;probeNext=false;
+    // AV-211: transfer bounded timing hints only on a fresh actor/session.
+    // Local completed actions remain the sole authority thereafter.
+    for(const button of Object.keys(holds)){
+      const hint=x?.holdAdvice?.[button];
+      if(Number.isSafeInteger(hint)&&hint>=6&&hint<=10)
+        holds[button]=hint;
+    }
+  };
   const snapshot=()=>({schema:SCHEMA,identity:key,phase,laps,pending:pending?{...pending}:null,
    holds:{...holds},successes:{...successes},failures:{...failures},missingReceipts,streak,probes,probeNext,history:history.map(x=>({...x}))});
   function offer(x){
