@@ -13,8 +13,22 @@
   p.startFrame>=0&&p.endFrame>p.startFrame&&KEYS.includes(p.button);
  const byte=v=>Number.isInteger(v)&&v>=0&&v<=255;
  function create(){
-  let rows=[],ids=new Set(),episodes=[],active=null;
+  let rows=[],ids=new Set(),episodes=[],active=null,boundaries=[];
   const copy=x=>({...x});
+  function boundary(p){
+    if(!p||!p.root||!p.rom||!Number.isSafeInteger(p.frame)||p.frame<0||
+       ![0,1,2].includes(p.mode))return false;
+    // Only explicit observed cartridge title or game-over can split
+    // a run. UI labels, timer guesses and synthetic defeats do not.
+    if(p.mode===1)return false;
+    const key=[p.root,p.rom,p.actor].join('|');
+    if(!active||active.key!==key)return false;
+    const last=boundaries.at(-1);
+    if(last?.key===key&&last?.mode===p.mode&&last.frame===p.frame)return false;
+    boundaries.push({key,frame:p.frame,mode:p.mode,kind:'CARTRIDGE_MODE_BOUNDARY'});
+    if(boundaries.length>80)boundaries.shift();
+    active=null;return true;
+  }
   function observe(p){
    if(!valid(p)||p.source!=='nes-completed-trial'||!p.id)return false;
    // The embedded NES may restart its trial counter. A completed action
@@ -39,7 +53,10 @@
    // No episode earns continuity until both movement and palette changes
    // were observed on completed original NES actions.
    const key=[p.root,p.rom,p.actor].join('|');
-   if(!active||active.key!==key||p.startFrame<active.endFrame){
+   // A delayed completed action must not stitch two separate lives together.
+   // 90 NES frames is a generous upper bound on a same-episode action gap.
+   if(!active||active.key!==key||p.startFrame<active.endFrame||
+      p.startFrame-active.endFrame>90||a.mode!==1||b.mode!==1){
      active={key,actor:p.actor,root:p.root,rom:p.rom,
        firstFrame:p.startFrame,endFrame:p.endFrame,actions:0,
        movements:0,colors:0,hasMovement:false,hasColor:false,qualified:false};
@@ -57,8 +74,8 @@
      active.movements>=2&&active.colors>=2&&active.actions>=4;
    return {kind,changed};
   }
-  return {observe,snapshot:()=>({schema:SCHEMA,rows:rows.map(copy),
-    episodes:episodes.map(copy),
+  return {observe,boundary,snapshot:()=>({schema:SCHEMA,rows:rows.map(copy),
+    episodes:episodes.map(copy),boundaries:boundaries.map(copy),
     qualifiedEpisodes:episodes.filter(x=>x.qualified).length,
     note:'One emulator ancestry. Contiguous completed-action effects are not causal proof of controller delivery or a gameplay win.'})};
  }
