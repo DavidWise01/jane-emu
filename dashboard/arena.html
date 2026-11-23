@@ -355,14 +355,15 @@ window.JANE_AV202_DEFEAT_HANDOFF=packet=>{
 };
 // AV-205: state-grounded, bounded START priority. Only this existing
 // NES action loop sends controller presses; the priority layer offers actions.
-const av205StartPolicy=window.JaneAV205.create({maxAttempts:4,gapFrames:48,holdFrames:12});
+let av205StartPolicy=null;
+function av205Policy(){return av205StartPolicy??=(window.JaneAV205?.create({maxAttempts:4,gapFrames:48,holdFrames:12})||null)}
 window.JANE_AV205_START_OFFER=p=>{
   const c=window.JANE_RUN_CONTEXT?.();
   if(!c?.root||!c?.rom||c.rom==='unloaded'||p?.rom!==c.rom)return null;
   const mode=w().JANE_ARENA_RAM?.read?.(5);
-  return av205StartPolicy.offer({root:c.root,rom:c.rom,actor:c.actor,frame:Number(p.frame),mode});
+  return av205Policy()?.offer({root:c.root,rom:c.rom,actor:c.actor,frame:Number(p.frame),mode})||null;
 };
-window.JANE_AV205_START_STATUS=()=>av205StartPolicy.snapshot();
+window.JANE_AV205_START_STATUS=()=>av205Policy()?.snapshot()||null;
 // AV-203: route original homebrew boot/defeat recovery through the
 // EXISTING reciprocal START scheduler. This does not press a second NES port.
 const av203RecoveryQueued=new Set();
@@ -385,7 +386,7 @@ window.JANE_AV203_QUEUE_RECOVERY=packet=>{
       return {ok:false,reason:'await-cartridge-handoff'};
   }
   // Existing reciprocal controller executes START at a neutral action boundary.
-  const armed=av205StartPolicy.arm({...packet,frame:c.frame});
+  const armed=av205Policy()?.arm({...packet,frame:c.frame})||{ok:false,reason:'policy-not-loaded'};
   if(!armed.ok)return armed;
   av203RecoveryQueued.add(packet.evidenceId);
   return {ok:true,reason:'armed-original-NES-action-scheduler',actor:c.actor,frame:c.frame};
