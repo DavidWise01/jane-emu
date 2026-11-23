@@ -1,0 +1,40 @@
+{
+  "schema": "jane.phase9.av221-228.progress.v1",
+  "date": "2026-11-23",
+  "phase": 9,
+  "turnsPlanned": 8,
+  "turnsImplemented": 1,
+  "implementationPercent": 12.5,
+  "liveGameplayAcceptance": {
+    "verifiedGates": 0,
+    "earnedPercent": 0
+  },
+  "latest": "AV-221",
+  "priorPhase": {
+    "phase": 8,
+    "implementedPercent": 100,
+    "earnedLiveBrowserPercent": 0
+  },
+  "invariants": {
+    "oneNES": true,
+    "players": [
+      "JANE",
+      "TOPH",
+      "PATRICIA"
+    ],
+    "tools": [
+      "PLAY",
+      "LEARN",
+      "VERIFY"
+    ],
+    "originalPlayfield": true
+  },
+  "evidence": {
+    "verifiedSourceDefect": "AV218 AV219 AV220 Chromium tests returned a live canvas DOM node from page.evaluate instead of serializable numeric dimensions",
+    "repair": "Canvas width/height now explicitly read as primitives for real NES checks; avoids misleading undefined canvas assertions",
+    "controlledTest": "AV221 serialization regression passed controlled GitHub-source test fixtures",
+    "browser": "No Chromium test has independently been observed passing after the patch",
+    "hostedPages": "Publishing configuration committed; latest deployment unverified"
+  },
+  "next": "AV-222: execute/review real Chromium original NES boot, completed START, movement and A/B effects; repair first demonstrated runtime failure"
+}
