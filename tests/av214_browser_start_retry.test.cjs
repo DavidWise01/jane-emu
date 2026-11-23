@@ -41,14 +41,13 @@ async function main(){
     run:window.JANE_RUN_CONTEXT(),
     policy:window.JANE_AV205_START_STATUS(),
     monitor:window.JANE_AV201_MONITOR?.snapshot?.(),
-    width:document.querySelector('#game')?.contentWindow?.document.getElementById('nesCanvas')?.width
+    width:document.querySelector('#game')?.contentWindow?.document.getElementById('nesCanvas')?.width,
+    mode:document.querySelector('#game')?.contentWindow?.JANE_ARENA_RAM?.read?.(5)
   }));
   assert.equal(state.width,256,'NES playfield must survive recovery');
   assert.equal(state.run.root,baseline.root);
   assert.equal(state.run.rom,baseline.rom);
-  assert.ok(state.policy.history.some(x=>x.event==='PLAYING_OBSERVED')||
-    document.querySelector('#game'),
-    'real NES RAM playing state was observed');
+  assert.equal(state.mode,1,'actual NES RAM must report playing state');
   const offers=state.policy.history.filter(x=>x.event==='START_OFFER');
   assert.ok(offers.length>=1&&offers.length<=8,'bounded START offers');
   assert.ok(state.policy.history.filter(x=>x.event==='START_RETRY_BATCH').length<=1,
