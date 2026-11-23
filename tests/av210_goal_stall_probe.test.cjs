@@ -23,7 +23,7 @@ assert.equal(p.snapshot().phase,1,'goal only advances on actual X threshold');
 assert.equal(p.offer(state(102,138)).button,'A');
 assert.equal(p.complete({...state(111,138,0x16),button:'A'}),true);
 assert.equal(p.snapshot().phase,2);
-assert.equal(p.offer(state(120,138,0x16,'TOPH')).button,'RIGHT','owner resets goal');
+assert.equal(p.offer(state(120,120,0x30,'TOPH')).button,'RIGHT','owner resets goal');
 assert.equal(p.snapshot().probes,0);
 assert.equal(p.snapshot().streak,0);
 assert.equal(p.offer(state(130,138,0x16,'TOPH',2)),null,'defeat disallows an offer');
