@@ -549,7 +549,7 @@ jobs:
           cp -R releases _site/releases
           cp -R dashboard _site/dashboard
           mkdir -p _site/docs
-          cp docs/AV-174-playability-verification.md docs/AV-174-playability-verification.pdf docs/PHASE-2-AV177-184.md docs/PHASE-3-AV185-188.md docs/PHASE-4-AV189-192.md docs/PHASE-5-AV193-196.md docs/PHASE-6-AV197-204.md docs/PHASE-7-AV205-212.md docs/PHASE-8-AV213-220.md docs/AV-221-chromium-nes-serialization-repair.md docs/AV-222-nes-restart-state.md _site/docs/
+          cp docs/AV-174-playability-verification.md docs/AV-174-playability-verification.pdf docs/PHASE-2-AV177-184.md docs/PHASE-3-AV185-188.md docs/PHASE-4-AV189-192.md docs/PHASE-5-AV193-196.md docs/PHASE-6-AV197-204.md docs/PHASE-7-AV205-212.md docs/PHASE-8-AV213-220.md docs/AV-221-chromium-nes-serialization-repair.md docs/AV-222-nes-restart-state.md docs/AV-223-visible-nes-sprite-bounds.md _site/docs/
           mkdir -p _site/data
           cp data/phase2-progress.json _site/data/phase2-progress.json
           cp data/phase3-progress.json _site/data/phase3-progress.json
