@@ -3,13 +3,13 @@
   "date": "2026-11-23",
   "phase": 9,
   "turnsPlanned": 8,
-  "turnsImplemented": 6,
-  "implementationPercent": 75,
+  "turnsImplemented": 7,
+  "implementationPercent": 87.5,
   "liveGameplayAcceptance": {
     "verifiedGates": 0,
     "earnedPercent": 0
   },
-  "latest": "AV-226",
+  "latest": "AV-227",
   "priorPhase": {
     "phase": 8,
     "implementedPercent": 100,
@@ -30,11 +30,11 @@
     "originalPlayfield": true
   },
   "evidence": {
-    "verifiedSourceDefect": "AV-220 browser acceptance accepted any observed Toph/Patricia input effect without checking it occurred inside that player's actual restarted NES life",
-    "repair": "Read-only AV-226 original NES life effects audit requires a completed movement and distinct A and B palette RAM effects within each incoming actor's observed restart-to-defeat frame range, matched to original cartridge ancestry",
-    "controlledTest": "AV-226 controlled completed NES input receipts test passed: Jane-to-Toph-to-Patricia valid lives; rejects pre-restart, after-defeat, foreign ROM, offered-only and wrong-owner data",
-    "browser": "AV-226 Chromium two-life movement/A/B acceptance test committed, browser execution not independently verified",
+    "verifiedSourceDefect": "AV-215 discarded completed Toph action effects when its 160-row diagnostic ring filled during subsequent Patricia play, so AV-226 could falsely deny genuine multi-life effects",
+    "repair": "Retain first real completed NES effect per root/ROM/actor/control in a bounded 8-session archive; AV-226 merges archival and current evidence with source-identity deduplication",
+    "controlledTest": "AV-227 retention regression executed controlled 250-action diagnostic eviction, preserved Toph/Patricia A/B/movement, rejected duplicate credit and isolated wrong ROM; PASS",
+    "browser": "AV-227 Chromium retained-effect test committed and queued in CI; no independently observed passing browser result",
     "hostedPages": "Publishing configuration committed; latest deployment unverified"
   },
-  "next": "AV-227 identify actual browser input delivery or cartridge replay failure from per-life evidence and repair it"
+  "next": "AV-228 Phase 9 implementation freeze, inspect actual Chromium evidence and retain truthful gameplay acceptance status"
 }
