@@ -1,0 +1,89 @@
+{
+  "schema": "jane.phase7.av205-212.freeze.v1",
+  "date": "2026-11-23",
+  "status": "FROZEN_EVIDENCE_PENDING",
+  "implementation": {
+    "turns": 8,
+    "completed": 8,
+    "percent": 100
+  },
+  "liveGameplayAcceptance": {
+    "verifiedGates": 0,
+    "totalGates": 8,
+    "earnedPercent": 0,
+    "evidencePolicy": "Only independently inspectable passing Chromium tests tied to the exact commit may earn credit. Unit simulations and nonblocking runs do not."
+  },
+  "previousPhase": {
+    "phase": 6,
+    "implementedPercent": 100,
+    "verifiedGameplayPercent": 0
+  },
+  "gates": [
+    {
+      "step": "AV-205",
+      "test": "bounded automatic START on original NES",
+      "verified": false
+    },
+    {
+      "step": "AV-206",
+      "test": "real NES completed START receipt and automatic recovery",
+      "verified": false
+    },
+    {
+      "step": "AV-207",
+      "test": "real NES D-pad movement and A/B palette response",
+      "verified": false
+    },
+    {
+      "step": "AV-208",
+      "test": "adaptive hold changes following completed NES action effects",
+      "verified": false
+    },
+    {
+      "step": "AV-209",
+      "test": "missing receipt recovery and no conflicting NES input",
+      "verified": false
+    },
+    {
+      "step": "AV-210",
+      "test": "real objective progress and counter-probe behavior",
+      "verified": false
+    },
+    {
+      "step": "AV-211",
+      "test": "completed action exchange across Jane Toph Patricia",
+      "verified": false
+    },
+    {
+      "step": "AV-212",
+      "test": "integrated NES browser gameplay acceptance and layout invariant",
+      "verified": false
+    }
+  ],
+  "invariants": {
+    "emulators": 1,
+    "players": [
+      "JANE",
+      "TOPH",
+      "PATRICIA"
+    ],
+    "tools": [
+      "PLAY",
+      "LEARN",
+      "VERIFY"
+    ],
+    "nesCanvas": [
+      256,
+      240
+    ],
+    "preserveOriginalPlayArea": true
+  },
+  "evidence": {
+    "githubFilesAndChanges": "verified through GitHub connector",
+    "policyRegression": "direct controlled-input tests previously passed",
+    "latestCommitChecks": "no statuses and no matching PR workflow runs returned by available connected endpoints",
+    "browserRuns": "not independently verified",
+    "hostedPages": "not independently verified"
+  },
+  "nextPhase": "AV-213–AV-220: repair browser-verified gameplay faults before expanding policies"
+}
