@@ -3,13 +3,13 @@
   "date": "2026-11-23",
   "phase": 8,
   "turnsPlanned": 8,
-  "turnsImplemented": 3,
-  "implementationPercent": 37.5,
+  "turnsImplemented": 4,
+  "implementationPercent": 50,
   "liveGameplayAcceptance": {
     "verifiedGates": 0,
     "earnedPercent": 0
   },
-  "latest": "AV-215",
+  "latest": "AV-216",
   "priorPhase": {
     "phase": 7,
     "implementationPercent": 100,
@@ -30,9 +30,9 @@
     "originalPlayfield": true
   },
   "evidence": {
-    "controlledFaultRegression": "AV-215 completed input/real NES RAM effect regression passed direct functional checks; original dispatch-to-trial bridge syntax checked",
-    "browserFaultTrace": "AV-215 Chromium sprite movement and A/B palette test committed; no independently verified run",
+    "controlledFaultRegression": "AV-216 sustained NES movement and A/B episode test and AV-215 input-effect regression passed direct functional checks; repeated trial IDs preserved by NES frame span",
+    "browserFaultTrace": "AV-216 sustained real Chromium NES input test committed; no independently verified browser outcome",
     "hostedPages": "not independently verified"
   },
-  "next": "AV-216 inspect live completed-action effects, fix first input/ROM mismatch and keep one NES"
+  "next": "AV-217 inspect first failed browser input episode and repair actual gameplay button or cartridge response; preserve one NES"
 }
