@@ -47,8 +47,14 @@
   label('vblank');emit(0x2C,0x02,0x20);branch(0x10,'vblank');
   // Controller strobe latches A,B,Select,Start,Up,Down,Left,Right.
   ldaImm(1);staAbs(0x4016);ldaImm(0);staAbs(0x4016);
-  input('A',()=>{ldaImm(0x16);staZp(0x04)});
-  input('B',()=>{ldaImm(0x2A);staZp(0x04)});
+  // AV-225: title and defeat are not active gameplay. A/B and D-pad
+  // must not mutate the frozen prior-life RAM while awaiting START.
+  const onlyPlaying=(name,body)=>{
+   ldaZp(0x05);emit(0xC9,1);branch(0xD0,name+'_not_playing');
+   body();label(name+'_not_playing');
+  };
+  input('A',()=>onlyPlaying('A',()=>{ldaImm(0x16);staZp(0x04)}));
+  input('B',()=>onlyPlaying('B',()=>{ldaImm(0x2A);staZp(0x04)}));
   input('SELECT',()=>{ldaImm(120);staZp(0x02);ldaImm(108);staZp(0x03)});
   // AV-222: a new life must start with deterministic sprite and palette
   // state. Holding START while already playing must not restart each frame.
@@ -66,10 +72,10 @@
   // AV-223: keep the complete 8x8 original NES sprite inside the visible
   // viewport. 8-bit INC/DEC otherwise wraps across the screen at 0/255.
   // Every clamp executes as original 6502 instructions, not a host-side fix.
-  input('UP',()=>{ldaZp(0x03);emit(0xC9,8);branch(0xF0,'UP_edge');emit(0xC6,0x03);label('UP_edge');});
-  input('DOWN',()=>{ldaZp(0x03);emit(0xC9,231);branch(0xF0,'DOWN_edge');emit(0xE6,0x03);label('DOWN_edge');});
-  input('LEFT',()=>{ldaZp(0x02);emit(0xC9,8);branch(0xF0,'LEFT_edge');emit(0xC6,0x02);label('LEFT_edge');});
-  input('RIGHT',()=>{ldaZp(0x02);emit(0xC9,247);branch(0xF0,'RIGHT_edge');emit(0xE6,0x02);label('RIGHT_edge');});
+  input('UP',()=>onlyPlaying('UP',()=>{ldaZp(0x03);emit(0xC9,8);branch(0xF0,'UP_edge');emit(0xC6,0x03);label('UP_edge');}));
+  input('DOWN',()=>onlyPlaying('DOWN',()=>{ldaZp(0x03);emit(0xC9,231);branch(0xF0,'DOWN_edge');emit(0xE6,0x03);label('DOWN_edge');}));
+  input('LEFT',()=>onlyPlaying('LEFT',()=>{ldaZp(0x02);emit(0xC9,8);branch(0xF0,'LEFT_edge');emit(0xC6,0x02);label('LEFT_edge');}));
+  input('RIGHT',()=>onlyPlaying('RIGHT',()=>{ldaZp(0x02);emit(0xC9,247);branch(0xF0,'RIGHT_edge');emit(0xE6,0x02);label('RIGHT_edge');}));
   // Actual 6502 game-over transition, not a host-side label or injected RAM.
   ldaZp(0x05);emit(0xC9,1);branch(0xD0,'skip_age');
   emit(0xE6,0x06); // INC $06 once per observed PPU vblank
