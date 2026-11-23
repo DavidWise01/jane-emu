@@ -1,0 +1,38 @@
+{
+  "schema": "jane.phase8.av213-220.progress.v1",
+  "date": "2026-11-23",
+  "phase": 8,
+  "turnsPlanned": 8,
+  "turnsImplemented": 1,
+  "implementationPercent": 12.5,
+  "liveGameplayAcceptance": {
+    "verifiedGates": 0,
+    "earnedPercent": 0
+  },
+  "latest": "AV-213",
+  "priorPhase": {
+    "phase": 7,
+    "implementationPercent": 100,
+    "earnedLiveBrowserPercent": 0
+  },
+  "invariants": {
+    "oneNES": true,
+    "rotation": [
+      "JANE",
+      "TOPH",
+      "PATRICIA"
+    ],
+    "tools": [
+      "PLAY",
+      "LEARN",
+      "VERIFY"
+    ],
+    "originalPlayfield": true
+  },
+  "evidence": {
+    "controlledFaultRegression": "passed direct functional execution",
+    "browserFaultTrace": "committed as nonblocking; live outcome not independently verified",
+    "hostedPages": "not independently verified"
+  },
+  "next": "AV-214 use retrieved NES fault candidates to fix one identified live controller boundary, avoid expanding instrumentation"
+}
