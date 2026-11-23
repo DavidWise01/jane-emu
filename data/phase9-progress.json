@@ -3,13 +3,13 @@
   "date": "2026-11-23",
   "phase": 9,
   "turnsPlanned": 8,
-  "turnsImplemented": 5,
-  "implementationPercent": 62.5,
+  "turnsImplemented": 6,
+  "implementationPercent": 75,
   "liveGameplayAcceptance": {
     "verifiedGates": 0,
     "earnedPercent": 0
   },
-  "latest": "AV-225",
+  "latest": "AV-226",
   "priorPhase": {
     "phase": 8,
     "implementedPercent": 100,
@@ -30,11 +30,11 @@
     "originalPlayfield": true
   },
   "evidence": {
-    "verifiedSourceDefect": "The 6502 A/B and D-pad handlers still modified sprite RAM in title and defeated modes, although only START should authorize a new life",
-    "repair": "Original NES A/B and directional 6502 routines now guard on $0005=1, leaving title/defeat sprite position and palette frozen until valid START",
-    "controlledTest": "AV-225 executes the generated NROM-128 6502 code across idle title A/B/D-pad, playing movement/color, defeated-life A/B/D-pad, START, four edges and PPU staging; passed controlled execution, as did AV-222..224 regressions",
-    "browser": "AV-225 Chromium A/B pixel comparison diagnostic committed; passing browser result not independently verified",
+    "verifiedSourceDefect": "AV-220 browser acceptance accepted any observed Toph/Patricia input effect without checking it occurred inside that player's actual restarted NES life",
+    "repair": "Read-only AV-226 original NES life effects audit requires a completed movement and distinct A and B palette RAM effects within each incoming actor's observed restart-to-defeat frame range, matched to original cartridge ancestry",
+    "controlledTest": "AV-226 controlled completed NES input receipts test passed: Jane-to-Toph-to-Patricia valid lives; rejects pre-restart, after-defeat, foreign ROM, offered-only and wrong-owner data",
+    "browser": "AV-226 Chromium two-life movement/A/B acceptance test committed, browser execution not independently verified",
     "hostedPages": "Publishing configuration committed; latest deployment unverified"
   },
-  "next": "AV-226 trace original NES controller completions through two lives and verify A/B color changes with observed Chromium frame evidence"
+  "next": "AV-227 identify actual browser input delivery or cartridge replay failure from per-life evidence and repair it"
 }
