@@ -453,6 +453,17 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" "$RUNNER_TEMP/jane-browser/node_modules/.bin/playwright" install chromium
           NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av215_browser_input_effects.test.cjs
 
+      - name: Verify AV-216 sustained NES input effects and recycled-trial evidence
+        run: node tests/av216_sustained_input_effects.test.cjs
+
+      - name: Diagnose AV-216 sustained NES D-pad and A/B effects in Chromium
+        continue-on-error: true # Earn browser acceptance only after reviewing real run logs.
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/jane-browser" playwright@1.56.1
+          PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" "$RUNNER_TEMP/jane-browser/node_modules/.bin/playwright" install chromium
+          NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av216_browser_sustained_inputs.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
