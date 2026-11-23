@@ -3,13 +3,13 @@
   "date": "2026-11-23",
   "phase": 9,
   "turnsPlanned": 8,
-  "turnsImplemented": 4,
-  "implementationPercent": 50,
+  "turnsImplemented": 5,
+  "implementationPercent": 62.5,
   "liveGameplayAcceptance": {
     "verifiedGates": 0,
     "earnedPercent": 0
   },
-  "latest": "AV-224",
+  "latest": "AV-225",
   "priorPhase": {
     "phase": 8,
     "implementedPercent": 100,
@@ -30,11 +30,11 @@
     "originalPlayfield": true
   },
   "evidence": {
-    "verifiedSourceDefect": "Homebrew START enabled NES sprite rendering ($2001=$14) before palette $3F11 and OAM $2003/$2004 were updated for the new life, permitting stale sprite state",
-    "repair": "6502 ROM now commits current-life palette and OAM before re-enabling PPU sprites; observed game-over still disables rendering",
-    "controlledTest": "AV-224 executes generated 6502 ROM with recorded PPU palette/OAM bus writes and verifies staged sprite state before enable; AV-222 and AV-223 ROM regressions passed",
-    "browser": "AV-224 frame-matched Chromium NES sprite RGB pixel diagnostic committed; independently passing browser results not reviewed",
+    "verifiedSourceDefect": "The 6502 A/B and D-pad handlers still modified sprite RAM in title and defeated modes, although only START should authorize a new life",
+    "repair": "Original NES A/B and directional 6502 routines now guard on $0005=1, leaving title/defeat sprite position and palette frozen until valid START",
+    "controlledTest": "AV-225 executes the generated NROM-128 6502 code across idle title A/B/D-pad, playing movement/color, defeated-life A/B/D-pad, START, four edges and PPU staging; passed controlled execution, as did AV-222..224 regressions",
+    "browser": "AV-225 Chromium A/B pixel comparison diagnostic committed; passing browser result not independently verified",
     "hostedPages": "Publishing configuration committed; latest deployment unverified"
   },
-  "next": "AV-225 examine visible PPU sprite animation / palette changes and controller frame timing with actual browser evidence; fix first reproduced failure"
+  "next": "AV-226 trace original NES controller completions through two lives and verify A/B color changes with observed Chromium frame evidence"
 }
