@@ -7,7 +7,7 @@
  if(root)root.JaneAV205=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){'use strict';
  const SCHEMA='jane.av205.priority-start.v1';
- function create({maxAttempts=4,gapFrames=48,holdFrames=12}={}){
+ function create({maxAttempts=4,gapFrames=48,holdFrames=12,maxBatches=2,retryPauseFrames=120}={}){
   let pending=null,history=[];
   const save=e=>{history.push(Object.freeze({...e}));if(history.length>64)history.shift();};
   const same=(a,b)=>a.root===b.root&&a.rom===b.rom&&a.actor===b.actor;
@@ -17,7 +17,8 @@
    if(pending?.evidenceId===x.evidenceId)return {ok:true,reason:'already-armed'};
    pending={root:x.root,rom:x.rom,actor:x.actor,mode:x.mode,
     evidenceId:x.evidenceId,armedFrame:x.frame,nextFrame:x.frame,
-    attempts:0,completions:0,lastCompletedFrame:null};
+    attempts:0,completions:0,lastCompletedFrame:null,
+    batch:1,totalAttempts:0,exhausted:false};
    save({event:'ARMED',id:x.evidenceId,frame:x.frame,mode:x.mode});
    return {ok:true,reason:'armed'};
   }
@@ -33,15 +34,30 @@
     save({event:'CANCEL_MODE',id:pending.evidenceId,frame:x.frame,mode:x.mode});
     pending=null;return null;
    }
-   if(x.frame<pending.nextFrame||pending.attempts>=maxAttempts)return null;
-   pending.attempts++;pending.nextFrame=x.frame+gapFrames;
-   save({event:'START_OFFER',id:pending.evidenceId,frame:x.frame,attempt:pending.attempts});
+   if(pending.exhausted||x.frame<pending.nextFrame)return null;
+   if(pending.attempts>=maxAttempts){
+    if(pending.batch>=maxBatches){
+     pending.exhausted=true;
+     save({event:'START_EXHAUSTED',id:pending.evidenceId,frame:x.frame,
+       totalAttempts:pending.totalAttempts,completed:pending.completions});
+     return null;
+    }
+    pending.batch++;pending.attempts=0;
+    pending.nextFrame=x.frame+retryPauseFrames;
+    save({event:'START_RETRY_BATCH',id:pending.evidenceId,frame:x.frame,
+      batch:pending.batch,completed:pending.completions});
+    return null;
+   }
+   pending.attempts++;pending.totalAttempts++;
+   pending.nextFrame=x.frame+gapFrames;
+   save({event:'START_OFFER',id:pending.evidenceId,frame:x.frame,
+     batch:pending.batch,attempt:pending.attempts,totalAttempts:pending.totalAttempts});
    return {button:'START',hold:holdFrames,source:SCHEMA};
   }
   function completed(x){
    if(!pending||!x||!same(x,pending)||x.button!=='START'||
       !Number.isSafeInteger(x.frame)||x.frame<pending.armedFrame||
-      !pending.attempts||pending.completions>=pending.attempts)return false;
+      !pending.attempts||pending.completions>=pending.totalAttempts)return false;
    pending.completions++;
    pending.lastCompletedFrame=x.frame;
    save({event:'START_COMPLETED',id:pending.evidenceId,frame:x.frame,
