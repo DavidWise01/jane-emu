@@ -20,6 +20,11 @@
   if(c.root!==bootRoot||c.rom!==gameRom){armed=false;return;}
   const mode=f.JANE_ARENA_RAM.read(5),frame=st.frame;
   if(![0,1,2].includes(mode))return;
+  // AV-217: hardware RAM mode is the only source of life boundaries.
+  // Dispatch before an observed defeat transfers owner to the next learner.
+  if(mode===0||mode===2)
+    window.JANE_AV217_GAME_BOUNDARY?.({root:c.root,rom:c.rom,
+      actor:c.actor,frame,mode});
   const previousMode=lastMode;
   if(mode===2&&previousMode===1)defeatCount++;
   lastMode=mode;
