@@ -18,7 +18,7 @@
    pending={root:x.root,rom:x.rom,actor:x.actor,mode:x.mode,
     evidenceId:x.evidenceId,armedFrame:x.frame,nextFrame:x.frame,
     attempts:0,completions:0,lastCompletedFrame:null,
-    batch:1,totalAttempts:0,exhausted:false};
+    batch:1,totalAttempts:0,exhausted:false,waitingRetry:false};
    save({event:'ARMED',id:x.evidenceId,frame:x.frame,mode:x.mode});
    return {ok:true,reason:'armed'};
   }
@@ -35,6 +35,7 @@
     pending=null;return null;
    }
    if(pending.exhausted||x.frame<pending.nextFrame)return null;
+   if(pending.waitingRetry){pending.attempts=0;pending.waitingRetry=false;}
    if(pending.attempts>=maxAttempts){
     if(pending.batch>=maxBatches){
      pending.exhausted=true;
@@ -42,7 +43,7 @@
        totalAttempts:pending.totalAttempts,completed:pending.completions});
      return null;
     }
-    pending.batch++;pending.attempts=0;
+    pending.batch++;pending.waitingRetry=true;
     pending.nextFrame=x.frame+retryPauseFrames;
     save({event:'START_RETRY_BATCH',id:pending.evidenceId,frame:x.frame,
       batch:pending.batch,completed:pending.completions});
