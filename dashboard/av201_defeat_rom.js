@@ -106,7 +106,7 @@
   button.addEventListener('click',()=>{
    const rom=buildROM();
    const file=new File([rom],'jane-loss-restart-test.nes',{type:'application/octet-stream'});
-   window.dispatchEvent(new CustomEvent('jane-av201-load',{detail:{file}}));
+   window.dispatchEvent(new CustomEvent('jane-av193-load',{detail:{file}}));
   });
   toolbar.append(button);
   window.JANE_AV201_TEST_ROM={buildROM,SCHEMA};
