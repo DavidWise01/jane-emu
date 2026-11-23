@@ -18,6 +18,7 @@ on:
       - 'data/phase7-progress.json'
       - 'data/phase7-freeze.json'
       - 'data/phase8-progress.json'
+      - 'data/phase8-freeze.json'
       - 'scripts/build_av174_pdf.py'
       - 'memory/curation/**'
       - '.github/workflows/jane-pages.yml'
@@ -497,6 +498,17 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" "$RUNNER_TEMP/jane-browser/node_modules/.bin/playwright" install chromium
           NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av219_browser_three_player_chain.test.cjs
 
+      - name: Verify AV-220 frozen Phase 8 and original NES invariants
+        run: node tests/av220_phase8_freeze.test.cjs
+
+      - name: Diagnose AV-220 live three-player NES gameplay acceptance in Chromium
+        continue-on-error: true # Only inspected passing browser evidence may earn acceptance.
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/jane-browser" playwright@1.56.1
+          PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" "$RUNNER_TEMP/jane-browser/node_modules/.bin/playwright" install chromium
+          NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av220_browser_acceptance.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
@@ -521,6 +533,7 @@ jobs:
           cp data/phase7-progress.json _site/data/phase7-progress.json
           cp data/phase7-freeze.json _site/data/phase7-freeze.json
           cp data/phase8-progress.json _site/data/phase8-progress.json
+          cp data/phase8-freeze.json _site/data/phase8-freeze.json
           if [ -d memory/curation ]; then mkdir -p _site/memory; cp -R memory/curation _site/memory/curation; fi
           if [ -d assets ]; then cp -R assets _site/assets; fi
           printf 'Jane EMU release: %s\nCommit: %s\n' '${{ steps.verify.outputs.entry }}' "$GITHUB_SHA" > _site/BUILD.txt
