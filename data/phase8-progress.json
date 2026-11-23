@@ -3,13 +3,13 @@
   "date": "2026-11-23",
   "phase": 8,
   "turnsPlanned": 8,
-  "turnsImplemented": 4,
-  "implementationPercent": 50,
+  "turnsImplemented": 5,
+  "implementationPercent": 62.5,
   "liveGameplayAcceptance": {
     "verifiedGates": 0,
     "earnedPercent": 0
   },
-  "latest": "AV-216",
+  "latest": "AV-217",
   "priorPhase": {
     "phase": 7,
     "implementationPercent": 100,
@@ -30,9 +30,9 @@
     "originalPlayfield": true
   },
   "evidence": {
-    "controlledFaultRegression": "AV-216 sustained NES movement and A/B episode test and AV-215 input-effect regression passed direct functional checks; repeated trial IDs preserved by NES frame span",
-    "browserFaultTrace": "AV-216 sustained real Chromium NES input test committed; no independently verified browser outcome",
+    "controlledFaultRegression": "AV-217 actual cartridge title/defeat boundary and long-gap episode separation, AV-215 and AV-216 tests passed direct functional execution",
+    "browserFaultTrace": "AV-217 Chromium actual defeat-to-handoff episode boundary test committed, browser result unverified",
     "hostedPages": "not independently verified"
   },
-  "next": "AV-217 inspect first failed browser input episode and repair actual gameplay button or cartridge response; preserve one NES"
+  "next": "AV-218 inspect actual NES defeat/restart and handoff actions; repair first reproducible resumed-play fault"
 }
