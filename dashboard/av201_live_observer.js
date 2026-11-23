@@ -20,7 +20,8 @@
   if(c.root!==bootRoot||c.rom!==gameRom){armed=false;return;}
   const mode=f.JANE_ARENA_RAM.read(5),frame=st.frame;
   if(![0,1,2].includes(mode))return;
-  if(mode===2&&lastMode===1)defeatCount++;
+  const previousMode=lastMode;
+  if(mode===2&&previousMode===1)defeatCount++;
   lastMode=mode;
   // The game-over transition comes from the actual ROM. The host's
   // authoritative handoff gate independently re-reads NES RAM before acting.
@@ -71,12 +72,18 @@
     if(transfer)currentCycle.transfer={frame:transfer.frame,from:transfer.from,to:transfer.to};
   }
   if(mode===1){
-    if(lastMode===2&&currentCycle&&currentCycle.transfer)
+    if(previousMode===2&&currentCycle&&currentCycle.transfer)
       currentCycle.restart={frame,actor:c.actor};
     if(currentCycle?.restart&&!currentCycle.resumed&&frame>=currentCycle.restart.frame+60){
+      const completed=(f.JANE_PERCEPTION?.diagnostics?.()?.recentTrials||[])
+        .some(t=>String(t.button).toUpperCase()==='START'&&
+          Number.isSafeInteger(t.endFrame)&&
+          t.endFrame>currentCycle.defeatFrame&&t.endFrame<=frame);
+      if(completed){
       currentCycle.resumed={frame,actor:c.actor};
       record({kind:'AV203_RESUMED_FRAMES',frame,defeatId:currentCycle.defeatId,actor:c.actor,
         delta:frame-currentCycle.restart.frame});
+      }
     }
     lastPlaying=frame;
   }
