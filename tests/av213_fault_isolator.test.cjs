@@ -13,6 +13,10 @@ const start=create();
 start.ingest(sample(10,0,0,{startPolicy:{pending:{evidenceId:'boot',armedFrame:10,attempts:1,completions:0}}}));
 start.ingest(sample(131,2000,0,{startPolicy:{pending:{evidenceId:'boot',armedFrame:10,attempts:4,completions:0}}}));
 assert.ok(types(start).includes('START_NOT_COMPLETED'),'offered START is not proof of completed START');
+const exhausted=create();
+exhausted.ingest(sample(10,0,0,{startPolicy:{pending:{evidenceId:'boot',armedFrame:10,attempts:4,completions:0,totalAttempts:8,exhausted:true}}}));
+assert.ok(types(exhausted).includes('START_RECOVERY_EXHAUSTED'),
+ 'terminal retries must be distinct from START still queued');
 const completed=create();
 completed.ingest(sample(10,0,0,{startPolicy:{pending:{evidenceId:'boot',armedFrame:10,attempts:1,completions:0}}}));
 completed.ingest(sample(150,2100,0,{startPolicy:{pending:{evidenceId:'boot',armedFrame:10,attempts:1,completions:1}}}));
