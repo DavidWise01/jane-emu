@@ -341,6 +341,9 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" "$RUNNER_TEMP/jane-browser/node_modules/.bin/playwright" install chromium
           NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av203_unassisted_endurance_browser.test.cjs
 
+      - name: Verify AV-204 three distinct recovery episodes and stale START rejection
+        run: node tests/av204_multi_cycle_recovery.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
