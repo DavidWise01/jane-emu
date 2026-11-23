@@ -10,7 +10,7 @@ assert.deepEqual([...rom.slice(0,4)],[0x4e,0x45,0x53,0x1a]);
 assert.equal(rom.length,16+16384+8192);
 const program=rom.slice(16,16+16384);
 const mem=new Uint8Array(65536);
-mem.set(program,0x8000);
+mem.set(program,0x8000);mem.set(program,0xc000); // NROM-128 mirrors 16 KiB into $C000-$FFFF
 const readWord=a=>mem[a]|mem[a+1]<<8;
 let pc=readWord(0xfffc),a=0,x=0,flags=0,cycles=0,readIndex=0,
   strobe=0,buttonMask=0,latches=0,ppuMask=0;
