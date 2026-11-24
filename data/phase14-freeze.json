@@ -1,0 +1,48 @@
+{
+  "phase": 14,
+  "range": "AV-261–AV-268",
+  "implementationClosed": true,
+  "commercialGameplayAccepted": false,
+  "arenaBlob": "9848c531a1f66d280a63f7e3ee678b62b430d9ec",
+  "sourceCommit": "4ea92a63a999fd689f6a1a34737ff6ca785ce2c0",
+  "iframeCount": 1,
+  "scriptCount": 230,
+  "blobs": {
+    "dashboard/av261_combo.js": "871ced0df4fa9be1f274adbf759560e509a62e5d",
+    "dashboard/shadow4d_tesseract.js": "9ccef6e7c84891fa4cb3379a2545f8e8d08dade6",
+    "dashboard/av262_combo_effect.js": "ee4d3efdf9285db43f38153040d23b2b148a7ffc",
+    "dashboard/av263_spatial.js": "b870e2e6bb6762e763f72445b7bd607551a747b9",
+    "dashboard/av264_objects.js": "0d4be0bf81c659528f1ecaec91482adffe162263",
+    "dashboard/av265_defensive.js": "7f12b3f6f62ad8d6c1563b36a3ad2ec0a35c4a46",
+    "dashboard/av266_navigation.js": "be6ce781ec9ff97378d5434ab7deea06ec7494b5",
+    "dashboard/av267_evaluation.js": "d9fdaca3a274500551a655c0b2dd8740a379313c",
+    "data/av259-endurance-browser-evidence.json": "cff55108e5948dc2f7671ef14b00bd8ae3757517",
+    "data/av257-combo-browser-evidence.json": "116cef78d34fa1fd0f93f235356e0bdfa0be9a57",
+    "data/av262-dual-effect-browser-evidence.json": "c9365acd583a00668309ffdf6d2063a4f23d6b47"
+  },
+  "regressions": {
+    "passed": 8,
+    "run": 45502427935,
+    "job": 138829664651
+  },
+  "repeatDualEffect": {
+    "actor": "PATRICIA",
+    "action": "RIGHT+A",
+    "startFrame": 458,
+    "endFrame": 479,
+    "dx": 17,
+    "paletteBefore": 48,
+    "paletteAfter": 22,
+    "root": "session-ae79b369-815d-4859-aa15-0612eaa0ab0e",
+    "rom": "0b10970a",
+    "manualControllerInput": false
+  },
+  "open": [
+    "live visual acceptance",
+    "commercial cartridge mapping",
+    "enemy identity",
+    "collision avoidance",
+    "causal learning and survival improvement"
+  ],
+  "watermark": ".dlw"
+}
