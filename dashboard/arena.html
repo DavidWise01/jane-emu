@@ -250,6 +250,19 @@ body .stage-panel .meters{background:linear-gradient(#28344f,#0a1020);border:1px
 #av235-eq .eq-segments i[data-on="true"]{background:var(--led);box-shadow:0 0 4px var(--led)}
 #av235-eq output{text-align:right;color:#d2ecff}
 </style>
+<style id="av238-lightning-monitoring">
+/* AV-238/239: localized decorative plasma, never input or measured telemetry. */
+body .instrument-panel{--storm:#35fff0}
+body .instrument-panel:has(#av186-tab-learn[aria-selected=true]){--storm:#f768ff}
+body .instrument-panel:has(#av186-tab-verify[aria-selected=true]){--storm:#ffc35d}
+body .instrument-panel :is(#av235-eq,#deckScope,.circadian-lcd,.micro-lens,.flux-instrument,.crystal-instrument,.time-instrument){position:relative;isolation:isolate;box-shadow:inset 0 0 9px #000,0 0 6px color-mix(in srgb,var(--storm) 55%,transparent)!important}
+body .instrument-panel :is(#av235-eq,#deckScope,.circadian-lcd,.micro-lens,.flux-instrument,.crystal-instrument,.time-instrument)::after{content:"";position:absolute;pointer-events:none;z-index:1;left:2px;right:2px;top:1px;height:12px;background:var(--storm);clip-path:polygon(0 35%,13% 42%,19% 8%,27% 65%,35% 30%,46% 48%,52% 10%,59% 76%,67% 25%,77% 42%,84% 12%,91% 64%,100% 30%,100% 44%,91% 78%,84% 26%,77% 56%,67% 39%,59% 90%,52% 24%,46% 62%,35% 44%,27% 79%,19% 22%,13% 56%,0 49%);opacity:.4;animation:av239-plasma 4s ease-in-out infinite}
+body .instrument-panel #av235-eq::after{height:16px;top:auto;bottom:1px;animation-duration:5s}
+body .instrument-panel .micro-lens:nth-child(2)::after{animation-delay:-2s}
+body .instrument-panel #av186-three-tools button[aria-selected=true]{box-shadow:inset 0 0 12px color-mix(in srgb,var(--storm) 18%,transparent),0 0 8px var(--storm),0 0 19px color-mix(in srgb,var(--storm) 40%,transparent)!important}
+@keyframes av239-plasma{0%,100%{opacity:.24;transform:scaleX(.92)}50%{opacity:.65;transform:scaleX(1)}}
+@media(prefers-reduced-motion:reduce){body .instrument-panel *::after{animation:none!important;transform:none!important}}
+</style>
 </head><body>
 <header><div class="art-brand"><svg viewBox="0 0 44 44" width="30" height="30" aria-hidden="true"><circle cx="22" cy="22" r="19" fill="none" stroke="#ba995c" stroke-width="1"/><ellipse cx="22" cy="22" rx="19" ry="8" fill="none" stroke="#658e91" transform="rotate(-45 22 22)"/><ellipse cx="22" cy="22" rx="19" ry="8" fill="none" stroke="#8b779e" transform="rotate(45 22 22)"/><circle cx="22" cy="22" r="3" fill="#eed399"/></svg><h1>JANE <span>/ Z184</span></h1><small>AV-132 / CIRCADIAN RHYTHM</small></div><a href="./">Archive ↗</a></header>
 <main>
