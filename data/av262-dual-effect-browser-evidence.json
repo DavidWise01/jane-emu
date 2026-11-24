@@ -1,0 +1,19 @@
+{
+  "kind": "AV262_DUAL_EFFECT_ACCEPTANCE",
+  "proof": {
+    "root": "session-6dfaefaf-2e69-4159-82e9-dca90e3c6cd8",
+    "rom": "0b10970a",
+    "actor": "PATRICIA",
+    "button": "RIGHT+A",
+    "startFrame": 467,
+    "endFrame": 485,
+    "dx": 14,
+    "paletteBefore": 48,
+    "paletteAfter": 22
+  },
+  "manualControllerInput": false,
+  "commercialVerified": false,
+  "sourceRun": 45488248392,
+  "sourceJob": 138785507570,
+  "sourceCommit": "bbc75dc1956aaaf518fc1d3e740ad19d5e8f0ba8"
+}

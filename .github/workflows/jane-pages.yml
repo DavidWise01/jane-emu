@@ -708,6 +708,9 @@ jobs:
       - name: Verify AV-263 spatial perception trail
         run: node tests/av263_spatial.test.cjs
 
+      - name: Verify AV-264 scoped OAM object candidates
+        run: node tests/av264_objects.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab

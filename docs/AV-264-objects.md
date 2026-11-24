@@ -1,0 +1,2 @@
+# AV-264
+Observe existing AV-105 OAM snapshot only when fresh, matching root/ROM/actor. Slot/tile/attribute continuity is a candidate, not identity proof. Exclude offscreen Y >=239; classify unknown/moving/stationary candidates, no enemy/obstacle or controlled-character identification inferred. Neon 2D overlay on existing 4D canvas. Requires existing sense capture enabled. No controller changes. AV-262 actual dual effect verified and archived; AV-263 regression passed. New tests and visual verification pending.
