@@ -615,6 +615,9 @@ jobs:
       - name: Verify AV-245 perceptual scene recognition
         run: node tests/av245_scene_recognition.test.cjs
 
+      - name: Verify AV-246 contextual action selection
+        run: node tests/av246_context_actions.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
