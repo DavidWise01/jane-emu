@@ -271,6 +271,14 @@ body .instrument-panel[data-plasma="standby"]{--plasma-opacity:.14!important;--p
 #av240-plasma-readout{color:var(--storm);font:9px monospace;letter-spacing:.04em}
 @media(prefers-reduced-motion:reduce){body .instrument-panel *::after{transition:none!important;opacity:.24!important}}
 </style>
+<style id="av241-neural-routing">
+#av241-routing{margin-top:5px;border-top:1px solid #6c508e;padding-top:5px;font:9px monospace;color:#a6c8df}
+#av241-routing svg{width:100%;height:96px;display:block}
+#av241-routing .route-line{stroke:#344358;stroke-width:1.5;fill:none;transition:stroke .35s,opacity .35s;opacity:.4}
+#av241-routing .route-line[data-live=true]{stroke:var(--route-color);stroke-width:3;opacity:1;filter:drop-shadow(0 0 3px var(--route-color))}
+#av241-routing .route-node[data-active=true]{stroke-width:3;filter:drop-shadow(0 0 4px var(--node-color))}
+@media(prefers-reduced-motion:reduce){#av241-routing *{transition:none!important;filter:none!important}}
+</style>
 </head><body>
 <header><div class="art-brand"><svg viewBox="0 0 44 44" width="30" height="30" aria-hidden="true"><circle cx="22" cy="22" r="19" fill="none" stroke="#ba995c" stroke-width="1"/><ellipse cx="22" cy="22" rx="19" ry="8" fill="none" stroke="#658e91" transform="rotate(-45 22 22)"/><ellipse cx="22" cy="22" rx="19" ry="8" fill="none" stroke="#8b779e" transform="rotate(45 22 22)"/><circle cx="22" cy="22" r="3" fill="#eed399"/></svg><h1>JANE <span>/ Z184</span></h1><small>AV-132 / CIRCADIAN RHYTHM</small></div><a href="./">Archive ↗</a></header>
 <main>
@@ -610,6 +618,7 @@ function sample(){
     p.observations.push({trial_id:t.id,frame,button:t.button,source_root:gameRoot,
      note:'Shared witnessed action; not independently corroborated or labeled beneficial'});
     if(p.observations.length>100)p.observations.shift();
+    try{window.dispatchEvent(new CustomEvent('jane-av241-route',{detail:{root:gameRoot,rom:safeRoot(),from:people[active].name,to:p.name,frame,trial:String(t.id)}}))}catch(e){}
    }
   }
   if(seenTrialIds.size>5000)seenTrialIds=new Set([...seenTrialIds].slice(-1000));
@@ -924,4 +933,5 @@ if(validAudio){audio.bands.forEach((v,i)=>{if(!Number.isFinite(v))return;const n
 setInterval(()=>{try{paint()}catch(e){$('av235-state').textContent='SIGNAL UNAVAILABLE';window.dispatchEvent(new CustomEvent('jane-av240-signal',{detail:{live:false}}));}},250);
 })();</script><script src="./av240_reactive_plasma.js"></script>
 <script id="av240-plasma-binding">(()=>{'use strict';const panel=document.querySelector('.instrument-panel'),eq=document.getElementById('av235-eq');if(!panel||!eq)return;const out=document.createElement('div');out.id='av240-plasma-readout';out.textContent='PLASMA / STANDBY';eq.append(out);function paint(p){const q=window.JaneAV240.project(p);panel.dataset.plasma=q.live?'live':'standby';panel.style.setProperty('--plasma-level',String(q.level));panel.style.setProperty('--plasma-opacity',String(q.opacity));panel.style.setProperty('--plasma-glow',q.glow+'px');out.textContent=q.live?'PLASMA / '+Math.round(q.level*100)+'%':'PLASMA / STANDBY';}window.addEventListener('jane-av240-signal',e=>paint(e.detail));paint(null);})();</script>
+<script src="./av241_neural_routing.js"></script><script id="av241-routing-binding">(()=>{'use strict';const eq=document.getElementById('av235-eq');if(!eq)return;const p=window.JaneAV241.create(),actors=window.JaneAV241.actors,colors=['#35fff0','#ff9d43','#ca73ff'],pos=[[144,18],[45,75],[243,75]],node=document.createElement('div');node.id='av241-routing';node.innerHTML='<div>OBSERVATION ROUTES / SHARED NES</div><svg viewBox="0 0 288 96" aria-label="Three player observation routes"></svg><div id="av241-route-status">STANDBY</div>';eq.append(node);const svg=node.querySelector('svg'),ns='http://www.w3.org/2000/svg',edges=[],nodes=[];function el(tag,attrs){const x=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>x.setAttribute(k,v));svg.append(x);return x}for(let i=0;i<3;i++)for(let j=0;j<3;j++)if(i!==j){const [x,y]=pos[i],[a,b]=pos[j],line=el('path',{d:'M'+x+' '+y+' L'+((x+a)/2+5)+' '+((y+b)/2-4)+' L'+a+' '+b,class:'route-line'});line.style.setProperty('--route-color',colors[i]);edges.push({from:actors[i],to:actors[j],line})}for(let i=0;i<3;i++){const [x,y]=pos[i],c=el('circle',{cx:x,cy:y,r:12,fill:'#081321',stroke:colors[i],class:'route-node'});c.style.setProperty('--node-color',colors[i]);nodes.push(c);const t=el('text',{x,y:y+3,'text-anchor':'middle',fill:colors[i],'font-size':'7'});t.textContent=actors[i].slice(0,3)}window.addEventListener('jane-av241-route',e=>p.observe(e.detail,window.JANE_RUN_CONTEXT?.(),performance.now()));window.addEventListener('jane-av240-signal',e=>{const run=window.JANE_RUN_CONTEXT?.(),routes=p.project(run,performance.now(),e.detail?.live===true);edges.forEach(x=>x.line.dataset.live=String(routes.some(y=>y.from===x.from&&y.to===x.to)));nodes.forEach((x,i)=>x.dataset.active=String(e.detail?.live===true&&run?.actor===actors[i]));document.getElementById('av241-route-status').textContent=routes.length?routes.map(x=>x.from+' → '+x.to).join(' / '):'NO RECENT OBSERVATION';});})();</script>
 </body></html>

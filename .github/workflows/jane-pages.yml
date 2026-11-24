@@ -600,6 +600,9 @@ jobs:
       - name: Verify AV-240 reactive plasma bounds
         run: node tests/av240_reactive_plasma.test.cjs
 
+      - name: Verify AV-241 neural observation routing
+        run: node tests/av241_neural_routing.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
