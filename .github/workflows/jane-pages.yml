@@ -594,6 +594,9 @@ jobs:
       - name: Verify AV-236 Phase 10 source freeze and neon equalizer syntax
         run: node tests/av236_phase10_freeze.test.cjs
 
+      - name: Verify AV-237 bounded gameplay diversity
+        run: node tests/av237_action_diversity.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab

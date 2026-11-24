@@ -19,12 +19,12 @@
  const MENU=/title|menu|intro|select|prefight|pre.fight|ready|matchup|between.round|waiting/;
  const PLAY=/playing|fight.active|combat|battle|level|gameplay|running/;
  function create(opts={}){
-   let enabled=opts.enabled!==false,identity=null,ledger=Object.create(null),lastChoice=null,epoch=0,results=0;
+   let enabled=opts.enabled!==false,identity=null,ledger=Object.create(null),lastChoice=null,epoch=0,results=0,streak=0,lastCompleted=null;
    const interval=Number.isSafeInteger(opts.interval)?Math.max(6,opts.interval):18;
    const key=x=>String(x.root||'')+'|'+String(x.rom||'')+'|'+String(x.actor||'');
    function reset(x){identity=key(x);ledger=Object.create(null);
      for(const button of ORDER)ledger[button]={trials:0,total:0,offers:0,lastFrame:-1};
-     lastChoice=null;epoch=0;results=0;}
+     lastChoice=null;epoch=0;results=0;streak=0;lastCompleted=null;}
    function eligible(x){
      return x&&x.root&&x.rom&&x.rom!=='unloaded'&&ACTORS.includes(x.actor)&&
        Number.isSafeInteger(x.frame)&&x.frame>=0&&Array.isArray(x.actions);
@@ -39,8 +39,10 @@
      const available=ORDER.filter(b=>x.actions.includes(b));
      if(!available.length)return null;
      const slot=Math.floor(x.frame/interval);
-     if(lastChoice&&lastChoice.slot===slot)return lastChoice.button;
-     const candidates=available.map((button,i)=>{
+     if(lastChoice&&lastChoice.slot===slot&&available.includes(lastChoice.button))return lastChoice.button;
+     // AV-237: after three distinct completed zero-change trials, probe another legal action.
+     const alternatives=streak>=3&&available.length>1?available.filter(b=>b!==lastCompleted):available;
+     const candidates=alternatives.map((button,i)=>{
        const stats=ledger[button];
        // Reward visible changed regions; prioritize underserved actions.
        // Ranking is deterministic, with stable button order tie-break.
@@ -64,9 +66,10 @@
      // A simple measured-change signal; does not claim life progress or wins.
      const delta=Number.isFinite(x.delta)?Math.max(0,Math.min(32,x.delta)):0;
      stat.trials++;stat.total+=delta;stat.lastFrame=x.frame;
+     if(Number.isFinite(x.delta)){streak=delta===0?(lastCompleted===x.button?streak+1:1):0;lastCompleted=x.button;}
      results++;return true;
    }
-   function snapshot(){return {schema:SCHEMA,enabled,identity,epoch,results,
+   function snapshot(){return {schema:SCHEMA,enabled,identity,epoch,results,zeroChangeStreak:streak,lastCompleted,
       lastChoice:lastChoice?{...lastChoice}:null,
       actions:Object.fromEntries(ORDER.map(b=>[b,{...ledger[b]||{trials:0,total:0,offers:0,lastFrame:-1}}])),
       meaning:'Observed pixel/region change only; game objectives remain unverified'};}
