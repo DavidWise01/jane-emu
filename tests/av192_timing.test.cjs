@@ -35,7 +35,7 @@ const page=fs.readFileSync(path.join(__dirname,'../dashboard/arena.html'),'utf8'
 assert.ok(page.includes('<script src="./av192_timing.js"></script>'));
 assert.ok(page.includes('JANE_AV192_TIMING?.hold?.('));
 assert.ok(page.includes('JANE_AV192_TIMING?.feedback?.('));
-assert.ok(page.includes('const frames=recovery?.hold||anticipatory?.hold||counterstrike?.hold||dreamTransfer?.hold||homeRecall?.hold||timed192||holdFrames(button)'));
+assert.ok(page.includes('const frames=recovery?.hold||adaptiveHold||anticipatory?.hold||counterstrike?.hold||dreamTransfer?.hold||homeRecall?.hold||timed192||holdFrames(button)'));
 assert.ok(page.includes('<script src="./av186_three_tools.js"></script>'));
 assert.ok(page.includes('setInterval(sample,500);renderPlayers();init()'));
 new vm.Script(fs.readFileSync(path.join(__dirname,'../dashboard/av192_timing.js'),'utf8'));
