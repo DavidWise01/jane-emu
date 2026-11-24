@@ -630,6 +630,9 @@ jobs:
       - name: Verify AV-250 generational survival memory
         run: node tests/av250_generations.test.cjs
 
+      - name: Verify AV-251 autonomous endurance accounting
+        run: node tests/av251_endurance.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab

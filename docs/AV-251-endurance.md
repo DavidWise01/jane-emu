@@ -1,0 +1,2 @@
+# AV-251
+Read-only endurance accounting using accepted AV-215 completed action receipts and matching AV-201 qualified recovery cycles. Separate per-player counters across rotation; stale signal standby, 180-frame completion recency threshold, scope and rewind reset. Instrumented homebrew only. Does not prove human-free play, uninterrupted gameplay between samples, or commercial-game endurance. AV-250 all publishing workflows passed. New CI/browser verification pending.
