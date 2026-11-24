@@ -717,6 +717,9 @@ jobs:
       - name: Verify AV-266 objective navigation projection
         run: node tests/av266_navigation.test.cjs
 
+      - name: Verify AV-267 measured objective evaluation
+        run: node tests/av267_evaluation.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab

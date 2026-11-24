@@ -1,0 +1,2 @@
+# AV-267
+Read-only evaluation of completed AV-208 pending actions with scoped matching native delivery, actual before/after RAM and playing endpoint. Goal-relative distance reduction, palette mismatch reduction, separate probe strata and player/goal counts. 240 retained rows, session-local deduplication. Existing adaptive hold policy unchanged. No causal survival or learning improvement claim; defeats excluded from this endpoint metric. New CI/browser rendering pending. AV-266 Pages and Punch-Out passed, main pending.
