@@ -1,0 +1,333 @@
+{
+  "kind": "AV259_REPEATED_ROTATION_ACCEPTANCE",
+  "root": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360",
+  "rom": "0b10970a",
+  "cycles": [
+    {
+      "defeatCount": 1,
+      "defeatFrame": 191,
+      "defeatId": "av201-loss-session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360-1",
+      "ownerAtDefeat": "JANE",
+      "transfer": {
+        "frame": 191,
+        "from": "JANE",
+        "to": "TOPH"
+      },
+      "restart": {
+        "frame": 194,
+        "actor": "TOPH"
+      },
+      "resumed": {
+        "frame": 257,
+        "actor": "TOPH",
+        "startReceiptFrame": 209,
+        "source": "NES-playing-60-frames-plus-matching-completed-START"
+      },
+      "startReceipt": {
+        "frame": 209,
+        "actor": "TOPH",
+        "root": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360",
+        "rom": "0b10970a",
+        "evidenceId": "av201-loss-session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360-1",
+        "trialId": "1",
+        "source": "completed-original-nes-trial"
+      }
+    },
+    {
+      "defeatCount": 2,
+      "defeatFrame": 381,
+      "defeatId": "av201-loss-session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360-2",
+      "ownerAtDefeat": "TOPH",
+      "transfer": {
+        "frame": 381,
+        "from": "TOPH",
+        "to": "PATRICIA"
+      },
+      "restart": {
+        "frame": 383,
+        "actor": "PATRICIA"
+      },
+      "resumed": {
+        "frame": 447,
+        "actor": "PATRICIA",
+        "startReceiptFrame": 397,
+        "source": "NES-playing-60-frames-plus-matching-completed-START"
+      },
+      "startReceipt": {
+        "frame": 397,
+        "actor": "PATRICIA",
+        "root": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360",
+        "rom": "0b10970a",
+        "evidenceId": "av201-loss-session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360-2",
+        "trialId": "1",
+        "source": "completed-original-nes-trial"
+      }
+    },
+    {
+      "defeatCount": 3,
+      "defeatFrame": 570,
+      "defeatId": "av201-loss-session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360-3",
+      "ownerAtDefeat": "PATRICIA",
+      "transfer": {
+        "frame": 570,
+        "from": "PATRICIA",
+        "to": "JANE"
+      },
+      "restart": {
+        "frame": 573,
+        "actor": "JANE"
+      },
+      "resumed": {
+        "frame": 635,
+        "actor": "JANE",
+        "startReceiptFrame": 585,
+        "source": "NES-playing-60-frames-plus-matching-completed-START"
+      },
+      "startReceipt": {
+        "frame": 585,
+        "actor": "JANE",
+        "root": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360",
+        "rom": "0b10970a",
+        "evidenceId": "av201-loss-session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360-3",
+        "trialId": "16",
+        "source": "completed-original-nes-trial"
+      }
+    },
+    {
+      "defeatCount": 4,
+      "defeatFrame": 760,
+      "defeatId": "av201-loss-session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360-4",
+      "ownerAtDefeat": "JANE",
+      "transfer": {
+        "frame": 760,
+        "from": "JANE",
+        "to": "TOPH"
+      },
+      "restart": {
+        "frame": 762,
+        "actor": "TOPH"
+      },
+      "resumed": {
+        "frame": 824,
+        "actor": "TOPH",
+        "startReceiptFrame": 778,
+        "source": "NES-playing-60-frames-plus-matching-completed-START"
+      },
+      "startReceipt": {
+        "frame": 778,
+        "actor": "TOPH",
+        "root": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360",
+        "rom": "0b10970a",
+        "evidenceId": "av201-loss-session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360-4",
+        "trialId": "12",
+        "source": "completed-original-nes-trial"
+      }
+    },
+    {
+      "defeatCount": 5,
+      "defeatFrame": 954,
+      "defeatId": "av201-loss-session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360-5",
+      "ownerAtDefeat": "TOPH",
+      "transfer": {
+        "frame": 954,
+        "from": "TOPH",
+        "to": "PATRICIA"
+      },
+      "restart": {
+        "frame": 957,
+        "actor": "PATRICIA"
+      },
+      "resumed": {
+        "frame": 1018,
+        "actor": "PATRICIA",
+        "startReceiptFrame": 970,
+        "source": "NES-playing-60-frames-plus-matching-completed-START"
+      },
+      "startReceipt": {
+        "frame": 970,
+        "actor": "PATRICIA",
+        "root": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360",
+        "rom": "0b10970a",
+        "evidenceId": "av201-loss-session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360-5",
+        "trialId": "14",
+        "source": "completed-original-nes-trial"
+      }
+    },
+    {
+      "defeatCount": 6,
+      "defeatFrame": 1143,
+      "defeatId": "av201-loss-session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360-6",
+      "ownerAtDefeat": "PATRICIA",
+      "transfer": {
+        "frame": 1143,
+        "from": "PATRICIA",
+        "to": "JANE"
+      },
+      "restart": {
+        "frame": 1148,
+        "actor": "JANE"
+      },
+      "resumed": {
+        "frame": 1209,
+        "actor": "JANE",
+        "startReceiptFrame": 1158,
+        "source": "NES-playing-60-frames-plus-matching-completed-START"
+      },
+      "startReceipt": {
+        "frame": 1158,
+        "actor": "JANE",
+        "root": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360",
+        "rom": "0b10970a",
+        "evidenceId": "av201-loss-session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360-6",
+        "trialId": "30",
+        "source": "completed-original-nes-trial"
+      }
+    }
+  ],
+  "effects": [
+    {
+      "id": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360|0b10970a|TOPH|2|215|228",
+      "root": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360",
+      "rom": "0b10970a",
+      "actor": "TOPH",
+      "button": "RIGHT",
+      "startFrame": 215,
+      "endFrame": 228,
+      "before": {
+        "x": 120,
+        "y": 108,
+        "palette": 48,
+        "mode": 1
+      },
+      "after": {
+        "x": 128,
+        "y": 108,
+        "palette": 48,
+        "mode": 1
+      },
+      "kind": "NES_EFFECT_OBSERVED",
+      "changed": true
+    },
+    {
+      "id": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360|0b10970a|PATRICIA|2|403|412",
+      "root": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360",
+      "rom": "0b10970a",
+      "actor": "PATRICIA",
+      "button": "RIGHT",
+      "startFrame": 403,
+      "endFrame": 412,
+      "before": {
+        "x": 120,
+        "y": 108,
+        "palette": 48,
+        "mode": 1
+      },
+      "after": {
+        "x": 126,
+        "y": 108,
+        "palette": 48,
+        "mode": 1
+      },
+      "kind": "NES_EFFECT_OBSERVED",
+      "changed": true
+    },
+    {
+      "id": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360|0b10970a|JANE|17|591|599",
+      "root": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360",
+      "rom": "0b10970a",
+      "actor": "JANE",
+      "button": "RIGHT",
+      "startFrame": 591,
+      "endFrame": 599,
+      "before": {
+        "x": 120,
+        "y": 108,
+        "palette": 48,
+        "mode": 1
+      },
+      "after": {
+        "x": 125,
+        "y": 108,
+        "palette": 48,
+        "mode": 1
+      },
+      "kind": "NES_EFFECT_OBSERVED",
+      "changed": true
+    },
+    {
+      "id": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360|0b10970a|TOPH|13|784|795",
+      "root": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360",
+      "rom": "0b10970a",
+      "actor": "TOPH",
+      "button": "RIGHT",
+      "startFrame": 784,
+      "endFrame": 795,
+      "before": {
+        "x": 120,
+        "y": 108,
+        "palette": 48,
+        "mode": 1
+      },
+      "after": {
+        "x": 126,
+        "y": 108,
+        "palette": 48,
+        "mode": 1
+      },
+      "kind": "NES_EFFECT_OBSERVED",
+      "changed": true
+    },
+    {
+      "id": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360|0b10970a|PATRICIA|15|976|985",
+      "root": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360",
+      "rom": "0b10970a",
+      "actor": "PATRICIA",
+      "button": "RIGHT",
+      "startFrame": 976,
+      "endFrame": 985,
+      "before": {
+        "x": 120,
+        "y": 108,
+        "palette": 48,
+        "mode": 1
+      },
+      "after": {
+        "x": 126,
+        "y": 108,
+        "palette": 48,
+        "mode": 1
+      },
+      "kind": "NES_EFFECT_OBSERVED",
+      "changed": true
+    },
+    {
+      "id": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360|0b10970a|JANE|31|1164|1172",
+      "root": "session-8e3c775e-99c0-4b7e-b4f9-e105dd4a6360",
+      "rom": "0b10970a",
+      "actor": "JANE",
+      "button": "RIGHT",
+      "startFrame": 1164,
+      "endFrame": 1172,
+      "before": {
+        "x": 120,
+        "y": 108,
+        "palette": 48,
+        "mode": 1
+      },
+      "after": {
+        "x": 126,
+        "y": 108,
+        "palette": 48,
+        "mode": 1
+      },
+      "kind": "NES_EFFECT_OBSERVED",
+      "changed": true
+    }
+  ],
+  "frame": 1211,
+  "manualControllerInput": false,
+  "commercialVerified": false,
+  "sourceRun": 45472521328,
+  "sourceJob": 138728781121,
+  "sourceCommit": "01fbb9ba8fc789fbbcaf85dbc7e16965d4b1772b"
+}

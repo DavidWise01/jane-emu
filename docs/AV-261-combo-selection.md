@@ -1,0 +1,2 @@
+# AV-261
+Homebrew AV-208 precedes generic AV-248, which excludes homebrew mode. Add one scoped combination opportunity after five eligible selector calls per contiguous actor scope, only armed matching homebrew RAM playing mode. Existing menu requests remain upstream in startAction. No direct controller writes. No live combo acceptance yet. AV-259 two rotations passed, raw log record archived; AV-260 freeze regression passed. Separate Punch-Out failed. New CI pending.
