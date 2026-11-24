@@ -263,6 +263,14 @@ body .instrument-panel #av186-three-tools button[aria-selected=true]{box-shadow:
 @keyframes av239-plasma{0%,100%{opacity:.24;transform:scaleX(.92)}50%{opacity:.65;transform:scaleX(1)}}
 @media(prefers-reduced-motion:reduce){body .instrument-panel *::after{animation:none!important;transform:none!important}}
 </style>
+<style id="av240-reactive-plasma">
+body .instrument-panel{--plasma-level:0;--plasma-opacity:.14;--plasma-glow:4px}
+body .instrument-panel :is(#av235-eq,#deckScope,.circadian-lcd,.micro-lens,.flux-instrument,.crystal-instrument,.time-instrument)::after{animation:none;opacity:var(--plasma-opacity);transition:opacity .35s ease;filter:drop-shadow(0 0 3px var(--storm))}
+body .instrument-panel :is(#av235-eq,#deckScope,.circadian-lcd,.micro-lens,.flux-instrument,.crystal-instrument,.time-instrument){box-shadow:inset 0 0 9px #000,0 0 var(--plasma-glow) color-mix(in srgb,var(--storm) 65%,transparent)!important}
+body .instrument-panel[data-plasma="standby"]{--plasma-opacity:.14!important;--plasma-glow:4px!important}
+#av240-plasma-readout{color:var(--storm);font:9px monospace;letter-spacing:.04em}
+@media(prefers-reduced-motion:reduce){body .instrument-panel *::after{transition:none!important;opacity:.24!important}}
+</style>
 </head><body>
 <header><div class="art-brand"><svg viewBox="0 0 44 44" width="30" height="30" aria-hidden="true"><circle cx="22" cy="22" r="19" fill="none" stroke="#ba995c" stroke-width="1"/><ellipse cx="22" cy="22" rx="19" ry="8" fill="none" stroke="#658e91" transform="rotate(-45 22 22)"/><ellipse cx="22" cy="22" rx="19" ry="8" fill="none" stroke="#8b779e" transform="rotate(45 22 22)"/><circle cx="22" cy="22" r="3" fill="#eed399"/></svg><h1>JANE <span>/ Z184</span></h1><small>AV-132 / CIRCADIAN RHYTHM</small></div><a href="./">Archive ↗</a></header>
 <main>
@@ -907,10 +915,13 @@ if(prior&&run?.frame>prior.frame){lastAdvance=now;if(Number.isFinite(count)&&Num
 const live=!!(run&&run.rom!=='unloaded'&&neon?.live&&now-lastAdvance<1500);prior=run?{key,frame:run.frame,count,now}:null;
 const validAudio=live&&audio?.scope===run.root+'|'+run.rom&&run.frame>=audio.frame&&run.frame-audio.frame<=30&&Array.isArray(audio.bands)&&audio.bands.length===24;
 const values=[validAudio&&Number.isFinite(neon.audio)?neon.audio:null,live?neon.held.length/8:null,live&&Number.isFinite(neon.motion)?neon.motion:null,live?rate:null];
+window.dispatchEvent(new CustomEvent('jane-av240-signal',{detail:{live,audio:values[0],motion:values[2],keys:live?neon.held.length:null}}));
 rows.forEach(({cells,out},i)=>{const v=values[i],n=v===null?0:Math.round(16*clamp(i===3?v/10:v));cells.forEach((cell,j)=>cell.dataset.on=String(j<n));out.textContent=v===null?'—':i===3?v.toFixed(1):i===1?String(neon.held.length):v.toFixed(3);});
 $('av235-state').textContent=live?'LIVE / '+run.actor:'WAIT / NO SIGNAL';
 const c=$('av235-spectrum'),g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);g.fillStyle='#040710';g.fillRect(0,0,c.width,c.height);
 if(validAudio){audio.bands.forEach((v,i)=>{if(!Number.isFinite(v))return;const n=Math.round(clamp(v)*12);g.fillStyle=i<12?'#2affe5':'#e956ff';for(let j=0;j<n;j++)g.fillRect(i*12+1,60-j*5,9,3);});}else{g.fillStyle='#8095af';g.font='10px monospace';g.fillText('AWAITING FRESH AUDIO',8,34);}
 }
-setInterval(()=>{try{paint()}catch(e){$('av235-state').textContent='SIGNAL UNAVAILABLE';}},250);
-})();</script></body></html>
+setInterval(()=>{try{paint()}catch(e){$('av235-state').textContent='SIGNAL UNAVAILABLE';window.dispatchEvent(new CustomEvent('jane-av240-signal',{detail:{live:false}}));}},250);
+})();</script><script src="./av240_reactive_plasma.js"></script>
+<script id="av240-plasma-binding">(()=>{'use strict';const panel=document.querySelector('.instrument-panel'),eq=document.getElementById('av235-eq');if(!panel||!eq)return;const out=document.createElement('div');out.id='av240-plasma-readout';out.textContent='PLASMA / STANDBY';eq.append(out);function paint(p){const q=window.JaneAV240.project(p);panel.dataset.plasma=q.live?'live':'standby';panel.style.setProperty('--plasma-level',String(q.level));panel.style.setProperty('--plasma-opacity',String(q.opacity));panel.style.setProperty('--plasma-glow',q.glow+'px');out.textContent=q.live?'PLASMA / '+Math.round(q.level*100)+'%':'PLASMA / STANDBY';}window.addEventListener('jane-av240-signal',e=>paint(e.detail));paint(null);})();</script>
+</body></html>

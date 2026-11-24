@@ -597,6 +597,9 @@ jobs:
       - name: Verify AV-237 bounded gameplay diversity
         run: node tests/av237_action_diversity.test.cjs
 
+      - name: Verify AV-240 reactive plasma bounds
+        run: node tests/av240_reactive_plasma.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
