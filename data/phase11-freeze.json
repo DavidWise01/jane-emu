@@ -1,0 +1,17 @@
+{
+  "phase": 11,
+  "range": "AV-237–AV-244",
+  "implementationClosed": true,
+  "fullGameplayAccepted": false,
+  "visualBrowserAccepted": false,
+  "arenaBlob": "5da28a395543051f50fbb2177db25b58e57a8066",
+  "sourceCommit": "83de5af4bcad704e834ac6157e8ae919f15c2c5b",
+  "iframeCount": 1,
+  "scriptCount": 200,
+  "observedPublishing": {
+    "pages": 45406322104,
+    "punchOut": 45406323400,
+    "mainPending": 45406323324
+  },
+  "watermark": ".dlw"
+}
