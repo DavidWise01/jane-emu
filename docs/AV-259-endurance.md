@@ -1,0 +1,2 @@
+# AV-259
+Two complete three-player rotations in one scoped homebrew session, six unique defeat/recovery cycles, matching completed START receipts, at least 60 resumed frames and a distinct measured action effect in each recovered life. Initial load only. Diagnostic nonblocking, 180-second timeout, pending execution. AV-258 full rotation verified from actual Chromium log; all publishing workflows passed. AV-257 combination diagnostic timed out again. No HTML changes; commercial and indefinite endurance claims remain unverified.

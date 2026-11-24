@@ -1,0 +1,55 @@
+{
+  "kind": "AV258_FULL_ROTATION_ACCEPTANCE",
+  "sourceRun": 45453126839,
+  "sourceJob": 138655310618,
+  "sourceCommit": "67ac3661e22a53b18cea34e77c179f85c8d21e61",
+  "root": "session-92b0ac1b-1d9b-4776-87ed-8168064198ce",
+  "rom": "0b10970a",
+  "cycles": [
+    {
+      "from": "JANE",
+      "to": "TOPH",
+      "defeat": 387,
+      "restart": 392,
+      "startReceipt": 405,
+      "resumed": 452
+    },
+    {
+      "from": "TOPH",
+      "to": "PATRICIA",
+      "defeat": 575,
+      "restart": 578,
+      "startReceipt": 591,
+      "resumed": 640
+    },
+    {
+      "from": "PATRICIA",
+      "to": "JANE",
+      "defeat": 761,
+      "restart": 764,
+      "startReceipt": 776,
+      "resumed": 825
+    }
+  ],
+  "returned": {
+    "actor": "JANE",
+    "button": "RIGHT",
+    "startFrame": 782,
+    "endFrame": 790,
+    "before": {
+      "x": 120,
+      "y": 108,
+      "palette": 48,
+      "mode": 1
+    },
+    "after": {
+      "x": 126,
+      "y": 108,
+      "palette": 48,
+      "mode": 1
+    }
+  },
+  "manualControllerInput": false,
+  "commercialVerified": false,
+  "comboDiagnostic": "TIMEOUT_90000MS"
+}
