@@ -1,0 +1,2 @@
+# AV-258
+Three distinct scoped observed defeats, transfers, completed START receipts and resumed-play qualifications, returning to Jane with a further measured completed playing action. Test loads instrumented homebrew only; no manual controller input. Nonblocking diagnostic pending. AV-256 corrected test passed actual A/B palette changes 48→22 and 48→42, archived with log provenance. AV-257 combined test timed out at 90 seconds; no combined proof. Main publishing and Pages passed, separate Punch-Out failed. No arcade HTML changes. Commercial acceptance remains open.

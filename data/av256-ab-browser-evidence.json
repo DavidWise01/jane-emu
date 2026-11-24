@@ -1,0 +1,45 @@
+{
+  "kind": "AV256_HOME_BREW_AB_ACCEPTANCE",
+  "sourceRun": 45441511139,
+  "sourceJob": 138613602315,
+  "sourceCommit": "62faffceb09e5e5e37680cdf21bcaecdc0b3313e",
+  "root": "session-4bc1c0ec-f02f-486b-b6fe-4e86a15c249f",
+  "rom": "0b10970a",
+  "actor": "JANE",
+  "a": {
+    "startFrame": 73,
+    "endFrame": 82,
+    "before": {
+      "x": 128,
+      "y": 110,
+      "palette": 48,
+      "mode": 1
+    },
+    "after": {
+      "x": 128,
+      "y": 110,
+      "palette": 22,
+      "mode": 1
+    }
+  },
+  "b": {
+    "startFrame": 287,
+    "endFrame": 297,
+    "before": {
+      "x": 103,
+      "y": 108,
+      "palette": 48,
+      "mode": 1
+    },
+    "after": {
+      "x": 103,
+      "y": 108,
+      "palette": 42,
+      "mode": 1
+    }
+  },
+  "manualControllerInput": false,
+  "commercialVerified": false,
+  "attackJumpSemanticsVerified": false,
+  "comboDiagnostic": "TIMEOUT_90000MS"
+}
