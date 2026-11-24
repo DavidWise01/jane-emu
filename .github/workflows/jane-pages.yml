@@ -633,6 +633,9 @@ jobs:
       - name: Verify AV-251 autonomous endurance accounting
         run: node tests/av251_endurance.test.cjs
 
+      - name: Verify AV-252 Phase 12 immutable gameplay cortex baseline
+        run: node tests/av252_phase12_freeze.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
@@ -648,9 +651,9 @@ jobs:
           cp -R dashboard _site/dashboard
           mkdir -p _site/docs
           cp docs/AV-174-playability-verification.md docs/AV-174-playability-verification.pdf docs/PHASE-2-AV177-184.md docs/PHASE-3-AV185-188.md docs/PHASE-4-AV189-192.md docs/PHASE-5-AV193-196.md docs/PHASE-6-AV197-204.md docs/PHASE-7-AV205-212.md docs/PHASE-8-AV213-220.md docs/AV-221-chromium-nes-serialization-repair.md docs/AV-222-nes-restart-state.md docs/AV-223-visible-nes-sprite-bounds.md docs/AV-224-nes-ppu-staging.md docs/AV-225-nes-playing-mode-palette.md docs/AV-226-per-life-nes-input-effects.md docs/AV-227-nes-effect-retention.md docs/PHASE-9-AV221-228.md _site/docs/
-          cp docs/PHASE-10-AV229-236.md docs/PHASE-11-AV237-244.md _site/docs/
+          cp docs/PHASE-10-AV229-236.md docs/PHASE-11-AV237-244.md docs/PHASE-12-AV245-252.md _site/docs/
           mkdir -p _site/data
-          cp data/phase10-freeze.json data/phase11-freeze.json _site/data/
+          cp data/phase10-freeze.json data/phase11-freeze.json data/phase12-freeze.json _site/data/
           cp data/phase2-progress.json _site/data/phase2-progress.json
           cp data/phase3-progress.json _site/data/phase3-progress.json
           cp data/phase4-progress.json _site/data/phase4-progress.json
