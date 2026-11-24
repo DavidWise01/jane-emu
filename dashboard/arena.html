@@ -632,6 +632,12 @@ async function init(){
     "try{const before=window.__av215Before,r=window.parent.JANE_RUN_CONTEXT?.();window.__av215Before=null;if(before&&r?.root===before.root&&r.actor===before.actor&&romID===before.rom)window.parent.JANE_AV215_INPUT_OBSERVE?.({source:'nes-completed-trial',id:String(record.id||record.startFrame+'-'+record.endFrame+'-'+record.button),root:before.root,rom:romID,actor:before.actor,startFrame:record.startFrame,endFrame:record.endFrame,button:record.button,before:{x:before.x,y:before.y,palette:before.palette,mode:before.mode},after:{x:nes.cpu.mem[2],y:nes.cpu.mem[3],palette:nes.cpu.mem[4],mode:nes.cpu.mem[5]}})}catch(e){}memory.trials.push(record);");
   // AV-232: explicit resume uses the original scheduler, never a second controller.
   html=html.replace(anchor,"window.JANE_AV232_RESUME=()=>{if(!nes||!romID)return false;if(action)return false;release();running=true;autoplay=true;pausedByHuman=false;nextActionFrame=frame+1;return true};"+anchor);
+  // AV-233: bounded idle recovery inside the original NES frame loop.
+  // No synthetic input, no restart, and never override a human pause.
+  html=html.replace(anchor,"let av233Idle={rom:null,actor:null,since:0,lastFrame:-1,lastRecovery:-360,recoveries:0};window.JANE_AV233_IDLE_STATUS=()=>({...av233Idle});function av233Tick(){const q=av233Idle;if(q.rom!==romID||q.actor!==arenaActor||frame<q.lastFrame){Object.assign(q,{rom:romID,actor:arenaActor,since:frame,lastRecovery:frame-360,recoveries:0})}q.lastFrame=frame;if(!nes||!romID||!running||!autoplay||pausedByHuman||action){q.since=frame;return}if(frame-q.since>=360&&frame-q.lastRecovery>=360){q.lastRecovery=frame;q.since=frame;nextActionFrame=frame;q.recoveries++}}"+anchor);
+  const idleFrameHook='nes.frame();frame++;fpsCount++;';
+  if(!html.includes(idleFrameHook))throw Error('AV-233 original frame hook missing');
+  html=html.replace(idleFrameHook,idleFrameHook+'av233Tick();');
   // AV-231: original controller remains live; advisory waits are bypassed in play-first mode.
   window.JANE_AV231_PLAY_FIRST=true;
   html=html.replace('if(!recovery&&!anticipatory&&!counterstrike&&!dreamTransfer&&!homeRecall&&window.JANE_SPINOR_V24?.shouldWait?.','if(window.parent.JANE_AV231_PLAY_FIRST!==true&&!recovery&&!anticipatory&&!counterstrike&&!dreamTransfer&&!homeRecall&&window.JANE_SPINOR_V24?.shouldWait?.');
