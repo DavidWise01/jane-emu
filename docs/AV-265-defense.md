@@ -1,0 +1,2 @@
+# AV-265
+Read-only proximity candidates from scoped homebrew player RAM and OAM slot observations. Maximum 24-frame age, 12-frame intersample skew, near radius 24 pixels, approach horizon 30 frames, exclude within 10 pixels to reduce self-sprite contamination (not identity proof). Closing rate derived from consecutive same slot/tile/attribute relative distances. Red neon rings indicate candidates, not verified collision or threat. No controller change. AV-264 main, Pages and Punch-Out workflows passed. New regression and visual verification pending.
