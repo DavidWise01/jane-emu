@@ -1,0 +1,2 @@
+# AV-254
+Focused Chromium diagnostic: legal instrumented homebrew cartridge load only; require matching title START queue, native buttonDown receipt, completed START trial, and observed RAM playing mode before first handoff. No test-generated controller input. Diagnostic is nonblocking for publishing and must be inspected before acceptance. Commercial menu navigation not established. AV-253 Pages build passed, Punch-Out failed, main running at inspection. No changes to arcade HTML or controller.

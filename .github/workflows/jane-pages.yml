@@ -639,6 +639,14 @@ jobs:
       - name: Verify AV-253 original NES controller runtime source
         run: node tests/av253_runtime.test.cjs
 
+      - name: Diagnose AV-254 original NES autonomous title navigation in Chromium
+        continue-on-error: true # Inspect diagnostic result before claiming acceptance.
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/jane-browser" playwright@1.56.1
+          PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" "$RUNNER_TEMP/jane-browser/node_modules/.bin/playwright" install chromium
+          NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av254_browser_title.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
