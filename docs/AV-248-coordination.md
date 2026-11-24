@@ -1,0 +1,2 @@
+# AV-248
+Bounded combination offers only for existing permitted direction+attack tokens, labeled PLAYING scene, enabled original gameplay policy, and matching context. 180-frame spacing, stable cycling. Specialized and recovery policies precede this hook. Embedded release fetch returned empty content, so actual combo availability and dispatch remain unverified. No combos synthesized, no controller modifications. CI pending.
