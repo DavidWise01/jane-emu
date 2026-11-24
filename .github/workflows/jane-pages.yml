@@ -705,6 +705,9 @@ jobs:
         run: |
           NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av262_browser_effect.test.cjs
 
+      - name: Verify AV-263 spatial perception trail
+        run: node tests/av263_spatial.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab

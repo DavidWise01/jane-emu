@@ -1,0 +1,2 @@
+# AV-263
+Read-only scoped homebrew RAM X/Y/palette/mode samples from existing live signal event. 48 samples max; W encodes elapsed frame age over 180 frames; Z fixed at zero before rotation. Same tesseract projection for trail and geometry. Clears on stale signal, nonplaying mode, cartridge/root/actor change or rewind. No enemy inference, commercial RAM mapping or controller writes. New CI and visual acceptance pending.
