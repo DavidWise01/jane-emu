@@ -1,0 +1,37 @@
+{
+  "phase": 13,
+  "range": "AV-253–AV-260",
+  "implementationClosed": true,
+  "fullGameplayAccepted": false,
+  "commercialGameplayAccepted": false,
+  "arenaBlob": "a3c2c9030637d2afe21c7f496825b7e3e8bef1fb",
+  "sourceCommit": "e07df6d97b05bbba93fd6ce22d002c568b9f1077",
+  "iframeCount": 1,
+  "scriptCount": 214,
+  "evidenceBlobs": {
+    "data/av254-title-browser-evidence.json": "e9d2b2b71496d0ce4f5a79eddbc234549e411f5d",
+    "data/av255-direction-browser-evidence.json": "cb51b2f6a3500396b5305b6857b37ad2d8562be0",
+    "data/av256-ab-browser-evidence.json": "9c7d70a6f6bebd80e2e71698f8f0bac658b9ddca",
+    "data/av258-rotation-browser-evidence.json": "4cbc5260d9e5223322e8b16f53ecb3f8667f03d9"
+  },
+  "accepted": [
+    "source-controller",
+    "homebrew-start",
+    "homebrew-right",
+    "homebrew-left",
+    "homebrew-A",
+    "homebrew-B",
+    "homebrew-full-rotation"
+  ],
+  "open": {
+    "combo": "TIMEOUT_90000MS",
+    "repeatedRotation": "PENDING",
+    "commercial": "UNQUALIFIED"
+  },
+  "observedPublishing": {
+    "pagesPassed": 45471288124,
+    "punchOutPassed": 45471288979,
+    "mainPending": 45471289768
+  },
+  "watermark": ".dlw"
+}
