@@ -214,7 +214,7 @@ body .deck-scope{border-color:#24e7da;box-shadow:0 0 8px #24e7da55,inset 0 0 8px
 <label>Volume <input id="volume" type="range" min="0" max="100" value="40" aria-label="NES audio volume"><output id="volOutput">40%</output></label>
 <button id="mute" aria-pressed="false">Mute</button>
 <label for="speed">Speed <select id="speed" aria-label="NES emulation speed"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option></select></label>
-<button id="confirmDeath">Life lost →</button><button id="assistStart" title="Queue three spaced START presses while autoplay runs">START ×3</button>
+<button id="confirmDeath">Life lost →</button><button id="av232Resume" title="Resume autonomous play without resetting cartridge" style="color:#25ffe3;border-color:#25ffe3">PLAY ▶</button><button id="assistStart" title="Queue three spaced START presses while autoplay runs">START ×3</button>
 <button id="undo">Undo</button><button id="screenMode" aria-pressed="true" title="Toggle original emulator cabinet">Canvas only</button>
 <span id="status" role="status" aria-live="polite">Booting NES cabinet · choose a local .nes ROM</span>
 </div>
@@ -630,6 +630,8 @@ async function init(){
     "try{const r=window.parent.JANE_RUN_CONTEXT?.();window.__av215Before=r?.root?{root:r.root,rom:romID,actor:r.actor,frame,x:nes.cpu.mem[2],y:nes.cpu.mem[3],palette:nes.cpu.mem[4],mode:nes.cpu.mem[5]}:null}catch(e){window.__av215Before=null}for(const b of buttons){");
   html=html.replace(av215Done,
     "try{const before=window.__av215Before,r=window.parent.JANE_RUN_CONTEXT?.();window.__av215Before=null;if(before&&r?.root===before.root&&r.actor===before.actor&&romID===before.rom)window.parent.JANE_AV215_INPUT_OBSERVE?.({source:'nes-completed-trial',id:String(record.id||record.startFrame+'-'+record.endFrame+'-'+record.button),root:before.root,rom:romID,actor:before.actor,startFrame:record.startFrame,endFrame:record.endFrame,button:record.button,before:{x:before.x,y:before.y,palette:before.palette,mode:before.mode},after:{x:nes.cpu.mem[2],y:nes.cpu.mem[3],palette:nes.cpu.mem[4],mode:nes.cpu.mem[5]}})}catch(e){}memory.trials.push(record);");
+  // AV-232: explicit resume uses the original scheduler, never a second controller.
+  html=html.replace(anchor,"window.JANE_AV232_RESUME=()=>{if(!nes||!romID)return false;if(action)return false;release();running=true;autoplay=true;pausedByHuman=false;nextActionFrame=frame+1;return true};"+anchor);
   // AV-231: original controller remains live; advisory waits are bypassed in play-first mode.
   window.JANE_AV231_PLAY_FIRST=true;
   html=html.replace('if(!recovery&&!anticipatory&&!counterstrike&&!dreamTransfer&&!homeRecall&&window.JANE_SPINOR_V24?.shouldWait?.','if(window.parent.JANE_AV231_PLAY_FIRST!==true&&!recovery&&!anticipatory&&!counterstrike&&!dreamTransfer&&!homeRecall&&window.JANE_SPINOR_V24?.shouldWait?.');
@@ -715,6 +717,7 @@ $('volume').oninput=e=>{volume=Number(e.target.value);audioEnabled=true;setVolum
 $('speed').onchange=e=>{speed=Number(e.target.value)||1;if(ready)w().JANE_ARENA_SPEED=speed;status('NES speed: '+speed+'× · one continuous game / three observers.');};
 $('mute').onclick=()=>{muted=!muted;audioEnabled=!muted;setVolume()};
 $('confirmDeath').onclick=()=>switchTurn('human-confirmed life loss',true);
+$('av232Resume').onclick=()=>{if(!ready||!safeRoot()||safeRoot()==='unloaded'){status('Load a cartridge first.');return}const ok=w().JANE_AV232_RESUME?.();status(ok?'Autoplay resumed · same cartridge and player.':'Controller action in progress or original fallback cabinet; no reset performed.');};
 $('undo').onclick=()=>{
  if(!entries.length||entries.at(-1)?.kind!=='handoff'){status('Undo requires most recent event to be a handoff.');return}
  const last=entries.at(-1);const next=(active+2)%3;const transfer=w().JANE_PLAYER_STATE?.switchTo(people[next].name,people[next].observations);if(!transfer?.ok){status('Undo blocked: state unavailable');return}chain.cancel('undo handoff');window.JANE_ABC?.cancel?.();saveAssist();teaching.close(gameRoot,people[active].name);active=next;nine.handoff(people[active].name,true);window.JANE_NINE_RENDER?.();lastTrials=transfer.trials;seenTrialIds.clear();for(const t of w().JANE_PERCEPTION?.diagnostics?.().recentTrials||[])seenTrialIds.add(String(t.id)+'|'+String(t.started||t.startFrame||0)+'|'+String(t.preHash||''));coach?.setEnabled(coachEnabled&&active===0);handoffs=Math.max(0,handoffs-1);people[active].turns=Math.max(0,people[active].turns-1);
