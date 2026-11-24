@@ -15,8 +15,8 @@
  const BUTTONS=['RIGHT','LEFT','UP','DOWN','A','B'];
  const HOLD={RIGHT:[6,18,10],LEFT:[6,18,10],UP:[6,18,9],DOWN:[6,18,9],A:[3,12,5],B:[3,12,5]};
  function create(){
-  let identity=null,history={},latestFrame=-1,decisions=0;
-  function reset(x){identity=[x.root,x.rom,x.actor].join('|');latestFrame=-1;decisions=0;history={};
+  let identity=null,history={},latestFrame=-1,decisions=0,pending=null;
+  function reset(x){identity=[x.root,x.rom,x.actor].join('|');latestFrame=-1;decisions=0;history={};pending=null;
    for(const button of BUTTONS)history[button]={hold:HOLD[button][2],zero:0,success:0,loss:0,observations:0};}
   function valid(x){return !!x?.root&&!!x?.rom&&x.rom!=='unloaded'&&
    ['JANE','TOPH','PATRICIA'].includes(x.actor)&&Number.isSafeInteger(x.frame)&&x.frame>=0;}
@@ -30,7 +30,7 @@
    if(!valid(x)||!BUTTONS.includes(x.button)||!eligibleSelection(x))return null;
    const k=[x.root,x.rom,x.actor].join('|');
    if(k!==identity||x.frame<latestFrame)reset(x);
-   latestFrame=x.frame;decisions++;
+   latestFrame=x.frame;decisions++;pending={button:x.button,frame:x.frame,hold:history[x.button].hold};
    return history[x.button].hold;
   }
   function feedback(x={}){
@@ -53,10 +53,11 @@
    }
    h.observations++;return true;
   }
+  function receipt(x={}){if(!pending||!valid(x)||identity!==[x.root,x.rom,x.actor].join('|')||x.button!==pending.button||x.startFrame!==pending.frame||x.frame<=x.startFrame||!Number.isFinite(x.delta)||x.completed!==true)return false;pending=null;return feedback(x);}
   function snapshot(){return {schema:SCHEMA,identity,decisions,
    timing:Object.fromEntries(BUTTONS.map(k=>[k,{...(history[k]||{hold:HOLD[k][2]})}])),
    gameplayVerified:false,meaning:'Frame-limited NES input timing; progress is a screen-change proxy'};}
-  return {hold,feedback,snapshot};
+  return {hold,feedback,receipt,snapshot};
  }
  function mount(){window.JANE_AV192_TIMING=create();}
  return {SCHEMA,BUTTONS,HOLD,create,mount};

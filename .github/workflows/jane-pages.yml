@@ -618,6 +618,9 @@ jobs:
       - name: Verify AV-246 contextual action selection
         run: node tests/av246_context_actions.test.cjs
 
+      - name: Verify AV-247 reaction timing receipt isolation
+        run: node tests/av247_reaction_timing.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
