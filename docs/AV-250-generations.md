@@ -1,0 +1,2 @@
+# AV-250
+Separate per-player survival endpoint counters retained for same root and ROM across rotations. Peer-only penalty after three observations, capped at one bias point, no copying into individual evidence. Root or cartridge change clears active memory. Same emulator ancestry, no independent corroboration or causal survival improvement. Existing specialized controller retains priority. AV-249 all three publishing workflows successful; AV-250 CI and browser verification pending.
