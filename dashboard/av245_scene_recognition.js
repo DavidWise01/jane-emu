@@ -1,0 +1,5 @@
+(function(g,f){const api=f();if(typeof module==='object'&&module.exports)module.exports=api;else g.JaneAV245=api;})(globalThis,function(){'use strict';
+function classify(run,observed,monitor,mode){if(!run?.root||!run.rom||run.rom==='unloaded')return {scene:'UNLOADED',source:'none'};if(monitor?.armed&&monitor.root===run.root&&monitor.rom===run.rom&&[0,1,2].includes(mode))return {scene:['MENU','PLAYING','DEFEAT'][mode],source:'homebrew-ram'};
+if(observed?.root!==run.root||observed?.rom!==run.rom||!Number.isSafeInteger(observed.frame)||!Number.isSafeInteger(run.frame)||run.frame<observed.frame||run.frame-observed.frame>120)return {scene:'UNKNOWN',source:'none'};
+const map={MENU:'MENU',GAME_OVER:'DEFEAT',RECOVERY:'TRANSITION',PLAYING_LABELED:'PLAYING',STALLED:'STALLED',IDLE_CANDIDATE:'IDLE_CANDIDATE',ACTIVE_UNCLASSIFIED:'ACTIVE_UNCLASSIFIED'};return {scene:map[observed.state]||'UNKNOWN',source:'existing-observer'};}
+return {classify};});

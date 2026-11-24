@@ -612,6 +612,9 @@ jobs:
       - name: Verify AV-244 Phase 11 immutable neon baseline
         run: node tests/av244_phase11_freeze.test.cjs
 
+      - name: Verify AV-245 perceptual scene recognition
+        run: node tests/av245_scene_recognition.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
