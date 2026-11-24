@@ -606,6 +606,9 @@ jobs:
       - name: Verify AV-242 bounded plasma memory
         run: node tests/av242_plasma_memory.test.cjs
 
+      - name: Verify AV-243 neural resonance clock
+        run: node tests/av243_neural_resonance.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
