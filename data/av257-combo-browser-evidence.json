@@ -1,0 +1,28 @@
+{
+  "kind": "AV257_NATIVE_COMBO_ACCEPTANCE",
+  "sourceRun": 45483955236,
+  "sourceJob": 138764227532,
+  "sourceCommit": "9b9cca78ea497b60e06dec845661a05a6ba2ee3a",
+  "root": "session-57bf446a-cb86-4b32-8c76-6ad38cd4cfbb",
+  "rom": "0b10970a",
+  "actor": "JANE",
+  "action": "RIGHT+A",
+  "startFrame": 130,
+  "endFrame": 148,
+  "presses": [
+    {
+      "actor": "JANE",
+      "frame": 130,
+      "action": "RIGHT+A",
+      "button": "RIGHT"
+    },
+    {
+      "actor": "JANE",
+      "frame": 130,
+      "action": "RIGHT+A",
+      "button": "A"
+    }
+  ],
+  "manualControllerInput": false,
+  "combinedGameEffectVerified": false
+}

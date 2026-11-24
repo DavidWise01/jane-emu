@@ -1,0 +1,2 @@
+# AV-262
+Archive actual native combo delivery (RIGHT+A frame 130, completion 148). Separate read-only qualification of scoped homebrew completed trial with both original native presses and signed movement plus distinct expected palette change. AV-215 single-action policy unchanged. Qualified receipt illuminates X/W tesseract edges for 1.8 seconds; no simulated evidence. New browser diagnostic and visual verification pending. Latest visual extension Pages passed, Punch-Out failed, main pending.

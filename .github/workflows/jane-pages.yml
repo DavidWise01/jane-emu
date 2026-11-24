@@ -696,6 +696,15 @@ jobs:
       - name: Verify neon 4D shadow tesseract projection
         run: node tests/shadow4d_tesseract.test.cjs
 
+      - name: Verify AV-262 dual effect qualification
+        run: node tests/av262_combo_effect.test.cjs
+
+      - name: Diagnose AV-262 simultaneous homebrew effects in Chromium
+        continue-on-error: true
+        shell: bash
+        run: |
+          NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av262_browser_effect.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
