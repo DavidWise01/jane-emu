@@ -1,0 +1,12 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const html=fs.readFileSync('dashboard/arena.html','utf8');
+assert.equal((html.match(/<iframe\b/g)||[]).length,1);
+for(const token of ['av234-winamp-neon','av235-live-eq-css','av235-eq','JANE_AV231_PLAY_FIRST=true','JANE_AV232_RESUME','av233Tick()'])assert.ok(html.includes(token),token);
+const script=html.match(/<script id="av235-live-eq-script">([\s\S]*?)<\/script>/);
+assert.ok(script);new vm.Script(script[1]);
+for(const token of ['now-lastAdvance<1500','audio.scope','run.frame-audio.frame<=30','audio.bands.length===24','SIGNAL UNAVAILABLE'])assert.ok(script[1].includes(token==='audio.scope'?'audio?.scope':token),token);
+assert.ok(!/buttonDown|buttonUp|\.cpu\.mem|JANE_AV232_RESUME/.test(script[1]));
+const freeze=JSON.parse(fs.readFileSync('data/phase10-freeze.json','utf8'));
+assert.equal(freeze.fullGameplayAccepted,false);assert.equal(freeze.implementationClosed,true);assert.equal(freeze.equalizerBrowserVerified,false);
+console.log('AV-236 source and syntax freeze PASS; browser acceptance not implied');

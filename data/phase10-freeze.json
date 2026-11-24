@@ -1,0 +1,15 @@
+{
+  "phase": 10,
+  "range": "AV-229–AV-236",
+  "implementationClosed": true,
+  "fullGameplayAccepted": false,
+  "equalizerBrowserVerified": false,
+  "sourceCommit": "6adc0161911adf98c8095b6ecfc987c9879a443a",
+  "observedRun": 45308673173,
+  "mainPublish": "success",
+  "pagesBuild": "success",
+  "separatePunchOutDeploy": "failure",
+  "homebrewHandoffsVerified": 2,
+  "remainingFault": "Toph completed B must be retained",
+  "watermark": ".dlw"
+}
