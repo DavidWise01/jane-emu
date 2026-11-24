@@ -1,0 +1,2 @@
+# AV-261 visual extension
+Actual 16-vertex, 32-edge tesseract with XW/YW/ZW rotation, 4D perspective to 3D then canvas perspective, floor shadow, four neon axis colors and freshness-gated signal glow. Decorative geometry is not neural telemetry. Standby rotation labeled, freeze control and reduced-motion default. Canvas2D projection, no external dependencies or controller writes. Existing arena preserved. New CI and visual acceptance pending. Phase 14 progress unchanged.

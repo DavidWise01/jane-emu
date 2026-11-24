@@ -693,6 +693,9 @@ jobs:
       - name: Verify AV-261 scoped combination opportunity
         run: node tests/av261_combo.test.cjs
 
+      - name: Verify neon 4D shadow tesseract projection
+        run: node tests/shadow4d_tesseract.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
