@@ -1,0 +1,32 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
+const {chromium}=require('playwright');
+const ROOT=path.resolve(__dirname,'..');
+const mime={'.html':'text/html;charset=utf-8','.js':'application/javascript;charset=utf-8','.css':'text/css;charset=utf-8','.json':'application/json;charset=utf-8'};
+function server(){return http.createServer((req,res)=>{
+ const uri=decodeURIComponent((req.url||'/').split('?')[0]);
+ const target=path.resolve(ROOT,'.'+(uri==='/'?'/index.html':uri));
+ if(!target.startsWith(ROOT+path.sep)){res.writeHead(403);return res.end();}
+ fs.readFile(target,(err,data)=>{
+  if(err){res.writeHead(404);return res.end('not found');}
+  res.writeHead(200,{'Content-Type':mime[path.extname(target)]||'application/octet-stream'});res.end(data);
+ });
+});}
+async function main(){
+const srv=server();await new Promise(r=>srv.listen(0,'127.0.0.1',r));
+const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+try{
+await page.goto('http://127.0.0.1:'+srv.address().port+'/dashboard/arena.html',{waitUntil:'domcontentloaded',timeout:60000});
+await page.waitForFunction(()=>document.querySelector('#status')?.textContent?.includes('cabinet ready'),null,{timeout:60000});
+await page.locator('#av201-demo').click();
+await page.waitForFunction(()=>window.JANE_AV262_STATUS?.().length>0 && window.JANE_AV263_STATUS?.().rows?.length>1 && document.querySelector('#shadow4d output')?.textContent.startsWith('LIVE'),null,{timeout:90000});
+assert.equal(await page.locator('iframe').count(),1);
+const canvas=page.locator('#shadow4d canvas');await canvas.scrollIntoViewIfNeeded();assert.ok(await canvas.isVisible());
+const before=await canvas.evaluate(c=>c.toDataURL());await page.waitForTimeout(350);assert.notEqual(await canvas.evaluate(c=>c.toDataURL()),before);
+const proof=await page.evaluate(()=>({effect:window.JANE_AV262_STATUS()[0],spatial:window.JANE_AV263_STATUS(),objects:window.JANE_AV264_STATUS(),proximity:window.JANE_AV265_STATUS(),navigation:window.JANE_AV266_STATUS(),evaluation:window.JANE_AV267_STATUS(),signal:document.querySelector('#shadow4d output').textContent}));
+assert.notEqual(proof.effect.dx,0);assert.notEqual(proof.effect.paletteBefore,proof.effect.paletteAfter);assert.ok(Array.isArray(proof.objects.objects));assert.ok(Array.isArray(proof.proximity));assert.ok(Array.isArray(proof.evaluation.rows));assert.deepEqual(errors,[]);
+console.log(JSON.stringify({kind:'AV269_LIVE_CORTEX',proof,manualControllerInput:false,commercialVerified:false}));
+}finally{await browser.close();await new Promise(r=>srv.close(r));}}
+main().catch(e=>{console.error(e);process.exitCode=1});

@@ -720,6 +720,8 @@ jobs:
       - name: Verify AV-267 measured objective evaluation
         run: node tests/av267_evaluation.test.cjs
 
+      - name: Verify AV-269 blocking live cortex Chromium acceptance
+        run: NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av269_browser_cortex.test.cjs
       - name: Verify AV-268 immutable Phase 14 cartridge intelligence archive
         run: node tests/av268_phase14_freeze.test.cjs
 
