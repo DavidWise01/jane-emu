@@ -1,0 +1,14 @@
+{
+  "kind": "AV254_HOME BREW_TITLE_ACCEPTANCE",
+  "sourceRun": 45431117651,
+  "sourceJob": 138577656040,
+  "sourceCommit": "f4aeefd16045fdaafcf1fbe28bd8aece849ce144",
+  "root": "session-b2455dfd-0a38-4e99-8957-ca019945d397",
+  "rom": "0b10970a",
+  "titleFrame": 1,
+  "startFrame": 2,
+  "endFrame": 16,
+  "playingFrame": 16,
+  "manualControllerInput": false,
+  "commercialVerified": false
+}
