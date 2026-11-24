@@ -1,7 +1,7 @@
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
-const {chromium}=require('playwaEffect');
+const {chromium}=require('playwright');
 const ROOT=path.resolve(__dirname,'..');
 const mime={'.html':'text/html;charset=utf-8','.js':'application/javascript;charset=utf-8','.css':'text/css;charset=utf-8','.json':'application/json;charset=utf-8'};
 function server(){return http.createServer((req,res)=>{

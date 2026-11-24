@@ -1,0 +1,2 @@
+# AV-257
+Inspect AV-255 actual Chromium directional proof (+8 RIGHT, -7 LEFT); archive source run. Correct AV-256 accidental Playwright import typo. AV-257 diagnostic requires both native component calls on same frame and matching completed trial. Homebrew loading only; no synthetic controller inputs. Existing homebrew policy may not choose combinations, so timeout is possible. No combined game-effect or commercial claim. Nonblocking diagnostic pending. No arcade HTML changes.

@@ -1,0 +1,43 @@
+{
+  "kind": "AV255_HOME_BREW_DIRECTIONAL_ACCEPTANCE",
+  "sourceRun": 45434665660,
+  "sourceJob": 138591696018,
+  "sourceCommit": "fe783df05e1c5a1bcb31f495b35830b733df7ccb",
+  "root": "session-ff2e973f-08f4-42eb-be4a-989e1abeeadb",
+  "rom": "0b10970a",
+  "actor": "JANE",
+  "right": {
+    "startFrame": 26,
+    "endFrame": 36,
+    "before": {
+      "x": 120,
+      "y": 108,
+      "palette": 48,
+      "mode": 1
+    },
+    "after": {
+      "x": 128,
+      "y": 108,
+      "palette": 48,
+      "mode": 1
+    }
+  },
+  "left": {
+    "startFrame": 122,
+    "endFrame": 132,
+    "before": {
+      "x": 141,
+      "y": 110,
+      "palette": 22,
+      "mode": 1
+    },
+    "after": {
+      "x": 134,
+      "y": 110,
+      "palette": 22,
+      "mode": 1
+    }
+  },
+  "manualControllerInput": false,
+  "commercialVerified": false
+}
