@@ -636,6 +636,9 @@ jobs:
       - name: Verify AV-252 Phase 12 immutable gameplay cortex baseline
         run: node tests/av252_phase12_freeze.test.cjs
 
+      - name: Verify AV-253 original NES controller runtime source
+        run: node tests/av253_runtime.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab

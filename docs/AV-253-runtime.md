@@ -1,0 +1,2 @@
+# AV-253
+Original release blob 7d2a04098983eb56ae58a754e67c4ca9b1164414 inspected directly. 14 allowed actions, 8 singles and 6 combinations (one triple). Native startAction splits tokens and calls player-one buttonDown; release calls buttonUp. Added bounded post-call observer only. Source inspection confirms combo support, not live execution or game outcome. AV-252 Pages and Punch-Out succeeded; main in progress at inspection. New CI pending.
