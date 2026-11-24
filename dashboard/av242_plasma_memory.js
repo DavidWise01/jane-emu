@@ -1,0 +1,6 @@
+(function(g,f){const api=f();if(typeof module==='object'&&module.exports)module.exports=api;else g.JaneAV242=api;})(globalThis,function(){'use strict';
+const actors=['JANE','TOPH','PATRICIA'],TTL=6000,MAX=48;
+function create(){let scope=null,rows=[],seen=new Set();function sync(r){const k=r&&r.root&&r.rom&&r.rom!=='unloaded'&&actors.includes(r.actor)?JSON.stringify([r.root,r.rom,r.actor]):null;if(k!==scope){scope=k;rows=[];seen.clear()}return !!scope}
+function observe(p,r,now){if(!sync(r)||!p||p.root!==r.root||p.rom!==r.rom||p.from!==r.actor||!actors.includes(p.to)||p.to===p.from||!Number.isSafeInteger(p.frame)||p.frame<0||p.frame>r.frame||r.frame-p.frame>120||typeof p.trial!=='string'||!p.trial||!Number.isFinite(now))return false;const id=JSON.stringify([p.from,p.to,p.trial,p.frame]);if(seen.has(id))return false;seen.add(id);rows.push({id,from:p.from,to:p.to,at:now});if(rows.length>MAX)seen.delete(rows.shift().id);return true}
+function project(r,now,live){if(!sync(r)||!live||!Number.isFinite(now)){rows=[];seen.clear();return []}rows=rows.filter(x=>now>=x.at&&now-x.at<TTL);seen=new Set(rows.map(x=>x.id));return rows.map(x=>({from:x.from,to:x.to,age:now-x.at,intensity:Math.pow(1-(now-x.at)/TTL,2)}))}
+return {observe,project}}return {create,TTL,MAX,actors};});

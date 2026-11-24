@@ -603,6 +603,9 @@ jobs:
       - name: Verify AV-241 neural observation routing
         run: node tests/av241_neural_routing.test.cjs
 
+      - name: Verify AV-242 bounded plasma memory
+        run: node tests/av242_plasma_memory.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
