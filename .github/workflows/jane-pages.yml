@@ -624,6 +624,9 @@ jobs:
       - name: Verify AV-248 bounded movement attack coordination
         run: node tests/av248_coordination.test.cjs
 
+      - name: Verify AV-249 survival endpoint feedback
+        run: node tests/av249_survival.test.cjs
+
       - name: Build AV-174 PDF evidence report
         run: |
           python3 -m pip install --disable-pip-version-check reportlab
