@@ -1,0 +1,2 @@
+# AV-270 — Cartridge-specific identity candidates
+AV269R blocking test passed in job 138900744594; native Patricia RIGHT+A dx13 palette 48→22, spatial and OAM telemetry present. AV270 adds observation-only candidate matching for instrumented homebrew ROM 0b10970a, with scope/freshness checks, ambiguity rejection and two motion matches. Thresholds are provisional engineering choices; not causal proof or commercial identity. New CI pending. .dlw
