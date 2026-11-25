@@ -23,7 +23,12 @@ await page.waitForFunction(()=>document.querySelector('#status')?.textContent?.i
 await page.locator('#av201-demo').click();
 await page.waitForFunction(()=>window.JANE_AV262_STATUS?.().length>0 && window.JANE_AV263_STATUS?.().rows?.length>1 && document.querySelector('#shadow4d output')?.textContent.startsWith('LIVE'),null,{timeout:90000});
 assert.equal(await page.locator('iframe').count(),1);
-const canvas=page.locator('#shadow4d canvas');await canvas.scrollIntoViewIfNeeded();assert.ok(await canvas.isVisible());
+const canvas=page.locator('#shadow4d canvas');
+const pane=await canvas.evaluate(c=>c.closest('[role=tabpanel]')?.id);
+assert.match(pane||'',/^av186-pane-(play|learn|verify)$/);
+const tab=page.locator('#'+pane.replace('pane','tab'));
+await tab.click();assert.equal(await tab.getAttribute('aria-selected'),'true');
+await canvas.scrollIntoViewIfNeeded();assert.ok(await canvas.isVisible());
 const before=await canvas.evaluate(c=>c.toDataURL());await page.waitForTimeout(350);assert.notEqual(await canvas.evaluate(c=>c.toDataURL()),before);
 const proof=await page.evaluate(()=>({effect:window.JANE_AV262_STATUS()[0],spatial:window.JANE_AV263_STATUS(),objects:window.JANE_AV264_STATUS(),proximity:window.JANE_AV265_STATUS(),navigation:window.JANE_AV266_STATUS(),evaluation:window.JANE_AV267_STATUS(),signal:document.querySelector('#shadow4d output').textContent}));
 assert.notEqual(proof.effect.dx,0);assert.notEqual(proof.effect.paletteBefore,proof.effect.paletteAfter);assert.ok(Array.isArray(proof.objects.objects));assert.ok(Array.isArray(proof.proximity));assert.ok(Array.isArray(proof.evaluation.rows));assert.deepEqual(errors,[]);
