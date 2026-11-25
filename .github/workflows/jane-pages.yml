@@ -720,6 +720,8 @@ jobs:
       - name: Verify AV-267 measured objective evaluation
         run: node tests/av267_evaluation.test.cjs
 
+      - name: Verify AV-271 conservative object recognition
+        run: node tests/av271_recognition.test.cjs
       - name: Verify AV-270 scoped character identity candidates
         run: node tests/av270_identity.test.cjs
       - name: Verify AV-269 blocking live cortex Chromium acceptance
