@@ -1,0 +1,60 @@
+{
+  "schema": "jane.phase17.freeze.v1",
+  "phase": 17,
+  "watermark": ".dlw",
+  "baseline": "27ffc19c7e059bfc2502b00cfcbb0d0f6df891cc",
+  "tree": "fd7cc01d004dd715f60077eb6868dae729e639ce",
+  "source": "PINNED",
+  "operational": "HOLD",
+  "bounds": [
+    "AV288R",
+    "AV289R",
+    "AV290R",
+    "AV291R",
+    "AV292R",
+    "AV293R",
+    "AV294R",
+    "AV295R"
+  ],
+  "lastQualified": {
+    "commit": "4a2fa0ec24eb2368da31466e3446b7e2314664fa",
+    "run": 45706648165,
+    "fps": {
+      "1x": 58.779054169410834,
+      "4x": 129.65707027942582,
+      "8x": 120.83847102342787
+    },
+    "controller": {
+      "dispatch": 56,
+      "completion": 51,
+      "unmatched": 0,
+      "abandoned": 4
+    },
+    "storage": {
+      "queued": 0,
+      "coalesced": 0
+    },
+    "target": {
+      "none": 30,
+      "ambiguous": 0,
+      "noPrediction": 31,
+      "identityUnqualified": 13,
+      "notPlaying": 1
+    }
+  },
+  "recovery": {
+    "run": 45711593630,
+    "syntax": "PASS",
+    "browser": "PENDING",
+    "pages": "PASS",
+    "punchOut": "DEPLOY_FAILED"
+  },
+  "next": "AV296R: qualify profiler and measure core versus monitoring costs before optimization",
+  "unqualified": [
+    "sustained 240 FPS",
+    "sustained 480 FPS",
+    "storage coalescing benefit",
+    "defensive target/action intervention",
+    "latest browser startup and profiling"
+  ]
+}
