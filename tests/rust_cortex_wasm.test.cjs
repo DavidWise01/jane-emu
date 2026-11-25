@@ -8,3 +8,5 @@ assert.equal(e.identity_step(1,1,1,0,1,0,120,120),1);assert.equal(e.identity_ste
 for(let f=1;f<=3600;f++){assert.equal(e.survival_score(1,1,f,0),f);assert.ok(e.survival_score(1,2,f,0)<0);assert.ok(e.survival_score(1,1,f,1)<0);}assert.equal(e.survival_score(0,1,60,0),-2147483648);assert.equal(e.survival_score(1,0,60,0),-2147483648);console.log('AV280R survival ABI PASS');
 
 assert.equal(e.arbitrate(7,2,0,100,20),2);assert.equal(e.arbitrate(7,0,0,20,20),1);assert.equal(e.arbitrate(7,0,20,20,20),0);assert.equal(e.arbitrate(6,0,0,100,100),3);assert.equal(e.arbitrate(7,1,0,100,100),3);for(let m=0;m<8;m++)for(let r=0;r<8;r++){const a=e.arbitrate(m,r,0,1,2);if(a<3){assert.ok(m&(1<<a));assert.equal(r&(1<<a),0);}}console.log('AV281R arbitration ABI PASS');
+
+assert.equal(e.effect_class(0,84),0);assert.equal(e.effect_class(1,-204),1);assert.equal(e.effect_class(1,0),2);assert.equal(e.effect_class(1,84),3);assert.equal(e.effect_class(1,-2147483648),0);console.log('AV283R effect ABI PASS');

@@ -1,0 +1,2 @@
+# AV-283R — Qualified action-effect observations
+Exact start/end sprite frames, matching scope and sprite signature, controlled identity and RAM coordinate agreement required. Rust classifies squared separation change; no causal inference or life-loss reward. Existing bounded session receipt history stores descriptive results, not persistent Rust learning weights. Exact frame requirement may abstain on real scheduler cadence. Default defensive experiment remains OFF. Native, WASM and synthetic adapter checks added; runtime pending. .dlw

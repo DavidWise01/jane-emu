@@ -161,3 +161,16 @@ mod survival_tests {
  #[test] fn precedence(){assert_eq!(arbitrate(7,2,0,100,20),2);assert_eq!(arbitrate(7,0,0,20,20),1);assert_eq!(arbitrate(7,0,20,20,20),0);assert_eq!(arbitrate(6,0,0,100,100),3);assert_eq!(arbitrate(7,1,0,100,100),3);assert_eq!(arbitrate(7,0,0,i32::MAX,-1),0);}
  #[test] fn masks(){for m in 0..8 {for r in 0..8 {let a=arbitrate(m,r,0,1,2);if a<3{assert_ne!(m&(1<<a),0);assert_eq!(r&(1<<a),0);}}}}
  }
+
+ // Descriptive separation outcome, never a causal survival reward.
+ // 0 unqualified, 1 reduced, 2 unchanged, 3 increased.
+ #[no_mangle]
+ pub extern "C" fn effect_class(qualified:u32,gain:i32)->u32 {
+   if qualified!=1 || !(-130050..=130050).contains(&gain){return 0}
+   if gain<0{1}else if gain==0{2}else{3}
+ }
+ #[cfg(test)]
+ mod effect_tests {
+ use super::*;
+ #[test]fn signs(){assert_eq!(effect_class(0,84),0);assert_eq!(effect_class(1,-204),1);assert_eq!(effect_class(1,0),2);assert_eq!(effect_class(1,84),3);assert_eq!(effect_class(1,i32::MIN),0);}
+ }
