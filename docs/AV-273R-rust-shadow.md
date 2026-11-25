@@ -1,0 +1,2 @@
+# AV-273R — Live Rust shadow parity
+AV272R native/ABI build and deployment passed in run 45622774965. Instrument existing JS primitive calls without replacing authoritative outcomes. Compare four exported Rust functions, record cumulative counts and first discrepancy. Browser gate requires all four primitives exercised by autonomous homebrew gameplay, no mismatch and no JS errors. No full state machine equivalence, commercial cartridge qualification, or Rust authority claimed. New CI pending. .dlw
