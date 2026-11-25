@@ -1,0 +1,2 @@
+# AV-282R — Opt-in defensive execution experiment
+Default OFF. Homebrew only; scoped fresh directional prediction, original scheduler, single pending offer, 120-frame cooldown. Rust arbitration ranks a provisional direction; no risk certification. Existing AV215 accepted native receipt required. Endpoint playing and displacement recorded, but target separation and life loss not verified, so survival score withheld. Synthetic adapter gate added; live action execution unqualified. .dlw
