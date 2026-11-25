@@ -1,0 +1,2 @@
+# AV-277R — Guarded Rust identity state
+Rust owns a parallel identity transition state with scope token, frame, prior sprite and continuity count. JS supplies scope token and candidate filtering and remains reference/fallback. Rust returns accepted state only on agreement; mismatch latches JS. No full cortex migration or controller authority claimed. AV276R workflows passed; live memory qualification remains open. New CI pending. .dlw

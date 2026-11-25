@@ -104,3 +104,27 @@ mod memory_tests {
  #[test] fn immutable_inheritance(){let mut l=Ledger::default();assert!(l.append(r(0,1,1)));assert!(l.append(r(1,2,2)));assert!(l.seal());let frozen=l.sealed()[0].clone();assert!(!l.append(r(0,2,2)));assert!(!l.append(r(0,1,3)));assert!(l.append(r(2,3,3)));assert!(l.seal());assert_eq!(l.sealed()[0],frozen);assert_eq!(l.sealed()[1].number(),1);assert!(!l.seal());}
  #[test] fn capacity(){let mut l=Ledger::default();for i in 0..1024{assert!(l.append(r(0,i,i)));}assert!(!l.append(r(0,1024,1024)));assert!(l.seal());assert!(!l.append(r(3,1025,1025)));}
 }
+
+#[derive(Default)]
+struct IdentityState { scope:u32, last:Option<u32>, prior:Option<(u32,u32,u32,i32,i32)>, hits:u32, kind:u32, id:u32 }
+impl IdentityState {
+ fn update(&mut self,scope:u32,frame:u32,valid:u32,id:u32,tile:u32,attr:u32,x:i32,px:i32)->u32 {
+  if scope==0 { *self=Self::default();return 0 }
+  if self.scope!=scope||self.last.is_some_and(|f|frame<f){*self=Self{scope,..Self::default()};}
+  if self.last==Some(frame){return self.kind}
+  self.last=Some(frame);
+  if valid!=1||id>63||tile>255||attr>255||!(0..=255).contains(&x)||!(0..=255).contains(&px){self.prior=None;self.hits=0;self.kind=if valid==2{2}else{0};return self.kind}
+  self.hits=match self.prior {Some((i,t,a,old_x,old_px)) if (i,t,a)==(id,tile,attr)=>motion_hits(self.hits,1,x-old_x,px-old_px),_=>0};
+  self.prior=Some((id,tile,attr,x,px));self.id=id;self.kind=if self.hits>=2{3}else{1};self.kind
+ }
+}
+thread_local!{static IDENTITY:std::cell::RefCell<IdentityState>=std::cell::RefCell::new(IdentityState::default());}
+#[no_mangle]
+pub extern "C" fn identity_step(scope:u32,frame:u32,valid:u32,id:u32,tile:u32,attr:u32,x:i32,px:i32)->u32{IDENTITY.with(|s|s.borrow_mut().update(scope,frame,valid,id,tile,attr,x,px))}
+#[no_mangle]
+pub extern "C" fn identity_hits()->u32{IDENTITY.with(|s|s.borrow().hits)}
+#[cfg(test)]
+mod identity_tests {
+ use super::*;
+ #[test]fn boundaries(){let mut s=IdentityState::default();assert_eq!(s.update(1,1,1,0,1,0,120,120),1);assert_eq!(s.update(1,2,1,0,1,0,125,125),1);assert_eq!(s.update(1,3,1,0,1,0,130,130),3);assert_eq!(s.update(1,3,1,0,1,0,130,130),3);assert_eq!(s.hits,2);assert_eq!(s.update(1,4,2,0,0,0,0,0),2);assert_eq!(s.update(2,5,1,0,1,0,135,135),1);assert_eq!(s.update(0,0,0,0,0,0,0,0),0);}
+}
