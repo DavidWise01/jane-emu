@@ -459,7 +459,7 @@ window.JANE_AV215_INPUT_OBSERVE=packet=>{
  if(!c?.root||!m?.armed||m.root!==c.root||m.rom!==c.rom||
     packet?.root!==c.root||packet?.rom!==c.rom||packet?.actor!==c.actor)return false;
  av215Effects??=window.JaneAV215?.create?.()||null;
- try{window.JANE_AV262_OBSERVE?.(packet)}catch(e){}const accepted=av215Effects?.observe?.(packet)||false;if(accepted)try{window.JANE_AV282_COMPLETE?.(packet)}catch(e){}if(accepted)try{window.JANE_AV249_SURVIVAL?.observe?.(packet);window.JANE_AV250_GENERATIONS?.observe?.(packet);window.JANE_AV251_ENDURANCE?.observe?.(packet)}catch(e){}return accepted;
+ try{window.JANE_AV262_OBSERVE?.(packet)}catch(e){}const accepted=av215Effects?.observe?.(packet)||false;if(accepted)try{window.JANE_AV291_COMPLETE?.(packet)}catch(e){}if(accepted)try{window.JANE_AV282_COMPLETE?.(packet)}catch(e){}if(accepted)try{window.JANE_AV249_SURVIVAL?.observe?.(packet);window.JANE_AV250_GENERATIONS?.observe?.(packet);window.JANE_AV251_ENDURANCE?.observe?.(packet)}catch(e){}return accepted;
 };
 window.JANE_AV215_INPUT_STATUS=()=>av215Effects?.snapshot?.()||null;
 window.JANE_AV226_LIFE_EFFECTS=()=>{
@@ -715,7 +715,7 @@ async function init(){
   // correlate only after an actual completed trial. Neither hook issues input.
     // AV-253 observes successful original buttonDown calls, without dispatching input.
   const av253Press="nes.buttonDown(1,CODES[b]);activeButtons.push(b)";
-  if(html.includes(av253Press))html=html.replace(av253Press,"nes.buttonDown(1,CODES[b]);activeButtons.push(b);try{window.parent.JANE_AV253_PRESS?.({rom:romID,frame,button,b,actions:ACTIONS.slice()})}catch(e){}");
+  if(html.includes(av253Press))html=html.replace(av253Press,"nes.buttonDown(1,CODES[b]);activeButtons.push(b);try{window.parent.JANE_AV253_PRESS?.({rom:romID,frame,button,b,actions:ACTIONS.slice()});window.parent.JANE_AV291_PRESS?.({rom:romID,frame,button,speed:window.JANE_ARENA_SPEED||1})}catch(e){}");
 const av215Dispatch='for(const b of buttons){';
   const av215Done='memory.trials.push(record);';
   if(!html.includes(av215Dispatch)||!html.includes(av215Done))
@@ -986,4 +986,5 @@ window.addEventListener('jane-av241-route',e=>m.observe(e.detail,window.JANE_RUN
 <script>(()=>{const h=document.getElementById('shadow4d');if(!h)return;const l=document.createElement('div');l.style.cssText='color:#ffad63;font:9px monospace';h.append(l);window.addEventListener('jane-av240-signal',()=>{const q=window.JANE_AV288_STATUS().counts;const top=Object.entries(q).filter(([k])=>k.startsWith('OFFER:')&&k!=='OFFER:ACCEPTED').sort((a,b)=>b[1]-a[1])[0];l.textContent='RUST FUNNEL / '+(q['OFFER:ACCEPTED']||0)+' OFFERS / '+(q['RECEIPT:COMPLETED']||0)+' COMPLETED / '+(top?top.join(' '):'AWAITING');});})();</script>
 <script>(()=>{const h=document.getElementById('shadow4d');if(!h)return;const l=document.createElement('div');l.style.cssText='color:#35ffe0;font:9px monospace';h.append(l);window.JANE_FAST_STATUS=()=>{try{return {...document.getElementById('game').contentWindow.__janeFastPerf}}catch(e){return {}}};window.addEventListener('jane-av240-signal',()=>{const p=window.JANE_FAST_STATUS();l.textContent='FAST CLOCK / '+(p.frames||0)+' FRAMES / '+(p.budgetYields||0)+' YIELDS / '+Math.round(p.clampedMs||0)+' ms BACKLOG LIMITED';});})();</script>
 <script src="./fast_governor.js"></script><script>(()=>{'use strict';const p=window.JaneAV290.create(),h=document.getElementById('shadow4d');window.JANE_AV290_STATUS=()=>p.snapshot();if(!h)return;const l=document.createElement('div');l.style.cssText='color:#35ffe0;font:9px monospace';h.append(l);window.addEventListener('jane-av240-signal',e=>{const r=window.JANE_RUN_CONTEXT?.(),speed=Number(document.getElementById('speed')?.value)||1;if(!e.detail?.live||!r?.root||r.rom==='unloaded')return;const s=p.observe(r.frame,performance.now(),speed,JSON.stringify([r.root,r.rom]));l.textContent='ACTUAL FPS / '+(s.fps===null?'WARMUP':s.fps.toFixed(1))+' / TARGET '+s.target+' / VISUAL '+s.interval+' ms';});})();</script>
+<script src="./fast_controller.js"></script><script>(()=>{const p=window.JaneAV291.create(),h=document.getElementById('shadow4d');window.JANE_AV291_PRESS=x=>{const r=window.JANE_RUN_CONTEXT?.();if(r?.rom===x.rom)p.dispatch({...r,...x})};window.JANE_AV291_COMPLETE=x=>p.complete(x);window.JANE_AV291_STATUS=()=>p.snapshot();if(!h)return;const l=document.createElement('div');l.style.cssText='color:#35ffe0;font:9px monospace';h.append(l);window.addEventListener('jane-av240-signal',()=>{const q=p.snapshot(),v=q.rows.at(-1);l.textContent='CONTROLLER / '+q.counts.dispatch+' DISPATCH / '+q.counts.completion+' MATCHED / '+(v?v.frames+' F LAST':'AWAITING');});})();</script>
 </body></html>

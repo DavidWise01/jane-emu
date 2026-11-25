@@ -5,8 +5,8 @@ check('minimal arena retains exactly one NES screen',()=>assert.equal(html.split
 check('speed selector has 1x 2x 4x 8x',()=>{
  for(const [v] of [['1'],['2'],['4'],['8']])assert.ok(html.includes('<option value="'+v+'">'));
 });
-check('speed factor modifies actual NES accumulator',()=>assert.ok(html.includes('accum+=delta*(window.JANE_ARENA_SPEED||1)')));
-check('speed step budget expanded above 6 frame cap',()=>assert.ok(html.includes('steps++<32')));
+check('speed factor modifies actual NES accumulator',()=>assert.ok(html.includes('const demand=accum+delta*speedNow')&&html.includes('const speedNow=window.JANE_ARENA_SPEED||1')&&html.includes('accum=fast?Math.min(demand,quantum*cap):demand')));
+check('speed step budget expanded above 6 frame cap',()=>assert.ok(html.includes('steps++<cap')));
 check('speed updates iframe without cartridge reload',()=>{
  const at=html.indexOf("$('speed').onchange");
  const part=html.slice(at,at+245);
