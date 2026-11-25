@@ -27,3 +27,32 @@ use super::*;
 #[test] fn continuity(){assert_eq!(motion_hits(0,1,5,5),1);assert_eq!(motion_hits(1,1,5,5),2);assert_eq!(motion_hits(2,1,-5,5),0);assert_eq!(motion_hits(2,0,5,5),0);assert_eq!(motion_hits(2,1,0,0),2);}
 #[test] fn freshness(){assert_eq!(fresh(20,15),1);assert_eq!(fresh(20,14),0);assert_eq!(fresh(20,21),0);}
 }
+
+ // Bounded, integer, horizontal projection. 0=hold, 1=left, 2=right.
+ // Packed result: low two bits action; remaining bits predicted squared-distance gain.
+ // Observational only; no controller side effects.
+ #[no_mangle]
+ pub extern "C" fn defend(px:i32,py:i32,ox:i32,oy:i32,vx:i32,vy:i32,step:i32)->u32 {
+     if ![px,py,ox,oy].iter().all(|v|(0..=255).contains(v)) || !(-16..=16).contains(&vx) || !(-16..=16).contains(&vy) || !(1..=8).contains(&step) {return 0}
+     let dist=|x:i32,y:i32| {let dx=x-(ox+vx);let dy=y-(oy+vy);dx*dx+dy*dy};
+     let baseline=dist(px,py);
+     let mut best=baseline;let mut action=0;
+     for (a,x) in [(1,px-step),(2,px+step)] {
+         if (0..=255).contains(&x) {let score=dist(x,py);if score>best {best=score;action=a}}
+     }
+     if best-baseline<16 {return 0}
+     ((best-baseline) as u32)<<2 | action
+ }
+ #[no_mangle]
+ pub extern "C" fn separation_gain(px:i32,py:i32,ox:i32,oy:i32,qx:i32,qy:i32,tx:i32,ty:i32)->i32 {
+     if ![px,py,ox,oy,qx,qy,tx,ty].iter().all(|v|(0..=255).contains(v)){return i32::MIN}
+     let sq=|a:i32,b:i32|a*a+b*b;
+     sq(qx-tx,qy-ty)-sq(px-ox,py-oy)
+ }
+ #[cfg(test)]
+ mod defense_tests {
+ use super::*;
+ #[test] fn directions(){assert_eq!(defend(100,100,120,100,-2,0,4)&3,1);assert_eq!(defend(100,100,80,100,2,0,4)&3,2);}
+ #[test] fn bounds(){assert_eq!(defend(0,0,20,0,0,0,4),0);assert_eq!(defend(100,100,120,100,17,0,4),0);assert_eq!(defend(100,100,120,100,0,0,9),0);}
+ #[test] fn endpoints(){assert_eq!(separation_gain(100,100,120,100,96,100,118,100),84);assert_eq!(separation_gain(100,100,120,100,104,100,118,100),-204);assert_eq!(separation_gain(-1,0,0,0,0,0,0,0),i32::MIN);}
+ }

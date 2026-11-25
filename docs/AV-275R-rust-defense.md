@@ -1,0 +1,2 @@
+# AV-275R — Rust defensive prediction
+Integer horizontal projection of HOLD/LEFT/RIGHT and squared separation endpoints. Four-frame extrapolation, four-pixel candidate step and minimum squared-distance gain 16 are provisional. Single fresh candidate only; ambiguous identity abstains. Controller authorization always false. Observed endpoint is descriptive, not causal. Native and WASM tests added; CI and live multi-object qualification pending. .dlw
