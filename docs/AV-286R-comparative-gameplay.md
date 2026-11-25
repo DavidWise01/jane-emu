@@ -1,0 +1,2 @@
+# AV-286R — Comparative autonomous gameplay observation
+Two fresh browser contexts, same instrumented homebrew, three observed defeat/recovery cycles per arm; baseline experiment OFF, treatment ON. Native receipts and Rust interventions reported. Zero intervention produces NO_INTERVENTION; nonzero produces DESCRIPTIVE_ONLY. Durations compare Toph and Patricia from preceding restart to defeat; first episode excluded because exact initial frame is not established. No causal inference from a single pair or unverified emulator state. No gameplay source changes. CI pending. .dlw
