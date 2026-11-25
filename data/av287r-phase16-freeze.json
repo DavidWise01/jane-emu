@@ -1,0 +1,52 @@
+{
+  "schema": "jane.phase16.freeze.v1",
+  "baseline": "0628e417fde797d6aede3eca576b270c59743294",
+  "tree": "0aea300971c572695e18def7981cac306664e304",
+  "source": "PINNED",
+  "phase": 16,
+  "watermark": ".dlw",
+  "validation": {
+    "run": 45685460763,
+    "job": 139461764624,
+    "missionControl": "PASS",
+    "pages": "PASS",
+    "punchOut": "FAIL",
+    "bounds": [
+      "AV280R",
+      "AV281R",
+      "AV282R",
+      "AV283R",
+      "AV284R",
+      "AV285R",
+      "AV286R"
+    ]
+  },
+  "comparison": {
+    "rom": "0b10970a",
+    "status": "NO_INTERVENTION",
+    "cycles": 6,
+    "primitiveReturns": 437,
+    "mismatches": 0,
+    "baselineFrames": [
+      188,
+      384
+    ],
+    "treatmentFrames": [
+      185,
+      189
+    ],
+    "baselineNativeReceiptRows": 60,
+    "treatmentNativeReceiptRows": 63,
+    "completedRustInterventions": 0,
+    "matchedInitialState": false,
+    "causalVerified": false
+  },
+  "unqualified": [
+    "live defensive action execution",
+    "causal survival improvement",
+    "browser reload persistence",
+    "authenticated archive custody",
+    "commercial cartridge skill transfer"
+  ],
+  "next": "AV288R: instrument defensive opportunity funnel without changing qualification thresholds"
+}
