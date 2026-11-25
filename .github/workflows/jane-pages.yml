@@ -733,6 +733,8 @@ jobs:
         run: node tests/av271_recognition.test.cjs
       - name: Verify AV-270 scoped character identity candidates
         run: node tests/av270_identity.test.cjs
+      - name: Verify AV-284R sealed archive integrity
+        run: node tests/av284r_archive.test.cjs
       - name: Verify AV-283R action effect endpoint qualification
         run: node tests/av283r_effect_learning.test.cjs
       - name: Verify AV-282R bounded defensive offer and receipt

@@ -10,3 +10,5 @@ for(let f=1;f<=3600;f++){assert.equal(e.survival_score(1,1,f,0),f);assert.ok(e.s
 assert.equal(e.arbitrate(7,2,0,100,20),2);assert.equal(e.arbitrate(7,0,0,20,20),1);assert.equal(e.arbitrate(7,0,20,20,20),0);assert.equal(e.arbitrate(6,0,0,100,100),3);assert.equal(e.arbitrate(7,1,0,100,100),3);for(let m=0;m<8;m++)for(let r=0;r<8;r++){const a=e.arbitrate(m,r,0,1,2);if(a<3){assert.ok(m&(1<<a));assert.equal(r&(1<<a),0);}}console.log('AV281R arbitration ABI PASS');
 
 assert.equal(e.effect_class(0,84),0);assert.equal(e.effect_class(1,-204),1);assert.equal(e.effect_class(1,0),2);assert.equal(e.effect_class(1,84),3);assert.equal(e.effect_class(1,-2147483648),0);console.log('AV283R effect ABI PASS');
+
+assert.equal(e.memory_generation_len(0),2);assert.equal(e.memory_receipt_field(0,0,0),0n);assert.equal(e.memory_receipt_field(0,1,2),2n);assert.equal(e.memory_receipt_field(99,0,0),-9223372036854775808n);assert.equal(e.memory_receipt_valid(2,3,1),1);console.log('AV284R archive ABI PASS');

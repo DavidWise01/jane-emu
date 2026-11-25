@@ -174,3 +174,15 @@ mod survival_tests {
  use super::*;
  #[test]fn signs(){assert_eq!(effect_class(0,84),0);assert_eq!(effect_class(1,-204),1);assert_eq!(effect_class(1,0),2);assert_eq!(effect_class(1,84),3);assert_eq!(effect_class(1,i32::MIN),0);}
  }
+
+ // Read-only sealed receipt access. No import or mutation of live ledger.
+ #[no_mangle]
+ pub extern "C" fn memory_generation_len(g:u32)->u32 {LEDGER.with(|l|l.borrow().sealed().get(g as usize).map_or(0,|s|s.receipts().len() as u32))}
+ #[no_mangle]
+ pub extern "C" fn memory_receipt_field(g:u32,i:u32,field:u32)->i64 {
+ LEDGER.with(|l|{let l=l.borrow();let Some(r)=l.sealed().get(g as usize).and_then(|s|s.receipts().get(i as usize))else{return i64::MIN};match field{0=>r.actor as i64,1=>r.frame as i64,2=>r.sequence as i64,3=>r.primitive as i64,4=>r.result as i64,_=>i64::MIN}})
+ }
+ #[no_mangle]
+ pub extern "C" fn memory_receipt_valid(actor:u32,primitive:u32,result:i32)->u32{u32::from(actor<=2&&primitive<=3&&result>0)}
+ #[cfg(test)]
+ mod archive_tests{use super::*;#[test]fn archive_domains(){assert_eq!(memory_receipt_valid(2,3,1),1);assert_eq!(memory_receipt_valid(3,3,1),0);assert_eq!(memory_receipt_valid(0,4,1),0);assert_eq!(memory_receipt_valid(0,0,0),0);}}
