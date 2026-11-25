@@ -56,3 +56,51 @@ use super::*;
  #[test] fn bounds(){assert_eq!(defend(0,0,20,0,0,0,4),0);assert_eq!(defend(100,100,120,100,17,0,4),0);assert_eq!(defend(100,100,120,100,0,0,9),0);}
  #[test] fn endpoints(){assert_eq!(separation_gain(100,100,120,100,96,100,118,100),84);assert_eq!(separation_gain(100,100,120,100,104,100,118,100),-204);assert_eq!(separation_gain(-1,0,0,0,0,0,0,0),i32::MIN);}
  }
+
+pub mod memory {
+    #[derive(Clone, Debug, PartialEq, Eq)]
+    pub struct Receipt { pub actor:u8, pub frame:u32, pub sequence:u32, pub primitive:u8, pub result:i32 }
+    #[derive(Clone, Debug, PartialEq, Eq)]
+    pub struct Generation { number:u32, receipts:Vec<Receipt> }
+    impl Generation {pub fn number(&self)->u32{self.number} pub fn receipts(&self)->&[Receipt]{&self.receipts}}
+    #[derive(Default)]
+    pub struct Ledger { sealed:Vec<Generation>, open:Vec<Receipt> }
+    impl Ledger {
+      pub fn append(&mut self,r:Receipt)->bool {
+        if r.actor>2 || r.primitive>3 || self.open.len()>=1024 || self.sealed.len()>=64 ||
+           self.open.last().is_some_and(|p|r.sequence<=p.sequence || r.frame<p.frame) ||
+           self.open.is_empty() && self.sealed.last().and_then(|g|g.receipts.last()).is_some_and(|p|r.sequence<=p.sequence || r.frame<p.frame) {return false}
+        self.open.push(r);true
+      }
+      pub fn seal(&mut self)->bool {
+        if self.open.is_empty() || self.sealed.len()>=64{return false}
+        self.sealed.push(Generation{number:self.sealed.len() as u32,receipts:std::mem::take(&mut self.open)});true
+      }
+      pub fn sealed(&self)->&[Generation]{&self.sealed}
+      pub fn pending(&self)->usize{self.open.len()}
+    }
+}
+thread_local! {static LEDGER:std::cell::RefCell<memory::Ledger>=std::cell::RefCell::new(memory::Ledger::default());}
+#[no_mangle]
+pub extern "C" fn memory_append(actor:u32,frame:u32,sequence:u32,primitive:u32,result:i32)->u32 {
+ if actor>2||primitive>3{return 0}
+ LEDGER.with(|l|u32::from(l.borrow_mut().append(memory::Receipt{actor:actor as u8,frame,sequence,primitive:primitive as u8,result})))
+}
+#[no_mangle]
+pub extern "C" fn memory_seal()->u32 {LEDGER.with(|l|u32::from(l.borrow_mut().seal()))}
+#[no_mangle]
+pub extern "C" fn memory_generations()->u32 {LEDGER.with(|l|l.borrow().sealed().len() as u32)}
+#[no_mangle]
+pub extern "C" fn memory_pending()->u32 {LEDGER.with(|l|l.borrow().pending() as u32)}
+#[no_mangle]
+pub extern "C" fn memory_count(g:u32,actor:u32)->u32 {
+ if actor>2{return 0}
+ LEDGER.with(|l|l.borrow().sealed().get(g as usize).map_or(0,|s|s.receipts().iter().filter(|r|r.actor as u32==actor).count() as u32))
+}
+#[cfg(test)]
+mod memory_tests {
+ use super::memory::*;
+ fn r(actor:u8,frame:u32,sequence:u32)->Receipt{Receipt{actor,frame,sequence,primitive:0,result:1}}
+ #[test] fn immutable_inheritance(){let mut l=Ledger::default();assert!(l.append(r(0,1,1)));assert!(l.append(r(1,2,2)));assert!(l.seal());let frozen=l.sealed()[0].clone();assert!(!l.append(r(0,2,2)));assert!(!l.append(r(0,1,3)));assert!(l.append(r(2,3,3)));assert!(l.seal());assert_eq!(l.sealed()[0],frozen);assert_eq!(l.sealed()[1].number(),1);assert!(!l.seal());}
+ #[test] fn capacity(){let mut l=Ledger::default();for i in 0..1024{assert!(l.append(r(0,i,i)));}assert!(!l.append(r(0,1024,1024)));assert!(l.seal());assert!(!l.append(r(3,1025,1025)));}
+}
