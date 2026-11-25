@@ -1,0 +1,2 @@
+# AV-285R — Cartridge-scoped descriptive inheritance
+Select validated local archives matching the current cartridge identifier, excluding current session, duplicates and foreign cartridges. Rust qualifies actor/count domains; JS performs exact string identity comparison. Archived counts are descriptive computational intervals, not skill weights or independently authenticated ROM identity. No controller authority, cross-cartridge policy transfer, or live adaptive improvement claimed. Poll interval 3 seconds provisional. Native/WASM and Node tests added; runtime pending. .dlw

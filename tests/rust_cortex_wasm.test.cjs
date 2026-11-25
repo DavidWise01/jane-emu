@@ -12,3 +12,5 @@ assert.equal(e.arbitrate(7,2,0,100,20),2);assert.equal(e.arbitrate(7,0,0,20,20),
 assert.equal(e.effect_class(0,84),0);assert.equal(e.effect_class(1,-204),1);assert.equal(e.effect_class(1,0),2);assert.equal(e.effect_class(1,84),3);assert.equal(e.effect_class(1,-2147483648),0);console.log('AV283R effect ABI PASS');
 
 assert.equal(e.memory_generation_len(0),2);assert.equal(e.memory_receipt_field(0,0,0),0n);assert.equal(e.memory_receipt_field(0,1,2),2n);assert.equal(e.memory_receipt_field(99,0,0),-9223372036854775808n);assert.equal(e.memory_receipt_valid(2,3,1),1);console.log('AV284R archive ABI PASS');
+
+assert.equal(e.cartridge_evidence(1,1,0,32),1);assert.equal(e.cartridge_evidence(0,1,0,32),0);assert.equal(e.cartridge_evidence(1,0,0,32),0);assert.equal(e.cartridge_evidence(1,1,3,32),0);assert.equal(e.cartridge_evidence(1,1,0,65537),0);console.log('AV285R cartridge ABI PASS');

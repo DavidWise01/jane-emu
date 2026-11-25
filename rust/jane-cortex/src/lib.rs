@@ -186,3 +186,10 @@ mod survival_tests {
  pub extern "C" fn memory_receipt_valid(actor:u32,primitive:u32,result:i32)->u32{u32::from(actor<=2&&primitive<=3&&result>0)}
  #[cfg(test)]
  mod archive_tests{use super::*;#[test]fn archive_domains(){assert_eq!(memory_receipt_valid(2,3,1),1);assert_eq!(memory_receipt_valid(3,3,1),0);assert_eq!(memory_receipt_valid(0,4,1),0);assert_eq!(memory_receipt_valid(0,0,0),0);}}
+
+#[no_mangle]
+pub extern "C" fn cartridge_evidence(same_rom:u32,valid:u32,actor:u32,rows:u32)->u32 {
+ if same_rom!=1 || valid!=1 || actor>2 || rows==0 || rows>65536 {0} else {1}
+}
+#[cfg(test)]
+mod cartridge_tests {use super::*;#[test]fn isolation(){for a in 0..3{assert_eq!(cartridge_evidence(1,1,a,32),1);assert_eq!(cartridge_evidence(0,1,a,32),0);assert_eq!(cartridge_evidence(1,0,a,32),0);}assert_eq!(cartridge_evidence(1,1,3,32),0);assert_eq!(cartridge_evidence(1,1,0,0),0);assert_eq!(cartridge_evidence(1,1,0,65537),0);}}
