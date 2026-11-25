@@ -1,0 +1,2 @@
+# AV-272R — Rust migration
+Cargo library and wasm32 target port pure identity/recognition primitives. CI builds WASM and tests native and ABI before packaging dashboard. Browser loader self-tests and reports READY_SHADOW or JS_FALLBACK. Existing JS owns scope, state and gameplay; no Rust authority or parity claim yet. No dependencies. Next: paired live replay, then switch authority only on accepted parity. AV272 defensive experiment deferred. .dlw

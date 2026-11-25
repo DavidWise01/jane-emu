@@ -8,6 +8,7 @@ on:
       - 'index.html'
       - 'releases/**'
       - 'dashboard/**'
+      - 'rust/**'
       - 'tests/**'
       - 'docs/**'
       - 'data/phase2-progress.json'
@@ -44,6 +45,14 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
+      - name: Build and test Rust cortex
+        run: |
+          rustup target add wasm32-unknown-unknown
+          cargo test --locked --manifest-path rust/jane-cortex/Cargo.toml
+          cargo build --locked --release --target wasm32-unknown-unknown --manifest-path rust/jane-cortex/Cargo.toml
+          cp rust/jane-cortex/target/wasm32-unknown-unknown/release/jane_cortex.wasm dashboard/jane_cortex.wasm
+          node tests/rust_cortex_wasm.test.cjs
 
       - name: Verify playable HTML and embedded JPG
         id: verify
