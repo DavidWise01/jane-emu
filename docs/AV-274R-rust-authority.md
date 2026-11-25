@@ -1,0 +1,2 @@
+# AV-274R — Guarded Rust primitive authority
+Prior live parity: fresh 38, position 38, motion 34, recognition 39; 149 total, zero mismatch or skips (job 139250164733). Rust results now returned when identical to JS reference; mismatch/trap latches fallback until reload. Missing or out-of-domain inputs use JS. Scope/state and NES actions remain JS. New browser gate requires all four Rust returns; CI pending. .dlw

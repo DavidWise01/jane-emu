@@ -733,6 +733,8 @@ jobs:
         run: node tests/av271_recognition.test.cjs
       - name: Verify AV-270 scoped character identity candidates
         run: node tests/av270_identity.test.cjs
+      - name: Verify AV-274R guarded Rust authority
+        run: NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av274r_browser_authority.test.cjs
       - name: Verify AV-273R Rust live shadow parity
         run: NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av273r_browser_parity.test.cjs
       - name: Verify AV-269 blocking live cortex Chromium acceptance
