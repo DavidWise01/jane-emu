@@ -1,0 +1,22 @@
+{
+  "baseline": "03689d767025d756f6e41615d4efef05a633a13f",
+  "sourceStatus": "PINNED",
+  "deployment": "HTTP 500",
+  "acceptance": {
+    "run": 45649370130,
+    "job": 139329325215,
+    "frame": 1214,
+    "handoffs": 6,
+    "effects": 6,
+    "primitiveReturns": 310,
+    "stateReturns": 84,
+    "mismatches": 0,
+    "sealedGenerations": 9,
+    "actorIntervalRows": [
+      115,
+      88,
+      89
+    ]
+  },
+  "watermark": ".dlw"
+}

@@ -128,3 +128,16 @@ mod identity_tests {
  use super::*;
  #[test]fn boundaries(){let mut s=IdentityState::default();assert_eq!(s.update(1,1,1,0,1,0,120,120),1);assert_eq!(s.update(1,2,1,0,1,0,125,125),1);assert_eq!(s.update(1,3,1,0,1,0,130,130),3);assert_eq!(s.update(1,3,1,0,1,0,130,130),3);assert_eq!(s.hits,2);assert_eq!(s.update(1,4,2,0,0,0,0,0),2);assert_eq!(s.update(2,5,1,0,1,0,135,135),1);assert_eq!(s.update(0,0,0,0,0,0,0,0),0);}
 }
+
+#[no_mangle]
+pub extern "C" fn survival_score(verified:u32,outcome:u32,frames:u32,losses:u32)->i32 {
+ if verified!=1 || !(1..=2).contains(&outcome) || frames==0 || frames>3600 || losses>255 {return i32::MIN}
+ if outcome==2 || losses>0 {return -10000-(losses as i32)*100}
+ frames as i32
+}
+#[cfg(test)]
+mod survival_tests {
+ use super::*;
+ #[test]fn priority(){for f in 1..=3600 {assert!(survival_score(1,2,f,0)<0);assert!(survival_score(1,1,f,1)<0);assert_eq!(survival_score(1,1,f,0),f as i32);}}
+ #[test]fn invalid(){for (v,o,f,l) in [(0,1,60,0),(1,0,60,0),(1,1,0,0),(1,1,3601,0),(1,1,60,256)]{assert_eq!(survival_score(v,o,f,l),i32::MIN);}}
+}

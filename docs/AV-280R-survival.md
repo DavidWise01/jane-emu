@@ -1,0 +1,2 @@
+# AV-280R — Deterministic survival scoring
+Prior baseline pinned in data/av279r-source-freeze.json. New pure Rust scoring: verified playing interval with no life loss earns frames (1–3600); defeat or any life loss yields negative score; unknown or invalid input returns i32::MIN, not a reward. Verification flag is caller supplied, not authenticated. No live adapter or controller change yet. Provisional weights; no claim of improved survival. CI pending. .dlw
