@@ -741,6 +741,8 @@ jobs:
         run: node tests/av283r_effect_learning.test.cjs
       - name: Verify AV-282R bounded defensive offer and receipt
         run: node tests/av282r_defense_execution.test.cjs
+      - name: Observe AV-288R defensive opportunity funnel
+        run: NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av288r_browser_funnel.test.cjs
       - name: Observe AV-286R comparative gameplay
         run: NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av286r_browser_comparison.test.cjs
       - name: Verify AV-278R Rust autonomous endurance
