@@ -1,0 +1,2 @@
+# AV-290R — Adaptive visualization governor
+Measures native frame progress against elapsed browser time, resets on session/speed changes. At 4x/8x, two windows below 85% target raise visualization interval from 100 to 200 to 500ms; three windows at >=95% lower one level. Original native frame hooks and controller unchanged. JS browser workload governor, not a Rust emulator port. Browser gate observes 240-frame progress at each of 4x,8x,1x; no claim of target FPS or improved survival. Provisional thresholds; CI pending. .dlw

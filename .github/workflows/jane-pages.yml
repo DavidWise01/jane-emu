@@ -741,6 +741,10 @@ jobs:
         run: node tests/av283r_effect_learning.test.cjs
       - name: Verify AV-282R bounded defensive offer and receipt
         run: node tests/av282r_defense_execution.test.cjs
+      - name: Verify AV-290R governor hysteresis
+        run: node tests/av290r_governor.test.cjs
+      - name: Observe AV-290R sustained speed switching
+        run: NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av290r_browser_governor.test.cjs
       - name: Verify AV-289R 4x clock progress and return to 1x
         run: NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av289r_fast_clock.test.cjs
       - name: Observe AV-288R defensive opportunity funnel
