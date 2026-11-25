@@ -1,0 +1,2 @@
+# AV-281R — Deterministic Rust arbitration
+Candidate mask and risk mask precede bounded prediction score. HOLD wins ties; LEFT precedes RIGHT on equal improved scores. Missing or risky HOLD baseline abstains. Live adapter exposes defense proposal but qualifies only HOLD as a computational baseline, not as a certified safe action. No action authority or causal survival evidence. Score bounds are provisional. Native and WASM tests added. CI pending. .dlw

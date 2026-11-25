@@ -141,3 +141,23 @@ mod survival_tests {
  #[test]fn priority(){for f in 1..=3600 {assert!(survival_score(1,2,f,0)<0);assert!(survival_score(1,1,f,1)<0);assert_eq!(survival_score(1,1,f,0),f as i32);}}
  #[test]fn invalid(){for (v,o,f,l) in [(0,1,60,0),(1,0,60,0),(1,1,0,0),(1,1,3601,0),(1,1,60,256)]{assert_eq!(survival_score(v,o,f,l),i32::MIN);}}
 }
+
+ // Action IDs 0=HOLD, 1=LEFT, 2=RIGHT; 3=ABSTAIN.
+ // All scores are qualified predictions, not observed survival outcomes.
+ #[no_mangle]
+ pub extern "C" fn arbitrate(mask:u32, risk_mask:u32, hold:i32,left:i32,right:i32)->u32 {
+    if mask&!7!=0 || risk_mask&!7!=0 || mask&1==0 || risk_mask&1!=0 {return 3}
+    let scores=[hold,left,right];
+    if !(-3600..=3600).contains(&hold) {return 3}
+    let mut best=0;
+    for i in 1..3 {
+      if mask&(1<<i)!=0 && risk_mask&(1<<i)==0 && (-3600..=3600).contains(&scores[i]) && scores[i]>scores[best] {best=i;}
+    }
+    best as u32
+ }
+ #[cfg(test)]
+ mod arbitration_tests {
+ use super::*;
+ #[test] fn precedence(){assert_eq!(arbitrate(7,2,0,100,20),2);assert_eq!(arbitrate(7,0,0,20,20),1);assert_eq!(arbitrate(7,0,20,20,20),0);assert_eq!(arbitrate(6,0,0,100,100),3);assert_eq!(arbitrate(7,1,0,100,100),3);assert_eq!(arbitrate(7,0,0,i32::MAX,-1),0);}
+ #[test] fn masks(){for m in 0..8 {for r in 0..8 {let a=arbitrate(m,r,0,1,2);if a<3{assert_ne!(m&(1<<a),0);assert_eq!(r&(1<<a),0);}}}}
+ }
