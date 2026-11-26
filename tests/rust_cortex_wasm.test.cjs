@@ -16,3 +16,7 @@ assert.equal(e.memory_generation_len(0),2);assert.equal(e.memory_receipt_field(0
 assert.equal(e.cartridge_evidence(1,1,0,32),1);assert.equal(e.cartridge_evidence(0,1,0,32),0);assert.equal(e.cartridge_evidence(1,0,0,32),0);assert.equal(e.cartridge_evidence(1,1,3,32),0);assert.equal(e.cartridge_evidence(1,1,0,65537),0);console.log('AV285R cartridge ABI PASS');
 
 for(const b of [9,10,11,12])for(const g of [0,1])for(const i of [18000,18001,22000,22001])for(const f of [203999,204000,227999,228000])for(const y of [0,1]){const expected=require('../dashboard/fast_budget.js').reference(b,g,1,4,i,f,y);assert.equal(e.fast_budget_step(b,g,1,4,i,f,y),expected)}console.log('AV299R scheduler ABI parity PASS');
+
+// AV-316R: compare fixed totals with original sealed-generation scan.
+for(let a=0;a<3;a++)assert.equal(e.memory_total(a),Array.from({length:e.memory_generations()},(_,g)=>e.memory_count(g,a)).reduce((x,y)=>x+y,0));
+assert.equal(e.memory_total(3),0);assert.equal(e.memory_append(0,4,4,0,1),1);assert.equal(e.memory_total(0),1);assert.equal(e.memory_seal(),1);assert.equal(e.memory_total(0),2);assert.equal(e.memory_seal(),0);assert.equal(e.memory_total(0),2);console.log('AV316R indexed totals ABI PASS');
