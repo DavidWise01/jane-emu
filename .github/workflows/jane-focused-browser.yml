@@ -24,6 +24,8 @@ jobs:
       max-parallel: 2
       matrix:
         include:
+          - name: 4x-operational-qualification
+            test: av309r_browser_qualification.test.cjs
           - name: hidden-monitor-paint
             test: av307r_browser_paint.test.cjs
           - name: render-isolation
