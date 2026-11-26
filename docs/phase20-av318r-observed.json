@@ -1,0 +1,871 @@
+{
+  "schema": "jane.phase20.observation.v1",
+  "source": {
+    "run": 45890018925,
+    "job": 140150090482,
+    "commit": "87e01e07bf1a7a56159a962dbe0f0621d05ae315",
+    "url": "https://github.com/DavidWise01/jane-emu/actions/runs/45890018925/job/140150090482",
+    "extraction": "Parsed JSON record from decoded GitHub job log; not raw log bytes or independent custody"
+  },
+  "record": {
+    "kind": "AV318R_SUSTAINED_4X",
+    "counter": {
+      "indexed": 38,
+      "scanned": 38,
+      "match": true
+    },
+    "memory": {
+      "kind": "CAPACITY_OR_ORDER_STOP",
+      "generations": 64,
+      "pending": 0,
+      "persistent": false,
+      "countPath": "RUST_INDEX",
+      "counts": [
+        740,
+        620,
+        688
+      ]
+    },
+    "archive": {
+      "kind": "ARCHIVED",
+      "archived": 64,
+      "authenticated": false,
+      "format": 2,
+      "head": "eade065353e7f9577f0306d86b14d7b7d0d2b46bea93b942edbe59f9ba2d04a3"
+    },
+    "archiveAudit": {
+      "segments": 64,
+      "head": "eade065353e7f9577f0306d86b14d7b7d0d2b46bea93b942edbe59f9ba2d04a3",
+      "authenticated": false
+    },
+    "fps": 45.58413159021828,
+    "windows": [
+      {
+        "fps": 57.5003159358019,
+        "frames": 364,
+        "ms": 6330.399999999994,
+        "actor": "PATRICIA",
+        "completion": 20,
+        "budget": 9,
+        "captures": 121,
+        "memory": {
+          "kind": "OBSERVING",
+          "generations": 3,
+          "pending": 12,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            48,
+            48,
+            0
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 3,
+          "authenticated": false,
+          "format": 2,
+          "head": "74dca70eb7b9c1af921c911daba9263c77ad5a4510c8229184f01c54a5c8c062"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 1,
+          "cycleCount": 2,
+          "observationCount": 11,
+          "recoveryRequests": 3,
+          "clockStalls": 4
+        }
+      },
+      {
+        "fps": 52.87546665504564,
+        "frames": 364,
+        "ms": 6884.100000000006,
+        "actor": "TOPH",
+        "completion": 22,
+        "budget": 9,
+        "captures": 122,
+        "memory": {
+          "kind": "OBSERVING",
+          "generations": 6,
+          "pending": 8,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            92,
+            48,
+            52
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 6,
+          "authenticated": false,
+          "format": 2,
+          "head": "05108f436fc858c5133600a682e5e6980cf431a2486a54fada7849f2256d7b3f"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 3,
+          "cycleCount": 4,
+          "observationCount": 23,
+          "recoveryRequests": 5,
+          "clockStalls": 6
+        }
+      },
+      {
+        "fps": 58.99608865710561,
+        "frames": 362,
+        "ms": 6136,
+        "actor": "JANE",
+        "completion": 20,
+        "budget": 9,
+        "captures": 120,
+        "memory": {
+          "kind": "OBSERVING",
+          "generations": 9,
+          "pending": 0,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            104,
+            84,
+            100
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 9,
+          "authenticated": false,
+          "format": 2,
+          "head": "18a724d6b1937d294c337b1a1d0a471aa8e266dfd4cce5d89600cb6eddb3e94d"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 5,
+          "cycleCount": 6,
+          "observationCount": 35,
+          "recoveryRequests": 7,
+          "clockStalls": 7
+        }
+      },
+      {
+        "fps": 55.73223824373982,
+        "frames": 361,
+        "ms": 6477.399999999994,
+        "actor": "PATRICIA",
+        "completion": 22,
+        "budget": 9,
+        "captures": 121,
+        "memory": {
+          "kind": "OBSERVING",
+          "generations": 12,
+          "pending": 0,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            156,
+            128,
+            100
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 12,
+          "authenticated": false,
+          "format": 2,
+          "head": "a9506cfb3aee43b8e8fb323753d4e91f918f8b73644f2c7ed907adfb1be104d0"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 7,
+          "cycleCount": 8,
+          "observationCount": 46,
+          "recoveryRequests": 9,
+          "clockStalls": 9
+        }
+      },
+      {
+        "fps": 48.482743882893395,
+        "frames": 363,
+        "ms": 7487.200000000012,
+        "actor": "JANE",
+        "completion": 23,
+        "budget": 9,
+        "captures": 121,
+        "memory": {
+          "kind": "OBSERVING",
+          "generations": 15,
+          "pending": 16,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            196,
+            128,
+            156
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 15,
+          "authenticated": false,
+          "format": 2,
+          "head": "327145db6cb422da24c1d3a08b56fde419ac0a5bf8b017a1a24e095c97aeb6d4"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 9,
+          "cycleCount": 9,
+          "observationCount": 55,
+          "recoveryRequests": 10,
+          "clockStalls": 13
+        }
+      },
+      {
+        "fps": 49.918864655243624,
+        "frames": 363,
+        "ms": 7271.799999999988,
+        "actor": "PATRICIA",
+        "completion": 21,
+        "budget": 9,
+        "captures": 121,
+        "memory": {
+          "kind": "OBSERVING",
+          "generations": 18,
+          "pending": 28,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            220,
+            184,
+            172
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 18,
+          "authenticated": false,
+          "format": 2,
+          "head": "1d1e3783075d8c07a08a5f98b41674ea88783af5d93fcfbb4a27a646750f867e"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 11,
+          "cycleCount": 11,
+          "observationCount": 67,
+          "recoveryRequests": 12,
+          "clockStalls": 13
+        }
+      },
+      {
+        "fps": 45.185435520007914,
+        "frames": 361,
+        "ms": 7989.3000000000175,
+        "actor": "TOPH",
+        "completion": 24,
+        "budget": 9,
+        "captures": 120,
+        "memory": {
+          "kind": "OBSERVING",
+          "generations": 22,
+          "pending": 20,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            284,
+            208,
+            212
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 22,
+          "authenticated": false,
+          "format": 2,
+          "head": "179b2d96080d1e43e62ead6840a88cc334f263eb286d96d20d62f0710747996a"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 13,
+          "cycleCount": 13,
+          "observationCount": 79,
+          "recoveryRequests": 14,
+          "clockStalls": 14
+        }
+      },
+      {
+        "fps": 42.40514484519788,
+        "frames": 362,
+        "ms": 8536.699999999983,
+        "actor": "JANE",
+        "completion": 24,
+        "budget": 9,
+        "captures": 121,
+        "memory": {
+          "kind": "OBSERVING",
+          "generations": 26,
+          "pending": 24,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            308,
+            244,
+            280
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 26,
+          "authenticated": false,
+          "format": 2,
+          "head": "3b8a0a2e05bf751d6b1e6d19088cfb73096cf5f266040855beb0b381e5ba2e10"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 15,
+          "cycleCount": 15,
+          "observationCount": 91,
+          "recoveryRequests": 16,
+          "clockStalls": 17
+        }
+      },
+      {
+        "fps": 43.797922935067334,
+        "frames": 361,
+        "ms": 8242.400000000023,
+        "actor": "PATRICIA",
+        "completion": 24,
+        "budget": 9,
+        "captures": 120,
+        "memory": {
+          "kind": "OBSERVING",
+          "generations": 30,
+          "pending": 20,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            356,
+            304,
+            300
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 30,
+          "authenticated": false,
+          "format": 2,
+          "head": "7b69959af8cb89f460158c0b1e26476d6d94d005de69c6a3c42fd24744427e7d"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 17,
+          "cycleCount": 17,
+          "observationCount": 103,
+          "recoveryRequests": 18,
+          "clockStalls": 22
+        }
+      },
+      {
+        "fps": 42.61581023014892,
+        "frames": 362,
+        "ms": 8494.5,
+        "actor": "TOPH",
+        "completion": 24,
+        "budget": 9,
+        "captures": 121,
+        "memory": {
+          "kind": "OBSERVING",
+          "generations": 34,
+          "pending": 12,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            424,
+            316,
+            348
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 34,
+          "authenticated": false,
+          "format": 2,
+          "head": "89c65ef5e44b4d2aec66e3d3ffcd2b33502d5c976cbbb5f80135228c73161395"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 19,
+          "cycleCount": 19,
+          "observationCount": 115,
+          "recoveryRequests": 20,
+          "clockStalls": 26
+        }
+      },
+      {
+        "fps": 42.60743328572955,
+        "frames": 361,
+        "ms": 8472.699999999983,
+        "actor": "JANE",
+        "completion": 26,
+        "budget": 9,
+        "captures": 120,
+        "memory": {
+          "kind": "OBSERVING",
+          "generations": 38,
+          "pending": 8,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            436,
+            364,
+            416
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 38,
+          "authenticated": false,
+          "format": 2,
+          "head": "ffa5684d072fa01e3ce840bf4381b8480db6dbc9ea62382b5be1a136914380f9"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 21,
+          "cycleCount": 21,
+          "observationCount": 126,
+          "recoveryRequests": 22,
+          "clockStalls": 32
+        }
+      },
+      {
+        "fps": 43.939595128016286,
+        "frames": 364,
+        "ms": 8284.100000000006,
+        "actor": "PATRICIA",
+        "completion": 23,
+        "budget": 9,
+        "captures": 121,
+        "memory": {
+          "kind": "OBSERVING",
+          "generations": 42,
+          "pending": 8,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            496,
+            428,
+            420
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 42,
+          "authenticated": false,
+          "format": 2,
+          "head": "86ef59ed7f0de24aebe172c35db58f54adce6b5bdc640bea15553016bd42cb4a"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 22,
+          "cycleCount": 23,
+          "observationCount": 137,
+          "recoveryRequests": 24,
+          "clockStalls": 34
+        }
+      },
+      {
+        "fps": 41.87710679812701,
+        "frames": 364,
+        "ms": 8692.100000000006,
+        "actor": "TOPH",
+        "completion": 25,
+        "budget": 9,
+        "captures": 122,
+        "memory": {
+          "kind": "OBSERVING",
+          "generations": 46,
+          "pending": 8,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            560,
+            428,
+            484
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 46,
+          "authenticated": false,
+          "format": 2,
+          "head": "e68e483073dda13b392e00f459c3d26cfb0098787d939e05416ac25c3ca01e37"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 24,
+          "cycleCount": 25,
+          "observationCount": 149,
+          "recoveryRequests": 26,
+          "clockStalls": 37
+        }
+      },
+      {
+        "fps": 43.15263908701854,
+        "frames": 363,
+        "ms": 8412,
+        "actor": "JANE",
+        "completion": 24,
+        "budget": 9,
+        "captures": 121,
+        "memory": {
+          "kind": "OBSERVING",
+          "generations": 50,
+          "pending": 8,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            564,
+            492,
+            544
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 50,
+          "authenticated": false,
+          "format": 2,
+          "head": "3042b5b1eecf1777b9e01da82f57d143345cd6585a0089b3e483c128309a443c"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 26,
+          "cycleCount": 27,
+          "observationCount": 160,
+          "recoveryRequests": 28,
+          "clockStalls": 40
+        }
+      },
+      {
+        "fps": 43.53541322463546,
+        "frames": 361,
+        "ms": 8292.100000000006,
+        "actor": "TOPH",
+        "completion": 25,
+        "budget": 9,
+        "captures": 120,
+        "memory": {
+          "kind": "OBSERVING",
+          "generations": 54,
+          "pending": 8,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            636,
+            540,
+            552
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 54,
+          "authenticated": false,
+          "format": 2,
+          "head": "55e11bbee1935bc80c886a1f91499cc07dee58dc9a21716f4ccd321d79a74fa5"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 28,
+          "cycleCount": 28,
+          "observationCount": 169,
+          "recoveryRequests": 29,
+          "clockStalls": 42
+        }
+      },
+      {
+        "fps": 41.53900880122101,
+        "frames": 362,
+        "ms": 8714.699999999983,
+        "actor": "JANE",
+        "completion": 24,
+        "budget": 9,
+        "captures": 121,
+        "memory": {
+          "kind": "OBSERVING",
+          "generations": 58,
+          "pending": 12,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            684,
+            552,
+            620
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 58,
+          "authenticated": false,
+          "format": 2,
+          "head": "69f9f10380a142b698d48d4cd1adbc62e0144ebe10848617de096f22a7539335"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 30,
+          "cycleCount": 30,
+          "observationCount": 181,
+          "recoveryRequests": 31,
+          "clockStalls": 45
+        }
+      },
+      {
+        "fps": 43.036133662362886,
+        "frames": 361,
+        "ms": 8388.300000000032,
+        "actor": "PATRICIA",
+        "completion": 24,
+        "budget": 9,
+        "captures": 120,
+        "memory": {
+          "kind": "OBSERVING",
+          "generations": 62,
+          "pending": 12,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            708,
+            620,
+            656
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 62,
+          "authenticated": false,
+          "format": 2,
+          "head": "48e7b13e9f1359d914acdf166cdf2ca17c0813df338325c37528cc32fed360c9"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 32,
+          "cycleCount": 32,
+          "observationCount": 193,
+          "recoveryRequests": 33,
+          "clockStalls": 49
+        }
+      },
+      {
+        "fps": 41.96110528317976,
+        "frames": 364,
+        "ms": 8674.700000000012,
+        "actor": "TOPH",
+        "completion": 25,
+        "budget": 9,
+        "captures": 121,
+        "memory": {
+          "kind": "CAPACITY_OR_ORDER_STOP",
+          "generations": 64,
+          "pending": 0,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            740,
+            620,
+            688
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 64,
+          "authenticated": false,
+          "format": 2,
+          "head": "eade065353e7f9577f0306d86b14d7b7d0d2b46bea93b942edbe59f9ba2d04a3"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 34,
+          "cycleCount": 34,
+          "observationCount": 205,
+          "recoveryRequests": 35,
+          "clockStalls": 53
+        }
+      },
+      {
+        "fps": 41.93968121195234,
+        "frames": 361,
+        "ms": 8607.599999999977,
+        "actor": "JANE",
+        "completion": 24,
+        "budget": 9,
+        "captures": 121,
+        "memory": {
+          "kind": "CAPACITY_OR_ORDER_STOP",
+          "generations": 64,
+          "pending": 0,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            740,
+            620,
+            688
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 64,
+          "authenticated": false,
+          "format": 2,
+          "head": "eade065353e7f9577f0306d86b14d7b7d0d2b46bea93b942edbe59f9ba2d04a3"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 36,
+          "cycleCount": 36,
+          "observationCount": 217,
+          "recoveryRequests": 37,
+          "clockStalls": 55
+        }
+      },
+      {
+        "fps": 42.25384811831089,
+        "frames": 364,
+        "ms": 8614.599999999977,
+        "actor": "PATRICIA",
+        "completion": 23,
+        "budget": 9,
+        "captures": 121,
+        "memory": {
+          "kind": "CAPACITY_OR_ORDER_STOP",
+          "generations": 64,
+          "pending": 0,
+          "persistent": false,
+          "countPath": "RUST_INDEX",
+          "counts": [
+            740,
+            620,
+            688
+          ]
+        },
+        "archive": {
+          "kind": "ARCHIVED",
+          "archived": 64,
+          "authenticated": false,
+          "format": 2,
+          "head": "eade065353e7f9577f0306d86b14d7b7d0d2b46bea93b942edbe59f9ba2d04a3"
+        },
+        "hot": {
+          "schema": "jane.av315.hot-status.v1",
+          "armed": true,
+          "root": "session-2e5f7af9-81b5-4ef2-aea5-7ba37df8070f",
+          "rom": "0b10970a",
+          "completedCycles": 38,
+          "cycleCount": 38,
+          "observationCount": 229,
+          "recoveryRequests": 39,
+          "clockStalls": 66
+        }
+      }
+    ],
+    "gates": {
+      "continuity": true,
+      "rust": true,
+      "sync": true,
+      "cache": true,
+      "paint": true,
+      "layout": true,
+      "errors": true,
+      "throughput": false,
+      "rotation": true,
+      "counter": true,
+      "index": true,
+      "archive": true
+    },
+    "memo": {
+      "hits": 5960,
+      "misses": 4762,
+      "evictions": 4646
+    },
+    "paint": {
+      "calls": 4771,
+      "skipped": 4771,
+      "executed": 0,
+      "workMs": 0
+    },
+    "clock": {
+      "intervals": 4348,
+      "frames": 7245,
+      "elapsedMs": 158960.09999999998,
+      "frameWorkMs": 24701.500000001077,
+      "unmeasuredMs": 134258.5999999989
+    },
+    "controller": {
+      "dispatch": 525,
+      "completion": 467,
+      "unmatched": 0,
+      "abandoned": 58
+    },
+    "cycles": 38,
+    "operational": "HOLD",
+    "thresholds": {
+      "overall": 216,
+      "perWindow": 192
+    },
+    "manualControllerInput": false,
+    "errors": []
+  }
+}
