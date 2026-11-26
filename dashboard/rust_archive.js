@@ -5,4 +5,30 @@ function extract(k,g){const len=k.memory_generation_len(g);if(!int(len,1,MAX))th
 async function hash(s,subtle){const b=await subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b),x=>x.toString(16).padStart(2,'0')).join('')}
 async function seal(scope,records,subtle){const payload=JSON.stringify({version:1,scope,records});return JSON.stringify({payload,digest:await hash(payload,subtle)})}
 async function open(raw,k,subtle){const e=JSON.parse(raw);if(typeof e.payload!=='string'||e.payload.length>4000000||await hash(e.payload,subtle)!==e.digest)throw Error('digest mismatch');const p=JSON.parse(e.payload);if(p.version!==1||!Array.isArray(p.scope)||p.scope.length!==2||!p.scope.every(x=>typeof x==='string'&&x.length>0&&x.length<=256)||!validate(p.records,k))throw Error('invalid archive');return p}
-return {validate,extract,seal,open};});
+
+// AV-317R: v2 segments share original receipt validation, with cross-segment order.
+const scopeValid=s=>Array.isArray(s)&&s.length===2&&s.every(x=>typeof x==='string'&&x.length>0&&x.length<=256);
+const digestValid=d=>typeof d==='string'&&/^[a-f0-9]{64}$/.test(d);
+function segmentValid(scope,g,previous,prior,k){
+ return scopeValid(scope)&&g&&int(g.index,0,LIMIT-1)&&(g.index===0?previous===null:digestValid(previous))&&
+ validate([{index:0,rows:g.rows}],k)&&(!prior||(g.rows[0][1]>=prior[1]&&g.rows[0][2]>prior[2]));
+}
+async function sealSegment(scope,g,previous,prior,k,subtle){
+ if(!segmentValid(scope,g,previous,prior,k))throw Error('invalid segment');
+ const payload=JSON.stringify({version:2,scope,generation:g,previous});
+ return JSON.stringify({payload,digest:await hash(payload,subtle)});
+}
+async function openSegment(raw,scope,index,previous,prior,k,subtle){
+ const e=JSON.parse(raw);
+ if(typeof e.payload!=='string'||e.payload.length>200000||!digestValid(e.digest)||await hash(e.payload,subtle)!==e.digest)throw Error('segment digest');
+ const p=JSON.parse(e.payload);
+ if(p.version!==2||JSON.stringify(p.scope)!==JSON.stringify(scope)||p.generation?.index!==index||p.previous!==previous||!segmentValid(scope,p.generation,previous,prior,k))throw Error('segment ancestry or order');
+ return {generation:p.generation,digest:e.digest};
+}
+async function auditSegments(raws,scope,k,subtle){
+ if(!scopeValid(scope)||!Array.isArray(raws)||raws.length>LIMIT)throw Error('invalid chain');
+ let previous=null,prior=null;const records=[];
+ for(let i=0;i<raws.length;i++){const p=await openSegment(raws[i],scope,i,previous,prior,k,subtle);records.push(p.generation);previous=p.digest;prior=p.generation.rows.at(-1);}
+ return {version:2,scope,records,head:previous,authenticated:false};
+}
+return {validate,extract,seal,open,sealSegment,openSegment,auditSegments};});
