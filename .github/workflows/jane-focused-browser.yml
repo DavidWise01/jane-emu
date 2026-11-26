@@ -24,6 +24,8 @@ jobs:
       max-parallel: 2
       matrix:
         include:
+          - name: sustained-4x-memory-qualification
+            test: av318r_browser_sustained.test.cjs
           - name: 4x-operational-qualification
             test: av309r_browser_qualification.test.cjs
           - name: hidden-monitor-paint
