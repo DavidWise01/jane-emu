@@ -30,6 +30,8 @@ jobs:
             test: av307r_browser_paint.test.cjs
           - name: render-isolation
             test: av306r_browser_render.test.cjs
+          - name: rust-identity
+            test: av277r_browser_state.test.cjs
           - name: frame-sync
             test: av300r_browser_sync.test.cjs
           - name: 4x-endurance
