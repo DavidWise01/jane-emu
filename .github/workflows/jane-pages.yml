@@ -756,9 +756,9 @@ jobs:
       - name: Observe AV-290R sustained speed switching
         run: NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av300r_browser_sync.test.cjs
       - name: Observe AV-301R extended 4x gameplay continuity
-        run: node tests/av301r_browser_endurance.test.cjs
+        run: NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av301r_browser_endurance.test.cjs
       - name: Observe AV-302R sustained 8x saturation and recovery
-        run: node tests/av302r_browser_recovery.test.cjs
+        run: NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av302r_browser_recovery.test.cjs
       - name: Verify AV-289R 4x clock progress and return to 1x
         run: NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av289r_fast_clock.test.cjs
       - name: Observe AV-288R defensive opportunity funnel

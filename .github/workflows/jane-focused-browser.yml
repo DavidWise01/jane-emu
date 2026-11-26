@@ -1,0 +1,66 @@
+name: Jane — Focused browser qualification
+run-name: Jane AV-304R / independent browser checks
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'dashboard/**'
+      - 'rust/**'
+      - 'releases/**'
+      - 'tests/**'
+      - '.github/workflows/jane-focused-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: jane-focused-${{ github.sha }}
+  cancel-in-progress: false
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - name: frame-sync
+            test: av300r_browser_sync.test.cjs
+          - name: 4x-endurance
+            test: av301r_browser_endurance.test.cjs
+          - name: 8x-recovery
+            test: av302r_browser_recovery.test.cjs
+          - name: native-input-effects
+            test: av215_browser_input_effects.test.cjs
+          - name: per-life-effects
+            test: av226_browser_life_effects.test.cjs
+          - name: retained-effects
+            test: av227_browser_retained_effects.test.cjs
+          - name: phase9-acceptance
+            test: av228_browser_phase9_acceptance.test.cjs
+    name: ${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and verify Rust WASM
+        run: |
+          rustup target add wasm32-unknown-unknown
+          cargo test --locked --manifest-path rust/jane-cortex/Cargo.toml
+          cargo build --locked --release --target wasm32-unknown-unknown --manifest-path rust/jane-cortex/Cargo.toml
+          cp rust/jane-cortex/target/wasm32-unknown-unknown/release/jane_cortex.wasm dashboard/jane_cortex.wasm
+          node tests/rust_cortex_wasm.test.cjs
+      - name: Install pinned browser
+        run: |
+          npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/jane-browser" playwright@1.56.1
+          PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" "$RUNNER_TEMP/jane-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Execute independent browser test
+        shell: bash
+        run: |
+          set -o pipefail
+          NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node "tests/${{ matrix.test }}" 2>&1 | tee focused-browser.log
+      - name: Preserve test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: focused-${{ matrix.name }}
+          path: focused-browser.log
+          if-no-files-found: warn
