@@ -1,0 +1,5 @@
+# AV-303R — Phase 18 source and evidence freeze
+
+Pinned baseline 798e22aa493a843c5386fd67e3d3694841fdc29d tree 8d888e5b7f0fb1ad2b731d8ea4284daa27bfac20. Operational qualification HOLD. AV296R profiler and AV297R scheduler measurements verified. AV297R 1x 60.12 FPS, 4x 117.60 FPS, 8x 121.21 FPS. 4x measured batch prefix 702.7 ms of 2087.3 ms; residual 1384.6 ms includes unmeasured execution and scheduling, not exclusively idle. Rust build passed at AV302R; adaptive budget and exact scope unit checks passed at AV300R. AV300R full Mission Control failed legacy movement/A/B acceptance and timed out. AV301R Mission Control cancelled; AV302R in progress with endurance steps pending. Separate latest Pages and Punch-Out passed. No causal improvement or sustained requested multiplier established. Keep experiments opt-in and baseline runtime unchanged. Phase 19 begins by isolating failing browser tests and collecting evidence independently of the long mission-control queue. Append later evidence separately; do not rewrite this freeze.
+
+.dlw

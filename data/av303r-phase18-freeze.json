@@ -1,0 +1,85 @@
+{
+  "schema": "jane.phase18.freeze.v1",
+  "phase": 18,
+  "watermark": ".dlw",
+  "baseline": "798e22aa493a843c5386fd67e3d3694841fdc29d",
+  "tree": "8d888e5b7f0fb1ad2b731d8ea4284daa27bfac20",
+  "source": "PINNED",
+  "operational": "HOLD",
+  "bounds": [
+    "AV296R",
+    "AV297R",
+    "AV298R",
+    "AV299R",
+    "AV300R",
+    "AV301R",
+    "AV302R",
+    "AV303R"
+  ],
+  "verified": {
+    "profiler": {
+      "run": 45712288854,
+      "coreMs": 419.1,
+      "calls": 246
+    },
+    "scheduler": {
+      "run": 45733422150,
+      "fps": {
+        "1x": 60.12123621186594,
+        "4x": 117.6026070939378,
+        "8x": 121.21212121212122
+      },
+      "fourX": {
+        "intervals": 80,
+        "frames": 245,
+        "elapsedMs": 2087.3,
+        "frameWorkMs": 702.7,
+        "unmeasuredMs": 1384.6,
+        "maxIntervalMs": 155
+      },
+      "eightX": {
+        "intervals": 81,
+        "frames": 247,
+        "elapsedMs": 2026.8,
+        "frameWorkMs": 660.2,
+        "unmeasuredMs": 1366.6,
+        "maxIntervalMs": 36.3
+      }
+    },
+    "rustBuild": {
+      "run": 45737255731,
+      "step": "PASS"
+    },
+    "unit": {
+      "run": 45736215969,
+      "frameScope": "PASS",
+      "adaptiveBudget": "PASS"
+    },
+    "pages": {
+      "run": 45737254712,
+      "status": "PASS"
+    },
+    "punchOut": {
+      "run": 45737255743,
+      "status": "PASS"
+    }
+  },
+  "unresolved": {
+    "frameSyncBrowser": {
+      "run": 45736215969,
+      "status": "FAIL",
+      "reason": "timeout and legacy gameplay failures"
+    },
+    "fourXEndurance": {
+      "run": 45736663292,
+      "status": "CANCELLED"
+    },
+    "eightXRecovery": {
+      "run": 45737255731,
+      "status": "PENDING"
+    },
+    "causalSpeedGain": false,
+    "commercialCartridgeGeneralization": false
+  },
+  "next": "AV304R: isolate browser timeout and legacy gameplay failures in independent focused workflow before modifying runtime"
+}
