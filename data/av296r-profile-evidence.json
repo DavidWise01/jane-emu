@@ -1,0 +1,60 @@
+{
+  "schema": "jane.av296r.profile.v1",
+  "watermark": ".dlw",
+  "sourceCommit": "9b08d34920616580e27bbb262e76256933ca53a4",
+  "runs": [
+    {
+      "id": 45711593630,
+      "job": 139547117306,
+      "fps": [
+        66.69606438099395,
+        63.705860939205635,
+        57.14685575667164
+      ],
+      "fourX": {
+        "calls": 243,
+        "coreMs": 639.8,
+        "observerMs": 4.4,
+        "neuralMs": 24.2,
+        "objectiveMs": 3.2
+      }
+    },
+    {
+      "id": 45712288854,
+      "job": 139554950743,
+      "fps": [
+        134.29467774781048,
+        130.87320317528264,
+        60.43503234023355
+      ],
+      "fourX": {
+        "calls": 246,
+        "coreMs": 419.1,
+        "observerMs": 2.8,
+        "neuralMs": 14.4,
+        "objectiveMs": 1.8
+      },
+      "controller": {
+        "dispatch": 57,
+        "completion": 52,
+        "unmatched": 0,
+        "abandoned": 4
+      }
+    }
+  ],
+  "speedOrder": [
+    "4x",
+    "8x",
+    "1x"
+  ],
+  "qualification": "DESCRIPTIVE_PROFILE_PASS",
+  "causalBottleneckVerified": false,
+  "limitations": [
+    "Cumulative timers cover only four synchronous channels",
+    "Core timer includes nested work",
+    "Different runner loads not controlled",
+    "Frame window and counter window not exactly aligned",
+    "No full-frame cost or callback gap profile yet"
+  ],
+  "next": "AV297R: measure full callback and frame-batch timing, distinguish execution from scheduler gaps before changing budget"
+}
