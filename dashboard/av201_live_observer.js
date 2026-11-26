@@ -67,7 +67,8 @@
   frameLast=frame;
   // A cycle becomes a fact only after live PLAYING resumes for 60 frames,
   // following a distinct ROM-observed loss and successful owner transfer.
-  if(mode===2&&defeatCount>0&&!cycles.some(x=>x.defeatCount===defeatCount))
+  // AV-313R: defeatCount is monotonic within a reset scope; only the tail can match.
+  if(mode===2&&defeatCount>0&&cycles.at(-1)?.defeatCount!==defeatCount)
     cycles.push({defeatCount,defeatFrame:frame,defeatId:'av201-loss-'+bootRoot+'-'+defeatCount,
       ownerAtDefeat:c.actor,transfer:null,restart:null,resumed:null});
   const currentCycle=cycles.at(-1);
