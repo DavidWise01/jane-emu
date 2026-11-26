@@ -126,6 +126,8 @@
  }
  const timer=setInterval(tick,60);
  window.JANE_AV201_MONITOR={
+   // AV-315R: scalar-only status; no archive traversal or receipt copies.
+   hotStatus:()=>({schema:'jane.av315.hot-status.v1',armed,root:bootRoot,rom:gameRom,completedCycles,cycleCount:cycles.length,observationCount:observations.length,recoveryRequests:recoveryIds.size,clockStalls:stalls}),
    snapshot:()=>({schema:'jane.av201.live-cartridge-observation.v1',
      armed,root:bootRoot,rom:gameRom,
      gate:gate?.snapshot()||null,observations:observations.slice(),
