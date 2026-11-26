@@ -64,7 +64,7 @@ pub mod memory {
     pub struct Generation { number:u32, receipts:Vec<Receipt> }
     impl Generation {pub fn number(&self)->u32{self.number} pub fn receipts(&self)->&[Receipt]{&self.receipts}}
     #[derive(Default)]
-    pub struct Ledger { sealed:Vec<Generation>, open:Vec<Receipt> }
+    pub struct Ledger { sealed:Vec<Generation>, open:Vec<Receipt>, sealed_counts:[u32;3] }
     impl Ledger {
       pub fn append(&mut self,r:Receipt)->bool {
         if r.actor>2 || r.primitive>3 || self.open.len()>=1024 || self.sealed.len()>=64 ||
@@ -74,10 +74,12 @@ pub mod memory {
       }
       pub fn seal(&mut self)->bool {
         if self.open.is_empty() || self.sealed.len()>=64{return false}
+        for r in &self.open { self.sealed_counts[r.actor as usize]+=1; }
         self.sealed.push(Generation{number:self.sealed.len() as u32,receipts:std::mem::take(&mut self.open)});true
       }
       pub fn sealed(&self)->&[Generation]{&self.sealed}
       pub fn pending(&self)->usize{self.open.len()}
+      pub fn sealed_count(&self,actor:u32)->u32 { self.sealed_counts.get(actor as usize).copied().unwrap_or(0) }
     }
 }
 thread_local! {static LEDGER:std::cell::RefCell<memory::Ledger>=std::cell::RefCell::new(memory::Ledger::default());}
@@ -205,3 +207,17 @@ mod cartridge_tests {use super::*;#[test]fn isolation(){for a in 0..3{assert_eq!
  }
  #[cfg(test)]
  mod fast_budget_tests {use super::*;#[test]fn bounds(){for b in 9..=12 {for g in 0..=1 {for i in [0,18000,18001,22000,22001] {for f in [0,203999,204000,227999,228000] {for y in 0..=1 {let q=fast_budget_step(b,g,1,4,i,f,y);assert!((9..=12).contains(&(q&15)));assert!(q>>4<=1);}}}}}assert_eq!(fast_budget_step(9,0,1,4,16700,135000,1),25);assert_eq!(fast_budget_step(9,1,1,4,16700,135000,1),10);assert_eq!(fast_budget_step(12,1,1,8,16700,135000,1),9);}}
+
+// AV-316R: constant-time sealed receipt totals; pending receipts excluded.
+#[no_mangle]
+pub extern "C" fn memory_total(actor:u32)->u32 {LEDGER.with(|l|l.borrow().sealed_count(actor))}
+#[cfg(test)]
+mod av316_tests {
+ use super::memory::*;
+ #[test] fn totals_match_frozen_generations(){
+ let mut l=Ledger::default();
+ for g in 0..64u32 {for i in 0..1024u32 {let seq=g*1024+i;assert!(l.append(Receipt{actor:(seq%3) as u8,frame:seq,sequence:seq,primitive:0,result:1}));} assert!(l.seal());for a in 0..3 {assert_eq!(l.sealed_count(a),l.sealed().iter().flat_map(|g|g.receipts()).filter(|r|r.actor as u32==a).count() as u32);}}
+ assert_eq!((0..3).map(|a|l.sealed_count(a)).sum::<u32>(),65536);assert_eq!(l.sealed_count(3),0);assert!(!l.seal());assert!(!l.append(Receipt{actor:0,frame:65536,sequence:65536,primitive:0,result:1}));assert_eq!((0..3).map(|a|l.sealed_count(a)).sum::<u32>(),65536);
+ }
+ #[test] fn pending_excluded(){let mut l=Ledger::default();assert!(l.append(Receipt{actor:1,frame:1,sequence:1,primitive:0,result:1}));assert_eq!(l.sealed_count(1),0);assert!(l.seal());assert_eq!(l.sealed_count(1),1);assert!(!l.seal());assert_eq!(l.sealed_count(1),1);}
+}
