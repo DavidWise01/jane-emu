@@ -24,6 +24,8 @@ jobs:
       max-parallel: 2
       matrix:
         include:
+          - name: hidden-monitor-paint
+            test: av307r_browser_paint.test.cjs
           - name: render-isolation
             test: av306r_browser_render.test.cjs
           - name: frame-sync
