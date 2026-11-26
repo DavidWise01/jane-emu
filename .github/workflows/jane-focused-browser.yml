@@ -30,6 +30,10 @@ jobs:
             test: av307r_browser_paint.test.cjs
           - name: render-isolation
             test: av306r_browser_render.test.cjs
+          - name: cumulative-workload
+            test: av312r_browser_workload.test.cjs
+          - name: guarded-authority
+            test: av274r_browser_authority.test.cjs
           - name: rust-identity
             test: av277r_browser_state.test.cjs
           - name: frame-sync
