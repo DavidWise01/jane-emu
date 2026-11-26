@@ -14,3 +14,5 @@ assert.equal(e.effect_class(0,84),0);assert.equal(e.effect_class(1,-204),1);asse
 assert.equal(e.memory_generation_len(0),2);assert.equal(e.memory_receipt_field(0,0,0),0n);assert.equal(e.memory_receipt_field(0,1,2),2n);assert.equal(e.memory_receipt_field(99,0,0),-9223372036854775808n);assert.equal(e.memory_receipt_valid(2,3,1),1);console.log('AV284R archive ABI PASS');
 
 assert.equal(e.cartridge_evidence(1,1,0,32),1);assert.equal(e.cartridge_evidence(0,1,0,32),0);assert.equal(e.cartridge_evidence(1,0,0,32),0);assert.equal(e.cartridge_evidence(1,1,3,32),0);assert.equal(e.cartridge_evidence(1,1,0,65537),0);console.log('AV285R cartridge ABI PASS');
+
+for(const b of [9,10,11,12])for(const g of [0,1])for(const i of [18000,18001,22000,22001])for(const f of [203999,204000,227999,228000])for(const y of [0,1]){const expected=require('../dashboard/fast_budget.js').reference(b,g,1,4,i,f,y);assert.equal(e.fast_budget_step(b,g,1,4,i,f,y),expected)}console.log('AV299R scheduler ABI parity PASS');

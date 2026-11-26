@@ -193,3 +193,15 @@ pub extern "C" fn cartridge_evidence(same_rom:u32,valid:u32,actor:u32,rows:u32)-
 }
 #[cfg(test)]
 mod cartridge_tests {use super::*;#[test]fn isolation(){for a in 0..3{assert_eq!(cartridge_evidence(1,1,a,32),1);assert_eq!(cartridge_evidence(0,1,a,32),0);assert_eq!(cartridge_evidence(1,0,a,32),0);}assert_eq!(cartridge_evidence(1,1,3,32),0);assert_eq!(cartridge_evidence(1,1,0,0),0);assert_eq!(cartridge_evidence(1,1,0,65537),0);}}
+
+ // Packed state: low nibble budget, bit 4 qualifying-window history.
+ #[no_mangle]
+ pub extern "C" fn fast_budget_step(budget:u32,good:u32,enabled:u32,speed:u32,interval_us:u32,fps_milli:u32,yields:u32)->u32 {
+ if !(9..=12).contains(&budget)||good>1||enabled!=1||speed!=4{return 9}
+ if interval_us>22000||fps_milli>=228000{return budget.saturating_sub(1).max(9)}
+ if interval_us<=18000&&fps_milli<204000&&yields>0 {
+ if good==1{return (budget+1).min(12)}return budget|16
+ } budget
+ }
+ #[cfg(test)]
+ mod fast_budget_tests {use super::*;#[test]fn bounds(){for b in 9..=12 {for g in 0..=1 {for i in [0,18000,18001,22000,22001] {for f in [0,203999,204000,227999,228000] {for y in 0..=1 {let q=fast_budget_step(b,g,1,4,i,f,y);assert!((9..=12).contains(&(q&15)));assert!(q>>4<=1);}}}}}assert_eq!(fast_budget_step(9,0,1,4,16700,135000,1),25);assert_eq!(fast_budget_step(9,1,1,4,16700,135000,1),10);assert_eq!(fast_budget_step(12,1,1,8,16700,135000,1),9);}}
