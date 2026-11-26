@@ -61,7 +61,7 @@ jobs:
           cp rust/jane-cortex/target/wasm32-unknown-unknown/release/jane_cortex.wasm dashboard/jane_cortex.wasm
           node tests/rust_cortex_wasm.test.cjs
           node tests/av308r_memo.test.cjs
-          node --test tests/av313r_history.test.cjs tests/av314r_history.test.cjs
+          node --test tests/av313r_history.test.cjs tests/av314r_history.test.cjs tests/av315r_hot_status.test.cjs
           node --check tests/av307r_browser_paint.test.cjs
       - name: Install pinned browser
         run: |
