@@ -1,0 +1,2 @@
+# AV-298R — Opt-in adaptive 4x frame budget
+AV297R Pages and Punch-Out passed, Mission Control telemetry pending at decision time. Default 9 ms unchanged. Experimental checkbox raises 4x budget by 1 ms after two one-second windows with <=18 ms average callback interval, <204 FPS and budget yields; reduces on >22 ms interval or >=228 FPS. Range 9–12 ms; speed change or disable resets. Native cap and controller unchanged. Browser experiment reports budget and throughput; no causal performance claim. Provisional thresholds, not derived from pending AV297R measurements. .dlw

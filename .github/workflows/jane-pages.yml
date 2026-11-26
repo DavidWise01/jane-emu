@@ -747,10 +747,12 @@ jobs:
         run: node tests/av292r_storage.test.cjs
       - name: Verify AV-291R controller accounting
         run: node tests/av291r_controller.test.cjs
+      - name: Verify AV-298R adaptive budget bounds
+        run: node tests/av298r_budget.test.cjs
       - name: Verify AV-290R governor hysteresis
         run: node tests/av290r_governor.test.cjs
       - name: Observe AV-290R sustained speed switching
-        run: NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av297r_browser_batch.test.cjs
+        run: NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av298r_browser_budget.test.cjs
       - name: Verify AV-289R 4x clock progress and return to 1x
         run: NODE_PATH="$RUNNER_TEMP/jane-browser/node_modules" PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/playwright-browsers" node tests/av289r_fast_clock.test.cjs
       - name: Observe AV-288R defensive opportunity funnel
