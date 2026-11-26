@@ -1,0 +1,126 @@
+{
+  "schema": "jane.phase19.freeze.v1",
+  "watermark": ".dlw",
+  "baseline": "e2121b96cbbcb9e9f6a53280e425a7421348148e",
+  "tree": "1fb5421238e2daced9a3d3096604118969ea4015",
+  "source": "PINNED",
+  "operational": "HOLD",
+  "bounds": [
+    "AV-304R",
+    "AV-305R",
+    "AV-306R",
+    "AV-307R",
+    "AV-308R",
+    "AV-309R",
+    "AV-310R",
+    "AV-311R"
+  ],
+  "runs": [
+    {
+      "run": 45842577509,
+      "job": 139987822550,
+      "frames": 3631,
+      "fps": 86.9427871947848,
+      "completions": 231,
+      "cycles": 17,
+      "hits": 2805,
+      "misses": 2265,
+      "skippedPaint": 1256,
+      "unmatched": 0,
+      "elapsedMs": 41753.8,
+      "workMs": 10989,
+      "residualMs": 30764.8,
+      "windows": [
+        142.117,
+        109.006,
+        78.11,
+        88.029,
+        88.074,
+        87.352,
+        79.063,
+        77.798,
+        77.325,
+        74.32
+      ]
+    },
+    {
+      "run": 45858102398,
+      "job": 140041684149,
+      "frames": 3626,
+      "fps": 67.72932173575293,
+      "completions": 220,
+      "cycles": 19,
+      "hits": 2863,
+      "misses": 2300,
+      "skippedPaint": 1610,
+      "unmatched": 0,
+      "elapsedMs": 53519.3,
+      "workMs": 10942.7,
+      "residualMs": 42576.6,
+      "windows": [
+        106.092,
+        80.17,
+        61.181,
+        74.564,
+        72.691,
+        69.389,
+        62.853,
+        58.431,
+        58.976,
+        55.894
+      ]
+    }
+  ],
+  "gates": {
+    "continuity": true,
+    "rust": true,
+    "sync": true,
+    "cache": true,
+    "paint": true,
+    "layout": true,
+    "errors": true,
+    "rotation": true,
+    "throughput": false
+  },
+  "latest": {
+    "focused": {
+      "run": 45858102398,
+      "passed": 7,
+      "total": 11
+    },
+    "rustIdentity": {
+      "job": 140041684249,
+      "returns": 67,
+      "mismatches": 0
+    },
+    "pages": {
+      "run": 45858099628,
+      "status": "PASS"
+    },
+    "punchOut": {
+      "run": 45858102267,
+      "status": "PASS"
+    },
+    "mission": {
+      "run": 45858102306,
+      "status": "FAIL",
+      "step": "AV274R guarded Rust authority"
+    }
+  },
+  "unresolved": [
+    "4x throughput",
+    "legacy per-life A/B effects",
+    "AV274R guarded authority browser acceptance",
+    "cause of declining throughput"
+  ],
+  "nextPhase": [
+    "AV-312R cumulative workload instrumentation and cache-aware authority audit",
+    "AV-313R bounded history pressure",
+    "AV-314R event fanout profiling",
+    "AV-315R native scheduler workload separation",
+    "AV-316R incremental evidence indexing",
+    "AV-317R controlled endurance comparison",
+    "AV-318R controller life qualification",
+    "AV-319R evidence freeze"
+  ]
+}

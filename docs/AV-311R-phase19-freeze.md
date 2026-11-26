@@ -1,0 +1,5 @@
+# AV-311R — Phase 19 operational evidence freeze
+
+Pinned baseline e2121b96cbbcb9e9f6a53280e425a7421348148e tree 1fb5421238e2daced9a3d3096604118969ea4015. Source sealed, operational HOLD. Two independent CI executions (not independent source ancestry) of the same homebrew qualification yielded 86.94 and 67.73 FPS, 231 and 220 native completions, 17 and 19 cycles, 2805 and 2863 cache hits, zero unmatched receipts, and eight of nine gates passed each. Throughput failed; no causal speed gain claimed. Both show lower final-window FPS than initial window. Residual includes unmeasured work and scheduling, not necessarily idle. Latest focused 7/11 passed; Rust identity 67 returns zero mismatches. Pages and Punch-Out passed. Mission Control still failed AV274R guarded authority. Per-life A/B remains unqualified. Freeze is append-only; later evidence separate. Phase 20 priorities: instrument growth of cumulative work and audit older parity assertions, then isolate history pressure and event fanout without changing native game or memory ownership. No runtime changes in this bound.
+
+.dlw
