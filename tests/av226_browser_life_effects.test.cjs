@@ -56,6 +56,7 @@ async function main(){
   // The source-qualified chain is necessary but not sufficient: each incoming
   // player must also yield at least one completed original NES input record.
   const observed=result.input?.rows||[];
+  console.log(JSON.stringify({kind:'AV305R_LIFE_DIAGNOSTIC',life,chain,rows:observed.map(x=>({actor:x.actor,button:x.button,kind:x.kind,startFrame:x.startFrame,endFrame:x.endFrame,changed:x.changed}))}));
   assert.equal(life?.complete,true,
     'Toph and Patricia must each show in-life movement and separate A/B effects');
   assert.equal(life?.qualifiedLives,2);

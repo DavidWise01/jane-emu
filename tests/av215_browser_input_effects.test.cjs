@@ -34,7 +34,7 @@ async function main(){
   assert.equal(first.actor,'JANE');
   await page.waitForFunction(()=>document.querySelector('#game')?.contentWindow?.JANE_ARENA_RAM?.read?.(5)===1,
     null,{timeout:60000});
-  await page.waitForFunction(()=>window.JANE_AV215_INPUT_STATUS?.()?.rows?.length>=4,
+  await page.waitForFunction(()=>(()=>{const rows=window.JANE_AV215_INPUT_STATUS?.()?.rows||[];return rows.length>=4&&rows.some(x=>['A','B'].includes(x.button)&&x.kind==='NES_EFFECT_OBSERVED')&&rows.some(x=>['RIGHT','LEFT','UP','DOWN'].includes(x.button)&&x.kind==='NES_EFFECT_OBSERVED')})(),
     null,{timeout:60000});
   const observation=await page.evaluate(()=>{
     const f=document.querySelector('#game').contentWindow;
