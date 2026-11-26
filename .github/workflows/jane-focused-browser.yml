@@ -24,6 +24,8 @@ jobs:
       max-parallel: 2
       matrix:
         include:
+          - name: render-isolation
+            test: av306r_browser_render.test.cjs
           - name: frame-sync
             test: av300r_browser_sync.test.cjs
           - name: 4x-endurance
