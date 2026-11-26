@@ -24,6 +24,8 @@ jobs:
       max-parallel: 2
       matrix:
         include:
+          - name: temporal-scheduler-isolation
+            test: av320r_browser_scheduler.test.cjs
           - name: sustained-4x-memory-qualification
             test: av318r_browser_sustained.test.cjs
           - name: 4x-operational-qualification
