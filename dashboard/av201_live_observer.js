@@ -3,9 +3,9 @@
  * controller trials; never writes RAM, synthesizes START or changes owner.
  */
 (function(){'use strict';
- let faultIsolator=null,armed=false,bootRoot=null,gameRom=null,gate=null,seen=new Set(),observations=[],lastMode=null,defeatCount=0,rotationIds=new Set(),recoveryIds=new Set(),cycles=[],frameLast=-1,stalls=0,lastPlaying=-1;
+ let faultIsolator=null,armed=false,bootRoot=null,gameRom=null,gate=null,seen=new Set(),observations=[],lastMode=null,defeatCount=0,rotationIds=new Set(),recoveryIds=new Set(),cycles=[],completedCycles=0,frameLast=-1,stalls=0,lastPlaying=-1;
  const context=()=>window.JANE_RUN_CONTEXT?.();
- function reset(){gate=window.JaneAV200?.create?.()||null;seen.clear();observations=[];bootRoot=null;gameRom=null;lastMode=null;defeatCount=0;rotationIds.clear();recoveryIds.clear();cycles=[];frameLast=-1;stalls=0;lastPlaying=-1;}
+ function reset(){gate=window.JaneAV200?.create?.()||null;seen.clear();observations=[];bootRoot=null;gameRom=null;lastMode=null;defeatCount=0;rotationIds.clear();recoveryIds.clear();cycles=[];completedCycles=0;frameLast=-1;stalls=0;lastPlaying=-1;}
  function record(row){observations.push(row);if(observations.length>256)observations.shift();}
  document.addEventListener('click',e=>{
    if(e.target?.closest?.('#av201-demo')){armed=true;reset();}
@@ -89,6 +89,8 @@
     const resumed=window.JaneAV218?.qualify?.(currentCycle,frame,c.actor);
     if(resumed){
       currentCycle.resumed=resumed;
+      // AV-314R: qualification is a one-time transition (AV-218 rejects resumed cycles).
+      completedCycles++;
       record({kind:'AV203_RESUMED_FRAMES',frame,
         defeatId:currentCycle.defeatId,actor:c.actor,
         startReceiptFrame:resumed.startReceiptFrame,
@@ -127,11 +129,12 @@
    snapshot:()=>({schema:'jane.av201.live-cartridge-observation.v1',
      armed,root:bootRoot,rom:gameRom,
      gate:gate?.snapshot()||null,observations:observations.slice(),
-     cycles:cycles.map(x=>({...x})),completedCycles:cycles.filter(x=>x.transfer&&x.restart&&x.resumed).length,
+     cycles:cycles.map(x=>({...x,transfer:x.transfer&&{...x.transfer},restart:x.restart&&{...x.restart},resumed:x.resumed&&{...x.resumed},...(x.startReceipt?{startReceipt:{...x.startReceipt}}:{})})),completedCycles,
      av219Chain:window.JaneAV219?.audit?.(cycles,bootRoot,gameRom)||null,
      recoveryRequests:recoveryIds.size,clockStalls:stalls,
      av213Faults:faultIsolator?.snapshot?.()||null,
      note:'Actual NES RAM mode on purpose-built homebrew ROM; not a commercial cartridge proof.'}),
+   auditCompletedCycles:()=>{const scanned=cycles.filter(x=>x.transfer&&x.restart&&x.resumed).length;return {indexed:completedCycles,scanned,match:completedCycles===scanned};},
    stop:()=>{clearInterval(timer);armed=false;}
  };
 })();
