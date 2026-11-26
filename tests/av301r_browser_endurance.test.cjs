@@ -1,0 +1,17 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
+const {chromium}=require('playwright');
+const ROOT=path.resolve(__dirname,'..');
+const mime={'.html':'text/html;charset=utf-8','.js':'application/javascript;charset=utf-8','.css':'text/css;charset=utf-8','.json':'application/json;charset=utf-8'};
+function server(){return http.createServer((req,res)=>{
+ const uri=decodeURIComponent((req.url||'/').split('?')[0]);
+ const target=path.resolve(ROOT,'.'+(uri==='/'?'/index.html':uri));
+ if(!target.startsWith(ROOT+path.sep)){res.writeHead(403);return res.end();}
+ fs.readFile(target,(err,data)=>{
+  if(err){res.writeHead(404);return res.end('not found');}
+  res.writeHead(200,{'Content-Type':mime[path.extname(target)]||'application/octet-stream'});res.end(data);
+ });
+});}
+
+async function main(){const srv=server();await new Promise(r=>srv.listen(0,'127.0.0.1',r));const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});try{const runs=[];for(const experimental of [false,true]){const page=await browser.newPage({viewport:{width:1440,height:960}}),errors=[];page.on('pageerror',e=>errors.push(e.message));try{await page.goto('http://127.0.0.1:'+srv.address().port+'/dashboard/arena.html');await page.waitForFunction(()=>document.querySelector('#status')?.textContent?.includes('cabinet ready'),null,{timeout:60000});await page.locator('#av201-demo').click();await page.waitForFunction(()=>window.JANE_RUN_CONTEXT?.().rom==='0b10970a'&&window.JANE_RUN_CONTEXT().frame>30,null,{timeout:60000});if(experimental){await page.getByLabel('EXPERIMENTAL 4× ADAPTIVE BUDGET').check();await page.getByLabel('EXPERIMENTAL 4× FRAME-SYNC PERCEPTION').check();}await page.locator('#speed').selectOption('4');const snap=()=>page.evaluate(()=>({r:window.JANE_RUN_CONTEXT(),now:performance.now(),controller:window.JANE_AV291_STATUS().counts,budget:window.JANE_AV298_STATUS(),sync:window.JANE_AV300_STATUS(),clock:window.JANE_AV297_STATUS()[4],cycles:window.JANE_AV201_MONITOR?.snapshot?.().cycles?.length||0}));const start=await snap(),windows=[];let prev=start;for(let i=0;i<6;i++){await page.waitForFunction(f=>window.JANE_RUN_CONTEXT().frame>=f+240,prev.r.frame,{timeout:60000});const end=await snap();assert.equal(end.r.root,start.r.root);assert.equal(end.r.rom,start.r.rom);assert.ok(end.r.frame>prev.r.frame);windows.push({fps:(end.r.frame-prev.r.frame)*1000/(end.now-prev.now),frame:end.r.frame,actor:end.r.actor,dispatch:end.controller.dispatch-prev.controller.dispatch,completion:end.controller.completion-prev.controller.completion,cycles:end.cycles,budget:end.budget,sync:end.sync});prev=end;}assert.ok(prev.controller.completion>start.controller.completion,'native completion progress');assert.equal(await page.locator('iframe').count(),1);assert.deepEqual(errors,[]);if(experimental){assert.ok(prev.budget.budget>=9&&prev.budget.budget<=12);assert.equal(prev.budget.parity.mismatches,0);assert.ok(prev.sync.accepted>start.sync.accepted,'exact capture progress');}runs.push({experimental,start,end:prev,windows,actors:[...new Set(windows.map(x=>x.actor))],actualFps:(prev.r.frame-start.r.frame)*1000/(prev.now-start.now),cycleDelta:prev.cycles-start.cycles});}finally{await page.close()}}console.log(JSON.stringify({kind:'AV301R_4X_ENDURANCE',runs,manualControllerInput:false}));}finally{await browser.close();await new Promise(r=>srv.close(r));}}main().catch(e=>{console.error(e);process.exitCode=1});
