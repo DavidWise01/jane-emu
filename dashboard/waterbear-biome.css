@@ -89,3 +89,11 @@ body #waterbear-room .wb-card .wb-portrait{animation:none;overflow:hidden}
 @keyframes wbStep{from{transform:translateY(0)}to{transform:translateY(-3px)}}
 @keyframes wbReact{0%,100%{transform:translateY(0)}45%{transform:translateY(-6px)}}
 @keyframes wbTurn{0%,100%{transform:scaleX(1)}50%{transform:scaleX(-1)}}
+
+/* AV-339S: bounded observation captions and social acknowledgment. */
+body #waterbear-room .wb-card{grid-template-areas:"art name" "art element" "art role" "art pose" "art trait" "art telemetry" "speech speech" "energy energy" "band band" "info info"}
+.wb-speech{grid-area:speech;position:relative;min-width:0;line-height:1.35;font:10px monospace;color:#f3e8fa;background:#1e1728;border:1px solid var(--element);border-radius:7px;padding:5px 8px;overflow-wrap:anywhere}
+.wb-speech:empty{display:none}
+.wb-card[data-social=handoff] .wb-speech{box-shadow:0 0 8px var(--element)}
+body #waterbear-room .wb-card[data-social=handoff] .wb-body{animation:wbSocialNod .65s ease-in-out 2}
+@keyframes wbSocialNod{0%,100%{transform:rotate(0)}50%{transform:rotate(-5deg) translateY(-2px)}}
