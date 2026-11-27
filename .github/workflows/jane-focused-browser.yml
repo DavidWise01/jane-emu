@@ -24,6 +24,8 @@ jobs:
       max-parallel: 2
       matrix:
         include:
+          - name: matched-intervention-trials
+            test: av322r_browser_matched.test.cjs
           - name: event-loop-pressure
             test: av321r_browser_long_tasks.test.cjs
           - name: temporal-scheduler-isolation
