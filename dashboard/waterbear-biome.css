@@ -167,3 +167,27 @@ body main>.grid>.stage-panel>.game{box-shadow:0 0 2px #fff,0 0 8px #ff32d6,0 0 1
 body #waterbear-room .wb-card[data-energy=surge] .wb-portrait{filter:drop-shadow(0 0 8px var(--element)) drop-shadow(0 0 12px color-mix(in srgb,var(--element) 55%,transparent))}
 @media(max-width:1000px){body header::before,body header::after{display:none}}
 @media(prefers-reduced-motion:reduce){body #waterbear-room .wb-starlight{animation:none!important}}
+
+/* AV-344S geometric midnight skin; all three cards remain in normal page flow. */
+body #waterbear-room .wb-art{grid-area:art;min-width:0;align-self:center}
+body #waterbear-room .wb-art svg{display:block;width:100%;height:auto;max-height:112px;overflow:hidden}
+body #waterbear-room[data-skin=geometry] .wb-portrait,body #waterbear-room[data-skin=waterbear] .wb-geometric{display:none}
+body #waterbear-room .wb-geometric{filter:drop-shadow(0 0 3px var(--element)) drop-shadow(0 0 6px color-mix(in srgb,var(--element) 40%,transparent))}
+.wb-geo-core,.wb-geo-orbit{transform-box:fill-box;transform-origin:center}
+.wb-geo-core{animation:wbGeoBreath 4s ease-in-out infinite}
+.wb-geo-orbit{animation:wbGeoOrbit 12s linear infinite}
+.wb-card[data-energy=surge] .wb-geo-core{animation-duration:1.8s}
+.wb-card[data-actor=TOPH] .wb-geo-orbit{animation-direction:reverse}
+.wb-card[data-actor=PATRICIA] .wb-geo-core{animation-delay:-1.4s}
+@keyframes wbGeoBreath{0%,100%{transform:scale(.94);opacity:.8}50%{transform:scale(1.03);opacity:1}}
+@keyframes wbGeoOrbit{to{transform:rotate(360deg)}}
+body #waterbear-room .wb-skin{font:10px monospace;margin:0 4px;padding:3px 6px;background:#191526;color:#ead8ff;border:1px solid #ac73d2;border-radius:4px}
+body #waterbear-room .wb-card{grid-template-columns:minmax(84px,.85fr) minmax(0,1.15fr);border-radius:5px;gap:1px 6px}
+body #waterbear-room .wb-card h3{font:italic 700 16px Georgia,serif;letter-spacing:.09em;text-shadow:0 0 8px var(--element)}
+body #waterbear-room .wb-card .wb-band{grid-area:band}
+body #waterbear-room .wb-tether svg{height:56px}
+body #waterbear-room .wb-info{font-size:9px}
+body #waterbear-room .wb-card>small{font-size:9px}
+body #waterbear-room .wb-journal pre{max-height:96px}
+body #waterbear-room .wb-geo-core,body #waterbear-room .wb-geo-orbit{pointer-events:none}
+@media(prefers-reduced-motion:reduce){body #waterbear-room .wb-geo-core,body #waterbear-room .wb-geo-orbit{animation:none!important}}
