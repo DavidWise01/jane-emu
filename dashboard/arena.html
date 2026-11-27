@@ -378,6 +378,7 @@ function renderCoach(){
 let av324PlayerSignature=null;
 const av324Paint={calls:0,skipped:0,executed:0,workMs:0};
 window.JANE_AV324_RENDER_STATUS=()=>({...av324Paint});
+window.JANE_WATERBEAR_OBSERVATIONS=()=>({root:gameRoot,ready,actor:people[active].name,players:people.map(p=>({name:p.name,turns:p.turns,watched:p.watched,observedTrials:p.observedTrials}))});
 function renderPlayers(){
  av324Paint.calls++;
  const signature=JSON.stringify([active,people.map(p=>[p.name,p.color,p.mode,p.turns,p.watched,p.observedTrials])]);
