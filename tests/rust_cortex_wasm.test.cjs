@@ -20,3 +20,6 @@ for(const b of [9,10,11,12])for(const g of [0,1])for(const i of [18000,18001,220
 // AV-316R: compare fixed totals with original sealed-generation scan.
 for(let a=0;a<3;a++)assert.equal(e.memory_total(a),Array.from({length:e.memory_generations()},(_,g)=>e.memory_count(g,a)).reduce((x,y)=>x+y,0));
 assert.equal(e.memory_total(3),0);assert.equal(e.memory_append(0,4,4,0,1),1);assert.equal(e.memory_total(0),1);assert.equal(e.memory_seal(),1);assert.equal(e.memory_total(0),2);assert.equal(e.memory_seal(),0);assert.equal(e.memory_total(0),2);console.log('AV316R indexed totals ABI PASS');
+
+// AV-323R: after AV-316R, three generations are sealed and pending is zero.
+assert.equal(e.memory_target_rows(),512);assert.equal(e.memory_remaining_rows(),61*1024);assert.equal(e.memory_append(1,5,5,0,1),1);assert.equal(e.memory_remaining_rows(),61*1024-1);assert.equal(e.memory_seal(),1);assert.equal(e.memory_remaining_rows(),60*1024);console.log('AV323R capacity ABI PASS');
