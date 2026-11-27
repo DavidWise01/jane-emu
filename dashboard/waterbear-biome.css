@@ -127,3 +127,31 @@ body #waterbear-room .wb-tether{border-color:#df6dff;box-shadow:0 0 10px #b635df
 @keyframes wbMidnightBreath{0%,100%{opacity:.5}50%{opacity:.95}}
 body:has(#waterbear-room[data-motion=false]) .stage-panel>.game::after{animation:none}
 @media(prefers-reduced-motion:reduce){body main>.grid>.stage-panel>.game::after,.wb-midnight-heart{animation:none!important}}
+
+/* AV-342S cumulative layout repair: compact habitats, no independent scroll trap. */
+body main>.grid{align-items:start!important}
+body #waterbear-room{max-height:none!important;overflow:visible!important;min-height:0!important}
+body #waterbear-room .wb-roster{gap:6px}
+body #waterbear-room .wb-card{min-height:0;padding:6px;gap:1px 7px;grid-template-columns:minmax(76px,.65fr) minmax(0,1.35fr)}
+body #waterbear-room .wb-portrait{max-height:85px}
+body #waterbear-room .wb-card h3{font-size:16px}
+body #waterbear-room .wb-card .wb-telemetry{font-size:9px;padding:1px 0}
+body #waterbear-room .wb-card .wb-band{gap:2px;margin:1px 0}
+body #waterbear-room .wb-group{padding:1px;gap:1px}
+body #waterbear-room .wb-cubit{height:16px!important;min-width:13px;padding:0 2px!important}
+body #waterbear-room .wb-tether svg{height:70px}
+body #waterbear-room .wb-tether{margin-bottom:5px}
+body #waterbear-room .wb-caption{margin:2px 0 4px}
+body #waterbear-room .wb-journal{padding-top:1px}
+body #waterbear-room .wb-journal summary{padding:1px 0}
+body #waterbear-room .wb-live{margin-top:4px}
+html body{height:auto!important;min-height:100dvh;overflow-y:auto!important}
+body main{height:auto!important;overflow:visible!important}
+body main>.grid{overflow:visible!important}
+body #waterbear-room .wb-card[data-actor=JANE]{background:radial-gradient(ellipse at 15% 75%,#b24f2170,transparent 48%),linear-gradient(125deg,#32100d,#09060d 75%)}
+body #waterbear-room .wb-card[data-actor=TOPH]{background:radial-gradient(ellipse at 15% 75%,#32b25b70,transparent 48%),linear-gradient(125deg,#092e1a,#060d10 75%)}
+body #waterbear-room .wb-card[data-actor=PATRICIA]{background:radial-gradient(ellipse at 15% 75%,#a142e070,transparent 48%),linear-gradient(125deg,#2c103e,#0b0713 75%)}
+body #waterbear-room .wb-portrait{filter:drop-shadow(0 0 5px var(--element)) drop-shadow(0 0 9px color-mix(in srgb,var(--element) 40%,transparent))}
+body #waterbear-room .wb-wire{stroke-width:3;filter:drop-shadow(0 0 3px #d9a0ff)}
+body #waterbear-room .wb-flow{stroke-width:4}
+body #waterbear-room .wb-midnight-heart{stroke-width:2.5;filter:drop-shadow(0 0 4px #ff3ccd)}
