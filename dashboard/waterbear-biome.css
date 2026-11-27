@@ -66,3 +66,26 @@ body #waterbear-room[data-motion=false] .wb-energy-fill{transition:none}
 @keyframes wbTravel{from{offset-distance:var(--wb-from);opacity:.35}30%,75%{opacity:1}to{offset-distance:var(--wb-to);opacity:.35}}
 body #waterbear-room[data-motion=false] .wb-traveler{display:none}
 @media(prefers-reduced-motion:reduce){.wb-traveler{display:none}}
+
+/* AV-338S: stationary terrain, independently animated character bodies. */
+body #waterbear-room .wb-card{grid-template-areas:"art name" "art element" "art role" "art pose" "art trait" "art telemetry" "energy energy" "band band" "info info"}
+.wb-pose{grid-area:pose;font:9px monospace;color:var(--element);letter-spacing:.08em}
+body #waterbear-room .wb-card .wb-portrait{animation:none;overflow:hidden}
+.wb-walker,.wb-facing,.wb-body,.wb-leg{transform-box:fill-box;transform-origin:center}
+.wb-walker{animation:wbPace 5s ease-in-out infinite}
+.wb-body{animation:wbBreath 3s ease-in-out infinite}
+.wb-card[data-pose=rest] .wb-walker,.wb-card[data-pose=breathe] .wb-walker{animation:none}
+.wb-card[data-pose=rest] .wb-body{animation-duration:5s}
+.wb-card[data-pose=walk] .wb-leg,.wb-card[data-pose=react] .wb-leg{animation:wbStep .55s ease-in-out infinite alternate}
+.wb-card[data-pose=walk] .wb-leg-1,.wb-card[data-pose=walk] .wb-leg-3,.wb-card[data-pose=react] .wb-leg-1,.wb-card[data-pose=react] .wb-leg-3{animation-delay:-.55s}
+.wb-card[data-pose=walk] .wb-facing{animation:wbFace 5s steps(1,end) infinite}
+.wb-card[data-pose=turn] .wb-facing{animation:wbTurn .9s ease-in-out}
+.wb-card[data-pose=react] .wb-body{animation:wbReact .65s ease-in-out infinite}
+.wb-card[data-actor=TOPH] .wb-walker,.wb-card[data-actor=TOPH] .wb-facing{animation-delay:-1.3s}
+.wb-card[data-actor=PATRICIA] .wb-walker,.wb-card[data-actor=PATRICIA] .wb-facing{animation-delay:-2.6s}
+@keyframes wbPace{0%,100%{transform:translateX(-8px)}50%{transform:translateX(8px)}}
+@keyframes wbFace{0%,100%{transform:scaleX(1)}50%{transform:scaleX(-1)}}
+@keyframes wbBreath{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.96)}}
+@keyframes wbStep{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+@keyframes wbReact{0%,100%{transform:translateY(0)}45%{transform:translateY(-6px)}}
+@keyframes wbTurn{0%,100%{transform:scaleX(1)}50%{transform:scaleX(-1)}}
