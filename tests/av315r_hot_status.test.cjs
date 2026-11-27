@@ -19,6 +19,6 @@ test('endurance hot and legacy cold counts agree',()=>{
 });
 test('identity consumers use hot status; evidence consumers retain full snapshots',()=>{
  const s=read('dashboard/arena.html');
- assert.equal((s.match(/JANE_AV201_MONITOR\?\.hotStatus\?\.\(\)/g)||[]).length,12);
+ assert.equal((s.match(/JANE_AV201_MONITOR\?\.hotStatus\?\.\(\)/g)||[]).length,13); // AV-325R adds one verified hot-status consumer
  assert.equal((s.match(/JANE_AV201_MONITOR\?\.snapshot\?\.\(\)/g)||[]).length,2);
 });
