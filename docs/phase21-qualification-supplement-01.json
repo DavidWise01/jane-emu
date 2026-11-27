@@ -1,0 +1,23 @@
+{
+  "schema": "jane.phase21.supplement.v1",
+  "run": 45933749216,
+  "jobs": [
+    {
+      "bound": "AV-325R",
+      "job": 140292068882
+    },
+    {
+      "bound": "AV-326R",
+      "job": 140292068686
+    }
+  ],
+  "status": "BLOCKED_BEFORE_BROWSER",
+  "observed": {
+    "failedJobs": 21,
+    "commonTest": "av315r_hot_status.test.cjs",
+    "expected": 12,
+    "actual": 13
+  },
+  "authority": "HOLD",
+  "note": "Both inspected job logs show regression failure; no browser qualification record. Original freeze unchanged."
+}
