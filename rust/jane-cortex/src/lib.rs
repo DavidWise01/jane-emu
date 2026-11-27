@@ -58,6 +58,10 @@ use super::*;
  }
 
 pub mod memory {
+    // AV-323R: retain all resident receipts, but use fuller generations in the opt-in host path.
+    pub const TARGET_ROWS: u32 = 512;
+    pub const MAX_GENERATIONS: u32 = 64;
+
     #[derive(Clone, Debug, PartialEq, Eq)]
     pub struct Receipt { pub actor:u8, pub frame:u32, pub sequence:u32, pub primitive:u8, pub result:i32 }
     #[derive(Clone, Debug, PartialEq, Eq)]
@@ -220,4 +224,15 @@ mod av316_tests {
  assert_eq!((0..3).map(|a|l.sealed_count(a)).sum::<u32>(),65536);assert_eq!(l.sealed_count(3),0);assert!(!l.seal());assert!(!l.append(Receipt{actor:0,frame:65536,sequence:65536,primitive:0,result:1}));assert_eq!((0..3).map(|a|l.sealed_count(a)).sum::<u32>(),65536);
  }
  #[test] fn pending_excluded(){let mut l=Ledger::default();assert!(l.append(Receipt{actor:1,frame:1,sequence:1,primitive:0,result:1}));assert_eq!(l.sealed_count(1),0);assert!(l.seal());assert_eq!(l.sealed_count(1),1);assert!(!l.seal());assert_eq!(l.sealed_count(1),1);}
+}
+
+// AV-323R: advisory admission capacity, no reclamation or authority change.
+#[no_mangle]
+pub extern "C" fn memory_target_rows()->u32 {memory::TARGET_ROWS}
+#[no_mangle]
+pub extern "C" fn memory_remaining_rows()->u32 {LEDGER.with(|l|{let l=l.borrow();(memory::MAX_GENERATIONS-l.sealed().len() as u32)*1024-l.pending() as u32})}
+#[cfg(test)]
+mod av323_tests {
+ use super::memory::*;
+ #[test] fn fuller_generations_preserve_order_and_extend_intake(){let mut l=Ledger::default();for seq in 0..(64*TARGET_ROWS){assert!(l.append(Receipt{actor:(seq%3) as u8,frame:seq,sequence:seq,primitive:0,result:1}));if l.pending()==TARGET_ROWS as usize{assert!(l.seal());}}assert_eq!(l.sealed().len(),64);assert_eq!(l.sealed().iter().map(|g|g.receipts().len()).sum::<usize>(),32768);assert_eq!((0..3).map(|a|l.sealed_count(a)).sum::<u32>(),32768);assert!(!l.append(Receipt{actor:0,frame:32768,sequence:32768,primitive:0,result:1}));for (i,r) in l.sealed().iter().flat_map(|g|g.receipts()).enumerate(){assert_eq!(r.sequence,i as u32);}}
 }
