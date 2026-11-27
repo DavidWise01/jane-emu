@@ -1,0 +1,4 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),{create}=require('../dashboard/av328_callback_families.js');
+test('distinct same-name callbacks remain separate; reset invalidates token',()=>{const p=create(),a=function loop(){},b=function loop(){};assert.equal(p.begin(a,0),null);p.enable(true);for(const cb of [a,b,a])assert.equal(p.end(p.begin(cb,1),4),true);assert.deepEqual(p.status().rows.map(r=>[r.name,r.calls,r.workMs]),[['loop',2,6],['loop',1,3]]);const t=p.begin(a,5);p.enable(true);assert.equal(p.end(t,6),false);assert.equal(p.status().rows.length,0);});
+test('unique callback churn is bounded',()=>{const p=create();p.enable(true);for(let i=0;i<1000;i++)p.end(p.begin(()=>{},i),i+1);const s=p.status();assert.equal(s.rows.length,33);assert.equal(s.rows.at(-1).calls,968);assert.equal(s.rows.reduce((n,r)=>n+r.calls,0),1000);});
