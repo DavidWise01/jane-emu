@@ -104,3 +104,26 @@ body #waterbear-room .wb-card{grid-template-areas:"art name" "art element" "art 
 .wb-journal summary{cursor:pointer;color:var(--element);padding:3px 0}
 .wb-journal pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:110px;overflow:auto;font:9px/1.4 monospace;color:#d7c9e5;background:#090711;padding:5px;margin:3px 0}
 body #waterbear-room .wb-journal-export{margin-top:8px;font:10px monospace;color:#e3d5f0;background:#20172e;border:1px solid #8e6eb1;border-radius:5px;padding:5px 8px}
+
+/* AV-341S — living midnight neon / emo skin. Presentation only. .dlw */
+body{background:radial-gradient(ellipse at 85% 0%,#42205c 0,transparent 35%),radial-gradient(ellipse at 0% 65%,#220b39 0,transparent 48%),linear-gradient(135deg,#080510,#10061c 50%,#050a13)!important}
+body header{border-color:#ff53df!important;box-shadow:0 0 16px #ee35c888!important;background:linear-gradient(110deg,#090713,#24102c,#0a111c)!important}
+body .art-brand h1{color:#8dfff3!important;text-shadow:0 0 6px #2dfff0,0 0 16px #28d9f5!important}
+body .art-brand h1 span{color:#ff8ef0!important;text-shadow:0 0 7px #ff35d8,0 0 20px #e900ae!important}
+body main>.toolbar{border-color:#a954db!important;border-radius:12px!important;background:linear-gradient(135deg,#221130,#070b17 70%)!important;box-shadow:0 0 12px #a03ae65c!important}
+body main>.grid>.stage-panel>.game{border:5px solid #ff65e5!important;box-shadow:0 0 2px #fff,0 0 12px #ff32d6,0 0 24px #b82fff70,inset 0 0 9px #28ffe9!important;position:relative}
+body main>.grid>.stage-panel>.game::after{content:"";position:absolute;inset:0;border-radius:16px;border:2px solid #64fff0;pointer-events:none;box-shadow:inset 0 0 13px #29efee88;opacity:.65;animation:wbMidnightBreath 4s ease-in-out infinite}
+body #waterbear-room{background:radial-gradient(ellipse at 80% 0,#39164c,transparent 45%),linear-gradient(145deg,#160d23,#070610 75%)!important;border-color:#ff67df!important;box-shadow:0 0 15px #fb35dd66,inset 0 0 15px #a33de233!important}
+body #waterbear-room h2{color:#ffc8f9;text-shadow:0 0 6px #ff5bdf,0 0 12px #c638fa}
+body #waterbear-room h2::before{content:"♡  ";color:#ff65de}
+body #waterbear-room .wb-card{border-color:var(--element);box-shadow:inset 0 0 14px color-mix(in srgb,var(--element) 15%,transparent),0 0 7px color-mix(in srgb,var(--element) 42%,transparent)}
+body #waterbear-room .wb-card[data-active=true]{box-shadow:0 0 14px var(--element),inset 0 0 14px color-mix(in srgb,var(--element) 20%,transparent)}
+body #waterbear-room .wb-card h3::after{content:"  ♡";font:14px monospace;color:var(--element);opacity:.8}
+body #waterbear-room .wb-cubit{box-shadow:inset 0 0 5px color-mix(in srgb,var(--element) 30%,transparent);border-color:var(--element)}
+body #waterbear-room .wb-tether{border-color:#df6dff;box-shadow:0 0 10px #b635df77;background:radial-gradient(ellipse,#331439,#080710 75%)}
+.wb-mesh-center{fill:#ffb3f2;text-shadow:0 0 7px #f43cde}
+.wb-midnight-heart{fill:none;stroke:#ff6bdf;stroke-width:1.7;transform-box:fill-box;transform-origin:center;animation:wbHeart 3s ease-in-out infinite}
+@keyframes wbHeart{0%,100%{transform:scale(.94);opacity:.65}50%{transform:scale(1.09);opacity:1}}
+@keyframes wbMidnightBreath{0%,100%{opacity:.5}50%{opacity:.95}}
+body:has(#waterbear-room[data-motion=false]) .stage-panel>.game::after{animation:none}
+@media(prefers-reduced-motion:reduce){body main>.grid>.stage-panel>.game::after,.wb-midnight-heart{animation:none!important}}
