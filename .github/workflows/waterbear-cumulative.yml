@@ -1,0 +1,18 @@
+name: Waterbear cumulative preservation
+on:
+  push:
+    paths:
+      - 'dashboard/arena.html'
+      - 'dashboard/waterbear*'
+      - 'tests/waterbear_cumulative.test.cjs'
+      - '.github/workflows/waterbear-cumulative.yml'
+  workflow_dispatch:
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tests/waterbear_cumulative.test.cjs
