@@ -24,6 +24,8 @@ jobs:
       max-parallel: 2
       matrix:
         include:
+          - name: matched-presentation-cadence
+            test: av330r_browser_cadence.test.cjs
           - name: presentation-scheduling
             test: av329r_browser_presentation.test.cjs
           - name: callback-family-isolation
