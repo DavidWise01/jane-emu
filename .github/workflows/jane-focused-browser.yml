@@ -24,6 +24,8 @@ jobs:
       max-parallel: 2
       matrix:
         include:
+          - name: fuller-generation-capacity
+            test: av323r_browser_capacity.test.cjs
           - name: matched-intervention-trials
             test: av322r_browser_matched.test.cjs
           - name: event-loop-pressure
