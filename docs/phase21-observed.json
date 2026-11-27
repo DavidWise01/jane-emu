@@ -1,0 +1,1188 @@
+{
+  "schema": "jane.phase21.freeze.v1",
+  "observations": [
+    {
+      "bound": "AV-320R",
+      "run": 45905023945,
+      "job": 140199610882,
+      "records": [
+        {
+          "kind": "AV320R_SCHEDULER",
+          "evidence": {
+            "timing": {
+              "parent": {
+                "enabled": true,
+                "callbacks": 448,
+                "intervals": 447,
+                "intervalMs": 9553.800000000003,
+                "executionMs": 0.8999999999941792,
+                "gapMs": 9552.900000000009,
+                "maxIntervalMs": 303,
+                "maxExecutionMs": 0.10000000000582077,
+                "maxGapMs": 303,
+                "invalid": 0
+              },
+              "iframe": {
+                "enabled": true,
+                "callbacks": 1525,
+                "intervals": 1524,
+                "intervalMs": 9591.700000000012,
+                "executionMs": 4056.7999999999447,
+                "gapMs": 5535.100000000064,
+                "maxIntervalMs": 283.6999999999971,
+                "maxExecutionMs": 38.30000000000291,
+                "maxGapMs": 283.3999999999942,
+                "invalid": 0
+              },
+              "parentProbePeriodMs": 16,
+              "note": "Parent timer probe and aggregate iframe RAF callbacks; not exclusive CPU attribution"
+            },
+            "run": {
+              "root": "session-128333d8-a602-4650-ab4c-dba0c0a90fb5",
+              "actor": "TOPH",
+              "rom": "0b10970a",
+              "frame": 755
+            },
+            "clock": {
+              "1": {
+                "intervals": 23,
+                "frames": 31,
+                "elapsedMs": 541,
+                "frameWorkMs": 161.10000000002037,
+                "unmeasuredMs": 379.8999999999796,
+                "maxIntervalMs": 45.80000000000291,
+                "demandMs": 568.2333333333332,
+                "acceptedMs": 568.2333333333332
+              },
+              "4": {
+                "intervals": 304,
+                "frames": 720,
+                "elapsedMs": 9582.300000000003,
+                "frameWorkMs": 2539.7000000000407,
+                "unmeasuredMs": 7042.599999999962,
+                "maxIntervalMs": 298.6000000000058,
+                "demandMs": 65585.33333333327,
+                "acceptedMs": 40500.06666666669
+              }
+            }
+          },
+          "errors": []
+        }
+      ],
+      "extraction": "parsed decoded job logs"
+    },
+    {
+      "bound": "AV-321R",
+      "run": 45908673325,
+      "job": 140211487184,
+      "records": [
+        {
+          "kind": "AV321R_LONG_TASKS",
+          "evidence": {
+            "timing": {
+              "supported": true,
+              "active": true,
+              "tasks": 2,
+              "taskMs": 215,
+              "blockingMs": 115,
+              "maxTaskMs": 116,
+              "self": 0,
+              "descendant": 2,
+              "other": 0,
+              "invalid": 0,
+              "timers": 274,
+              "latenessMs": 1231.8999999994412,
+              "maxLatenessMs": 118.39999999996508,
+              "late50": 2,
+              "late100": 1,
+              "note": "Browser long-task attribution is coarse; timer lateness and task durations overlap"
+            },
+            "run": {
+              "root": "session-6929cf7e-1a39-424a-b05e-58452739c64a",
+              "actor": "TOPH",
+              "rom": "0b10970a",
+              "frame": 755
+            },
+            "clock": {
+              "1": {
+                "intervals": 30,
+                "frames": 32,
+                "elapsedMs": 564.5,
+                "frameWorkMs": 108.00000000005821,
+                "unmeasuredMs": 456.4999999999418,
+                "maxIntervalMs": 38.90000000002328,
+                "demandMs": 998.5666666666641,
+                "acceptedMs": 998.5666666666641
+              },
+              "4": {
+                "intervals": 218,
+                "frames": 720,
+                "elapsedMs": 5054.200000000012,
+                "frameWorkMs": 1889.1999999998952,
+                "unmeasuredMs": 3165.0000000001164,
+                "maxIntervalMs": 134.40000000002328,
+                "demandMs": 36167.19999999995,
+                "acceptedMs": 28230.999999999924
+              }
+            }
+          },
+          "errors": []
+        }
+      ],
+      "extraction": "parsed decoded job logs"
+    },
+    {
+      "bound": "AV-322R",
+      "run": 45920047873,
+      "job": 140248361957,
+      "records": [
+        {
+          "kind": "AV322R_MATCHED_TRIALS",
+          "comparisons": [
+            {
+              "pair": "paint",
+              "control": 58.51847212053801,
+              "intervention": 65.46041785748984,
+              "delta": 6.941945736951837,
+              "valid": true
+            },
+            {
+              "pair": "budget",
+              "control": 64.85899212143458,
+              "intervention": 65.54410315061958,
+              "delta": 0.6851110291849949,
+              "valid": true
+            },
+            {
+              "pair": "sync",
+              "control": 67.66992121578288,
+              "intervention": 67.50639319202435,
+              "delta": -0.1635280237585306,
+              "valid": true
+            }
+          ],
+          "operational": "HOLD_PENDING_QUALIFICATION",
+          "manualControllerInput": false
+        }
+      ],
+      "extraction": "parsed decoded job logs"
+    },
+    {
+      "bound": "AV-323R",
+      "run": 45925896389,
+      "job": 140266986647,
+      "records": [
+        {
+          "kind": "AV323R_FULLER_GENERATIONS",
+          "counter": {
+            "indexed": 34,
+            "scanned": 34,
+            "match": true
+          },
+          "memory": {
+            "kind": "OBSERVING",
+            "generations": 2,
+            "pending": 312,
+            "targetRows": 512,
+            "remainingRows": 63176,
+            "persistent": false,
+            "countPath": "RUST_INDEX",
+            "counts": [
+              352,
+              352,
+              320
+            ]
+          },
+          "archive": {
+            "kind": "ARCHIVED",
+            "archived": 2,
+            "authenticated": false,
+            "format": 2,
+            "head": "6b9b23045af1cdadd91f948a029416fb7ea26fd92ab70fa74217a0b5476920bc"
+          },
+          "archiveAudit": {
+            "segments": 2,
+            "head": "6b9b23045af1cdadd91f948a029416fb7ea26fd92ab70fa74217a0b5476920bc",
+            "authenticated": false
+          },
+          "fps": 78.55924974078474,
+          "windows": [
+            {
+              "fps": 117.19500480307397,
+              "frames": 366,
+              "ms": 3123,
+              "actor": "TOPH",
+              "completion": 28,
+              "budget": 9,
+              "captures": 122,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 0,
+                "pending": 52,
+                "targetRows": 512,
+                "remainingRows": 65484,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "archive": {
+                "kind": "STANDBY",
+                "archived": 0,
+                "authenticated": false,
+                "format": 2
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 0,
+                "cycleCount": 1,
+                "observationCount": 5,
+                "recoveryRequests": 2,
+                "clockStalls": 0
+              }
+            },
+            {
+              "fps": 95.2257057369585,
+              "frames": 366,
+              "ms": 3843.5,
+              "actor": "TOPH",
+              "completion": 22,
+              "budget": 9,
+              "captures": 122,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 0,
+                "pending": 112,
+                "targetRows": 512,
+                "remainingRows": 65424,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "archive": {
+                "kind": "STANDBY",
+                "archived": 0,
+                "authenticated": false,
+                "format": 2
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 1,
+                "cycleCount": 1,
+                "observationCount": 7,
+                "recoveryRequests": 2,
+                "clockStalls": 0
+              }
+            },
+            {
+              "fps": 79.69881772748278,
+              "frames": 362,
+              "ms": 4542.100000000006,
+              "actor": "PATRICIA",
+              "completion": 24,
+              "budget": 9,
+              "captures": 120,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 0,
+                "pending": 184,
+                "targetRows": 512,
+                "remainingRows": 65352,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "archive": {
+                "kind": "STANDBY",
+                "archived": 0,
+                "authenticated": false,
+                "format": 2
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 2,
+                "cycleCount": 2,
+                "observationCount": 13,
+                "recoveryRequests": 3,
+                "clockStalls": 1
+              }
+            },
+            {
+              "fps": 98.05755203462786,
+              "frames": 367,
+              "ms": 3742.6999999999825,
+              "actor": "TOPH",
+              "completion": 22,
+              "budget": 9,
+              "captures": 123,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 0,
+                "pending": 236,
+                "targetRows": 512,
+                "remainingRows": 65300,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "archive": {
+                "kind": "STANDBY",
+                "archived": 0,
+                "authenticated": false,
+                "format": 2
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 4,
+                "cycleCount": 4,
+                "observationCount": 25,
+                "recoveryRequests": 5,
+                "clockStalls": 1
+              }
+            },
+            {
+              "fps": 93.43133702572554,
+              "frames": 361,
+              "ms": 3863.8000000000175,
+              "actor": "JANE",
+              "completion": 22,
+              "budget": 9,
+              "captures": 120,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 0,
+                "pending": 284,
+                "targetRows": 512,
+                "remainingRows": 65252,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "archive": {
+                "kind": "STANDBY",
+                "archived": 0,
+                "authenticated": false,
+                "format": 2
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 6,
+                "cycleCount": 6,
+                "observationCount": 37,
+                "recoveryRequests": 7,
+                "clockStalls": 1
+              }
+            },
+            {
+              "fps": 93.55724874306729,
+              "frames": 361,
+              "ms": 3858.600000000006,
+              "actor": "PATRICIA",
+              "completion": 21,
+              "budget": 9,
+              "captures": 120,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 0,
+                "pending": 336,
+                "targetRows": 512,
+                "remainingRows": 65200,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "archive": {
+                "kind": "STANDBY",
+                "archived": 0,
+                "authenticated": false,
+                "format": 2
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 8,
+                "cycleCount": 8,
+                "observationCount": 49,
+                "recoveryRequests": 9,
+                "clockStalls": 1
+              }
+            },
+            {
+              "fps": 74.97403946002076,
+              "frames": 361,
+              "ms": 4815,
+              "actor": "TOPH",
+              "completion": 25,
+              "budget": 9,
+              "captures": 121,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 0,
+                "pending": 404,
+                "targetRows": 512,
+                "remainingRows": 65132,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "archive": {
+                "kind": "STANDBY",
+                "archived": 0,
+                "authenticated": false,
+                "format": 2
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 10,
+                "cycleCount": 10,
+                "observationCount": 61,
+                "recoveryRequests": 11,
+                "clockStalls": 1
+              }
+            },
+            {
+              "fps": 76.16033755274262,
+              "frames": 361,
+              "ms": 4740,
+              "actor": "JANE",
+              "completion": 25,
+              "budget": 9,
+              "captures": 120,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 0,
+                "pending": 468,
+                "targetRows": 512,
+                "remainingRows": 65068,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "archive": {
+                "kind": "STANDBY",
+                "archived": 0,
+                "authenticated": false,
+                "format": 2
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 12,
+                "cycleCount": 12,
+                "observationCount": 72,
+                "recoveryRequests": 13,
+                "clockStalls": 1
+              }
+            },
+            {
+              "fps": 76.63239671515136,
+              "frames": 363,
+              "ms": 4736.899999999994,
+              "actor": "PATRICIA",
+              "completion": 23,
+              "budget": 9,
+              "captures": 121,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 1,
+                "pending": 24,
+                "targetRows": 512,
+                "remainingRows": 64488,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  188,
+                  200,
+                  124
+                ]
+              },
+              "archive": {
+                "kind": "ARCHIVED",
+                "archived": 1,
+                "authenticated": false,
+                "format": 2,
+                "head": "69c5710fc77980604944773cf45341af2535e37234cda107d67e6cd3962ddf1f"
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 13,
+                "cycleCount": 14,
+                "observationCount": 83,
+                "recoveryRequests": 15,
+                "clockStalls": 1
+              }
+            },
+            {
+              "fps": 71.72050616992873,
+              "frames": 365,
+              "ms": 5089.1999999999825,
+              "actor": "TOPH",
+              "completion": 27,
+              "budget": 9,
+              "captures": 122,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 1,
+                "pending": 96,
+                "targetRows": 512,
+                "remainingRows": 64416,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  188,
+                  200,
+                  124
+                ]
+              },
+              "archive": {
+                "kind": "ARCHIVED",
+                "archived": 1,
+                "authenticated": false,
+                "format": 2,
+                "head": "69c5710fc77980604944773cf45341af2535e37234cda107d67e6cd3962ddf1f"
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 15,
+                "cycleCount": 16,
+                "observationCount": 95,
+                "recoveryRequests": 17,
+                "clockStalls": 1
+              }
+            },
+            {
+              "fps": 74.62995121144446,
+              "frames": 361,
+              "ms": 4837.200000000012,
+              "actor": "JANE",
+              "completion": 23,
+              "budget": 9,
+              "captures": 120,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 1,
+                "pending": 164,
+                "targetRows": 512,
+                "remainingRows": 64348,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  188,
+                  200,
+                  124
+                ]
+              },
+              "archive": {
+                "kind": "ARCHIVED",
+                "archived": 1,
+                "authenticated": false,
+                "format": 2,
+                "head": "69c5710fc77980604944773cf45341af2535e37234cda107d67e6cd3962ddf1f"
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 17,
+                "cycleCount": 18,
+                "observationCount": 107,
+                "recoveryRequests": 19,
+                "clockStalls": 1
+              }
+            },
+            {
+              "fps": 72.8521518183261,
+              "frames": 367,
+              "ms": 5037.600000000006,
+              "actor": "PATRICIA",
+              "completion": 25,
+              "budget": 9,
+              "captures": 122,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 1,
+                "pending": 236,
+                "targetRows": 512,
+                "remainingRows": 64276,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  188,
+                  200,
+                  124
+                ]
+              },
+              "archive": {
+                "kind": "ARCHIVED",
+                "archived": 1,
+                "authenticated": false,
+                "format": 2,
+                "head": "69c5710fc77980604944773cf45341af2535e37234cda107d67e6cd3962ddf1f"
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 19,
+                "cycleCount": 20,
+                "observationCount": 118,
+                "recoveryRequests": 21,
+                "clockStalls": 1
+              }
+            },
+            {
+              "fps": 71.55174122450615,
+              "frames": 361,
+              "ms": 5045.299999999988,
+              "actor": "JANE",
+              "completion": 26,
+              "budget": 9,
+              "captures": 121,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 1,
+                "pending": 312,
+                "targetRows": 512,
+                "remainingRows": 64200,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  188,
+                  200,
+                  124
+                ]
+              },
+              "archive": {
+                "kind": "ARCHIVED",
+                "archived": 1,
+                "authenticated": false,
+                "format": 2,
+                "head": "69c5710fc77980604944773cf45341af2535e37234cda107d67e6cd3962ddf1f"
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 21,
+                "cycleCount": 21,
+                "observationCount": 127,
+                "recoveryRequests": 22,
+                "clockStalls": 1
+              }
+            },
+            {
+              "fps": 73.17562149157979,
+              "frames": 365,
+              "ms": 4988,
+              "actor": "PATRICIA",
+              "completion": 24,
+              "budget": 9,
+              "captures": 121,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 1,
+                "pending": 384,
+                "targetRows": 512,
+                "remainingRows": 64128,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  188,
+                  200,
+                  124
+                ]
+              },
+              "archive": {
+                "kind": "ARCHIVED",
+                "archived": 1,
+                "authenticated": false,
+                "format": 2,
+                "head": "69c5710fc77980604944773cf45341af2535e37234cda107d67e6cd3962ddf1f"
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 23,
+                "cycleCount": 23,
+                "observationCount": 139,
+                "recoveryRequests": 24,
+                "clockStalls": 1
+              }
+            },
+            {
+              "fps": 71.61547996143766,
+              "frames": 364,
+              "ms": 5082.700000000012,
+              "actor": "TOPH",
+              "completion": 25,
+              "budget": 9,
+              "captures": 122,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 1,
+                "pending": 456,
+                "targetRows": 512,
+                "remainingRows": 64056,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  188,
+                  200,
+                  124
+                ]
+              },
+              "archive": {
+                "kind": "ARCHIVED",
+                "archived": 1,
+                "authenticated": false,
+                "format": 2,
+                "head": "69c5710fc77980604944773cf45341af2535e37234cda107d67e6cd3962ddf1f"
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 25,
+                "cycleCount": 25,
+                "observationCount": 151,
+                "recoveryRequests": 26,
+                "clockStalls": 1
+              }
+            },
+            {
+              "fps": 71.31692067213756,
+              "frames": 365,
+              "ms": 5118,
+              "actor": "JANE",
+              "completion": 26,
+              "budget": 9,
+              "captures": 121,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 2,
+                "pending": 16,
+                "targetRows": 512,
+                "remainingRows": 63472,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  352,
+                  352,
+                  320
+                ]
+              },
+              "archive": {
+                "kind": "ARCHIVED",
+                "archived": 2,
+                "authenticated": false,
+                "format": 2,
+                "head": "6b9b23045af1cdadd91f948a029416fb7ea26fd92ab70fa74217a0b5476920bc"
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 27,
+                "cycleCount": 27,
+                "observationCount": 163,
+                "recoveryRequests": 28,
+                "clockStalls": 1
+              }
+            },
+            {
+              "fps": 72.47815726767276,
+              "frames": 365,
+              "ms": 5036,
+              "actor": "PATRICIA",
+              "completion": 23,
+              "budget": 9,
+              "captures": 122,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 2,
+                "pending": 92,
+                "targetRows": 512,
+                "remainingRows": 63396,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  352,
+                  352,
+                  320
+                ]
+              },
+              "archive": {
+                "kind": "ARCHIVED",
+                "archived": 2,
+                "authenticated": false,
+                "format": 2,
+                "head": "6b9b23045af1cdadd91f948a029416fb7ea26fd92ab70fa74217a0b5476920bc"
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 29,
+                "cycleCount": 29,
+                "observationCount": 175,
+                "recoveryRequests": 30,
+                "clockStalls": 1
+              }
+            },
+            {
+              "fps": 72.20072599625051,
+              "frames": 362,
+              "ms": 5013.799999999988,
+              "actor": "TOPH",
+              "completion": 25,
+              "budget": 9,
+              "captures": 121,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 2,
+                "pending": 164,
+                "targetRows": 512,
+                "remainingRows": 63324,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  352,
+                  352,
+                  320
+                ]
+              },
+              "archive": {
+                "kind": "ARCHIVED",
+                "archived": 2,
+                "authenticated": false,
+                "format": 2,
+                "head": "6b9b23045af1cdadd91f948a029416fb7ea26fd92ab70fa74217a0b5476920bc"
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 31,
+                "cycleCount": 31,
+                "observationCount": 186,
+                "recoveryRequests": 32,
+                "clockStalls": 1
+              }
+            },
+            {
+              "fps": 71.51205404013383,
+              "frames": 361,
+              "ms": 5048.100000000006,
+              "actor": "JANE",
+              "completion": 25,
+              "budget": 9,
+              "captures": 120,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 2,
+                "pending": 236,
+                "targetRows": 512,
+                "remainingRows": 63252,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  352,
+                  352,
+                  320
+                ]
+              },
+              "archive": {
+                "kind": "ARCHIVED",
+                "archived": 2,
+                "authenticated": false,
+                "format": 2,
+                "head": "6b9b23045af1cdadd91f948a029416fb7ea26fd92ab70fa74217a0b5476920bc"
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 32,
+                "cycleCount": 33,
+                "observationCount": 197,
+                "recoveryRequests": 34,
+                "clockStalls": 1
+              }
+            },
+            {
+              "fps": 73.43990911304049,
+              "frames": 362,
+              "ms": 4929.200000000012,
+              "actor": "PATRICIA",
+              "completion": 24,
+              "budget": 9,
+              "captures": 121,
+              "memory": {
+                "kind": "OBSERVING",
+                "generations": 2,
+                "pending": 308,
+                "targetRows": 512,
+                "remainingRows": 63180,
+                "persistent": false,
+                "countPath": "RUST_INDEX",
+                "counts": [
+                  352,
+                  352,
+                  320
+                ]
+              },
+              "archive": {
+                "kind": "ARCHIVED",
+                "archived": 2,
+                "authenticated": false,
+                "format": 2,
+                "head": "6b9b23045af1cdadd91f948a029416fb7ea26fd92ab70fa74217a0b5476920bc"
+              },
+              "hot": {
+                "schema": "jane.av315.hot-status.v1",
+                "armed": true,
+                "root": "session-471b3ca4-568b-479d-a8fd-d6c43a297e27",
+                "rom": "0b10970a",
+                "completedCycles": 34,
+                "cycleCount": 35,
+                "observationCount": 209,
+                "recoveryRequests": 36,
+                "clockStalls": 1
+              }
+            }
+          ],
+          "gates": {
+            "continuity": true,
+            "rust": true,
+            "sync": true,
+            "cache": true,
+            "paint": true,
+            "layout": true,
+            "errors": true,
+            "throughput": false,
+            "rotation": true,
+            "counter": true,
+            "index": true,
+            "archive": true
+          },
+          "memo": {
+            "hits": 5757,
+            "misses": 4453,
+            "evictions": 4339
+          },
+          "paint": {
+            "calls": 2775,
+            "skipped": 2775,
+            "executed": 0,
+            "workMs": 0
+          },
+          "clock": {
+            "intervals": 3353,
+            "frames": 7266,
+            "elapsedMs": 92483.6,
+            "frameWorkMs": 21475.50000000102,
+            "unmeasuredMs": 71008.09999999899
+          },
+          "controller": {
+            "dispatch": 533,
+            "completion": 485,
+            "unmatched": 0,
+            "abandoned": 49
+          },
+          "cycles": 35,
+          "operational": "HOLD",
+          "thresholds": {
+            "overall": 216,
+            "perWindow": 192
+          },
+          "manualControllerInput": false,
+          "errors": []
+        }
+      ],
+      "extraction": "parsed decoded job logs"
+    },
+    {
+      "bound": "AV-324R",
+      "run": 45930341928,
+      "job": 140281252419,
+      "records": [
+        {
+          "kind": "AV324R_ARM",
+          "enabled": false,
+          "fps": 95.9976566452746,
+          "frames": 1442,
+          "render": {
+            "calls": 11,
+            "skipped": 0,
+            "executed": 11,
+            "workMs": 0.5999999999767169
+          },
+          "storage": {
+            "attempts": 4,
+            "serializeMs": 0.4000000000814907,
+            "writeMs": 0.3999999999650754,
+            "maxWriteMs": 0.19999999995343387,
+            "codeUnits": 13627
+          },
+          "storageMaxWriteMs": 0.19999999995343387,
+          "completion": 97,
+          "errors": [],
+          "authority": "RUST_GUARDED"
+        },
+        {
+          "kind": "AV324R_ARM",
+          "enabled": true,
+          "fps": 108.64342132924898,
+          "frames": 1447,
+          "render": {
+            "calls": 7,
+            "skipped": 0,
+            "executed": 7,
+            "workMs": 0.5999999999767169
+          },
+          "storage": {
+            "attempts": 4,
+            "serializeMs": 0.3999999999650754,
+            "writeMs": 0.20000000001164153,
+            "maxWriteMs": 0.1000000000349246,
+            "codeUnits": 12989
+          },
+          "storageMaxWriteMs": 0.1000000000349246,
+          "completion": 97,
+          "errors": [],
+          "authority": "RUST_GUARDED"
+        },
+        {
+          "kind": "AV324R_ARM",
+          "enabled": true,
+          "fps": 110.04733709797723,
+          "frames": 1446,
+          "render": {
+            "calls": 9,
+            "skipped": 0,
+            "executed": 9,
+            "workMs": 1
+          },
+          "storage": {
+            "attempts": 4,
+            "serializeMs": 0.3999999999650754,
+            "writeMs": 2.2000000000116415,
+            "maxWriteMs": 2.2000000000116415,
+            "codeUnits": 14857
+          },
+          "storageMaxWriteMs": 2.2000000000116415,
+          "completion": 90,
+          "errors": [],
+          "authority": "RUST_GUARDED"
+        },
+        {
+          "kind": "AV324R_ARM",
+          "enabled": false,
+          "fps": 111.60455686425951,
+          "frames": 1445,
+          "render": {
+            "calls": 10,
+            "skipped": 0,
+            "executed": 10,
+            "workMs": 0.6000000000349246
+          },
+          "storage": {
+            "attempts": 4,
+            "serializeMs": 0.3999999999650754,
+            "writeMs": 0.3000000001047738,
+            "maxWriteMs": 0.1000000000349246,
+            "codeUnits": 14774
+          },
+          "storageMaxWriteMs": 0.1000000000349246,
+          "completion": 92,
+          "errors": [],
+          "authority": "RUST_GUARDED"
+        }
+      ],
+      "extraction": "parsed decoded job logs"
+    }
+  ],
+  "pending": [
+    {
+      "bound": "AV-325R",
+      "run": 45933200909,
+      "status": "queued"
+    },
+    {
+      "bound": "AV-326R",
+      "run": 45933749216,
+      "status": "queued"
+    }
+  ],
+  "authority": "HOLD",
+  "note": "Parsed records, not independent custody. Pending outcomes require append-only supplement."
+}
