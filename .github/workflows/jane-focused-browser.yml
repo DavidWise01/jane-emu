@@ -24,6 +24,8 @@ jobs:
       max-parallel: 2
       matrix:
         include:
+          - name: unified-sustained-operational
+            test: av326r_browser_unified.test.cjs
           - name: per-player-effect-recovery
             test: av325r_browser_effect_recovery.test.cjs
           - name: storage-render-isolation
