@@ -58,3 +58,11 @@ body #waterbear-room .wb-card[data-energy=active] .wb-bubble{animation-duration:
 body #waterbear-room .wb-card[data-energy=rest] .wb-bubble{animation-duration:6s;opacity:.4}
 body #waterbear-room[data-motion=false] .wb-energy-fill{transition:none}
 @media(prefers-reduced-motion:reduce){body #waterbear-room .wb-energy-fill{transition:none}}
+
+/* AV-337S: bounded decorative exchange; idle connections retain their static wire. */
+.wb-traveler{opacity:0;offset-distance:var(--wb-from);offset-rotate:0;pointer-events:none;stroke:#fff;stroke-width:.7}
+.wb-traveler[data-live=true]{opacity:1;animation:wbTravel .75s linear infinite}
+.wb-traveler[data-live=true][data-speed=fast]{animation-duration:.42s}
+@keyframes wbTravel{from{offset-distance:var(--wb-from);opacity:.35}30%,75%{opacity:1}to{offset-distance:var(--wb-to);opacity:.35}}
+body #waterbear-room[data-motion=false] .wb-traveler{display:none}
+@media(prefers-reduced-motion:reduce){.wb-traveler{display:none}}
