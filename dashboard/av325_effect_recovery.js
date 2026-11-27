@@ -1,0 +1,6 @@
+(function(g,f){const api=f();if(typeof module==='object'&&module.exports)module.exports=api;else g.JaneAV325=api;})(globalThis,function(){'use strict';
+function create(){let key=null,mask=0,last=-1,offers=0;const scope=x=>JSON.stringify([x.root,x.rom,x.actor]);function sync(x){const k=scope(x);if(k!==key){key=k;mask=0;last=-1;offers=0}}
+function observe(x,result){if(x?.rom!=='0b10970a'||x.source!=='nes-completed-trial'||result?.kind!=='NES_EFFECT_OBSERVED'||result.changed!==true||x.before?.mode!==1||x.after?.mode!==1)return false;sync(x);if(x.endFrame<=last)return false;last=x.endFrame;if(x.button==='A')mask|=1;else if(x.button==='B')mask|=2;else if(['LEFT','RIGHT','UP','DOWN'].includes(x.button))mask|=4;return true}
+function offer(x){if(!x?.root||x.rom!=='0b10970a'||!['JANE','TOPH','PATRICIA'].includes(x.actor)||x.mode!==1||!Number.isInteger(x.frame)||!Array.isArray(x.actions)||!Number.isInteger(x.palette)||!Number.isInteger(x.x))return null;sync(x);if(offers>=8||mask===7)return null;let b;if((mask&3)!==3){if(!(mask&1)&&x.palette!==0x16)b='A';else if(!(mask&2)&&x.palette!==0x2a)b='B';else b=x.palette===0x16?'B':'A'}else if(!(mask&4))b=x.x<128?'RIGHT':'LEFT';if(!x.actions.includes(b))return null;offers++;return b}
+return {offer,observe,status:()=>({key,mask,offers,last})}}
+return {create};});
