@@ -24,6 +24,8 @@ jobs:
       max-parallel: 2
       matrix:
         include:
+          - name: storage-render-isolation
+            test: av324r_browser_storage_render.test.cjs
           - name: fuller-generation-capacity
             test: av323r_browser_capacity.test.cjs
           - name: matched-intervention-trials
@@ -71,7 +73,7 @@ jobs:
           cp rust/jane-cortex/target/wasm32-unknown-unknown/release/jane_cortex.wasm dashboard/jane_cortex.wasm
           node tests/rust_cortex_wasm.test.cjs
           node tests/av308r_memo.test.cjs
-          node --test tests/av313r_history.test.cjs tests/av314r_history.test.cjs tests/av315r_hot_status.test.cjs tests/av317r_segments.test.cjs tests/av320r_scheduler.test.cjs tests/av321r_long_tasks.test.cjs
+          node --test tests/av313r_history.test.cjs tests/av314r_history.test.cjs tests/av315r_hot_status.test.cjs tests/av317r_segments.test.cjs tests/av320r_scheduler.test.cjs tests/av321r_long_tasks.test.cjs tests/av324r_storage.test.cjs
           node --check tests/av307r_browser_paint.test.cjs
       - name: Install pinned browser
         run: |
