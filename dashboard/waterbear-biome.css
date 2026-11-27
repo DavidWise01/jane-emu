@@ -97,3 +97,10 @@ body #waterbear-room .wb-card{grid-template-areas:"art name" "art element" "art 
 .wb-card[data-social=handoff] .wb-speech{box-shadow:0 0 8px var(--element)}
 body #waterbear-room .wb-card[data-social=handoff] .wb-body{animation:wbSocialNod .65s ease-in-out 2}
 @keyframes wbSocialNod{0%,100%{transform:rotate(0)}50%{transform:rotate(-5deg) translateY(-2px)}}
+
+/* AV-340S: compact per-player evidence journals. */
+body #waterbear-room .wb-card{grid-template-areas:"art name" "art element" "art role" "art pose" "art trait" "art telemetry" "speech speech" "energy energy" "band band" "info info" "journal journal"}
+.wb-journal{grid-area:journal;min-width:0;border-top:1px solid var(--element);padding-top:4px;font:10px monospace;color:#e8dcef}
+.wb-journal summary{cursor:pointer;color:var(--element);padding:3px 0}
+.wb-journal pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:110px;overflow:auto;font:9px/1.4 monospace;color:#d7c9e5;background:#090711;padding:5px;margin:3px 0}
+body #waterbear-room .wb-journal-export{margin-top:8px;font:10px monospace;color:#e3d5f0;background:#20172e;border:1px solid #8e6eb1;border-radius:5px;padding:5px 8px}
