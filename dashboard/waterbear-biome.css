@@ -46,3 +46,15 @@ body #waterbear-room .wb-cubit[data-pulse]{background:var(--element)!important;c
 body #waterbear-room .wb-cubit[data-pulse=turn]{outline:1px solid #fff;outline-offset:1px}
 body #waterbear-room .wb-cubit[data-pulse=action]{box-shadow:0 0 12px var(--element),inset 0 0 3px white}
 @keyframes wbCubitPulse{0%,100%{opacity:1}50%{opacity:.65}}
+
+/* AV-336S: independent visual activity envelopes, no simulation feedback. */
+body #waterbear-room .wb-card{grid-template-areas:"art name" "art element" "art role" "art trait" "art telemetry" "energy energy" "band band" "info info"}
+.wb-energy{grid-area:energy;min-width:0}.wb-energy-label{font:9px monospace;color:#d8c9e3}.wb-energy-track{height:4px;border-radius:3px;overflow:hidden;background:#080710;border:1px solid #58405b}.wb-energy-fill{display:block;width:0;height:100%;background:var(--element);box-shadow:0 0 6px var(--element);transition:width .35s ease}
+body #waterbear-room .wb-card[data-energy=rest] .wb-portrait{animation-duration:5s}
+body #waterbear-room .wb-card[data-energy=active] .wb-portrait{animation-duration:2.8s}
+body #waterbear-room .wb-card[data-energy=surge] .wb-portrait{animation-duration:1.5s}
+body #waterbear-room .wb-card[data-energy=surge] .wb-bubble{animation-duration:1.8s;stroke-width:2}
+body #waterbear-room .wb-card[data-energy=active] .wb-bubble{animation-duration:3s}
+body #waterbear-room .wb-card[data-energy=rest] .wb-bubble{animation-duration:6s;opacity:.4}
+body #waterbear-room[data-motion=false] .wb-energy-fill{transition:none}
+@media(prefers-reduced-motion:reduce){body #waterbear-room .wb-energy-fill{transition:none}}
