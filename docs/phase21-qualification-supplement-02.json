@@ -1,0 +1,25 @@
+{
+  "run": 45936058542,
+  "unified": {
+    "job": 140299415561,
+    "fps": 80.65858231724229,
+    "passed": 14,
+    "total": 15,
+    "failed": [
+      "throughput"
+    ],
+    "effects": true
+  },
+  "standalone": {
+    "job": 140299415620,
+    "qualifiedLives": 1,
+    "fault": "PATRICIA MISSING_COMPLETED_MOVEMENT_IN_LIFE"
+  },
+  "callback": {
+    "job": 140299415611,
+    "status": "BLOCKED_BROWSER_INSTALL",
+    "unitPass": 17,
+    "error": "Microsoft package repository HTTP 403"
+  },
+  "authority": "HOLD"
+}
