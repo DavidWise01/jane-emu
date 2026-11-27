@@ -6,3 +6,5 @@
 /* CRT styling drawn from the uploaded room template; only the outer cabinet. */
 body .stage-panel .game{border-radius:18px!important;border:5px solid #35232c!important;box-shadow:0 0 0 1px #ff5ca966,0 0 24px #ff5ca922,inset 0 0 14px #000!important;background:#080408!important}
 body .stage-panel .game iframe{border-radius:10px}
+
+.wb-telemetry{font:10px/1.5 monospace;color:#f1ddeb;border-top:1px solid color-mix(in srgb,var(--element) 40%,transparent);padding-top:5px;margin-top:6px;min-height:3em}
