@@ -40,3 +40,9 @@ body #waterbear-room .wb-card[data-actor=PATRICIA] .wb-portrait{animation-delay:
 @keyframes wbBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 body #waterbear-room[data-motion=false] *{animation-play-state:paused!important}
 @media(prefers-reduced-motion:reduce){body #waterbear-room *{animation:none!important}}
+
+/* AV-335S: observation-driven cursor glow, static addresses never change. */
+body #waterbear-room .wb-cubit[data-pulse]{background:var(--element)!important;color:#09070d!important;box-shadow:0 0 8px var(--element);animation:wbCubitPulse .9s ease-out infinite}
+body #waterbear-room .wb-cubit[data-pulse=turn]{outline:1px solid #fff;outline-offset:1px}
+body #waterbear-room .wb-cubit[data-pulse=action]{box-shadow:0 0 12px var(--element),inset 0 0 3px white}
+@keyframes wbCubitPulse{0%,100%{opacity:1}50%{opacity:.65}}
