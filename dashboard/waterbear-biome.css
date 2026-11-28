@@ -276,3 +276,12 @@ body #waterbear-room[data-motion=false] .wb-nexus-flow{animation:none}
 body #waterbear-room[data-storm=false] .wb-nexus-toroid{display:none}
 body #waterbear-room[data-motion=false] :is(.wb-toroid-ring,.wb-nexus-return){animation:none}
 @media(prefers-reduced-motion:reduce){.wb-toroid-ring,.wb-nexus-return{animation:none!important}}
+
+/* AV-352S: four cloverleaf lobes, fixed center, bounded decorative motion. */
+.wb-clover{pointer-events:none;opacity:calc(.45 + var(--wb-nexus-energy,0)*.55)}
+.wb-clover-lobe path{fill:none;stroke:currentColor;stroke-width:.8;stroke-dasharray:3 2;animation:wbCloverFlow 5s linear infinite}
+.wb-clover-lobe:nth-child(even) path{animation-direction:reverse}
+@keyframes wbCloverFlow{to{stroke-dashoffset:-50}}
+body #waterbear-room[data-storm=false] .wb-clover{display:none}
+body #waterbear-room[data-motion=false] .wb-clover-lobe path{animation:none}
+@media(prefers-reduced-motion:reduce){.wb-clover-lobe path{animation:none!important}}
