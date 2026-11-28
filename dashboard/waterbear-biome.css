@@ -266,3 +266,13 @@ body #waterbear-room .wb-midnight-heart{fill:#b93ec8;fill-opacity:calc(.08 + var
 body #waterbear-room[data-storm=false] .wb-nexus-stream{display:none}
 body #waterbear-room[data-motion=false] .wb-nexus-flow{animation:none}
 @media(prefers-reduced-motion:reduce){.wb-nexus-flow{animation:none!important}.wb-nexus-stream,body #waterbear-room .wb-midnight-heart{transition:none}}
+
+/* AV-351S: projected toroid and three outward return streams. */
+.wb-nexus-toroid{pointer-events:none;opacity:calc(.42 + var(--wb-nexus-energy,0)*.58)}
+.wb-toroid-ring{fill:none;stroke:#ef8aff;stroke-width:.65;stroke-dasharray:3 4;animation:wbToroidCirculation 5s linear infinite}
+.wb-toroid-ring:nth-child(even){stroke:#75edff;animation-direction:reverse}
+.wb-nexus-return{fill:none;stroke:currentColor;stroke-width:1.25;stroke-dasharray:3 7;stroke-linecap:round;animation:wbToroidCirculation 3.6s linear infinite}
+@keyframes wbToroidCirculation{to{stroke-dashoffset:-70}}
+body #waterbear-room[data-storm=false] .wb-nexus-toroid{display:none}
+body #waterbear-room[data-motion=false] :is(.wb-toroid-ring,.wb-nexus-return){animation:none}
+@media(prefers-reduced-motion:reduce){.wb-toroid-ring,.wb-nexus-return{animation:none!important}}
