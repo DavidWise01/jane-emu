@@ -251,3 +251,9 @@ body #waterbear-room[data-motion=false] .wb-corona{transition:none}
 .wb-card .wb-shadow4{color:var(--element)}
 .wb-card .wb-geo-core{opacity:.5}
 .wb-card[data-energy=surge] .wb-shadow4{stroke-width:1.65;opacity:1}
+
+/* AV-349S: projected vertex links remain inside the existing compact mesh. */
+.wb-mesh-shadow4{fill:none;stroke:currentColor;stroke-width:.85;opacity:.9;pointer-events:none}
+.wb-vertex-link{fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;opacity:.8;pointer-events:none}
+.wb-edge[data-live=true] .wb-vertex-link{stroke-width:2;opacity:1}
+body #waterbear-room[data-storm=false] .wb-vertex-link,body #waterbear-room[data-skin=waterbear] :is(.wb-vertex-link,.wb-mesh-shadow4){display:none}
