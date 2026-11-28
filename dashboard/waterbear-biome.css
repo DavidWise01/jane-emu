@@ -232,3 +232,16 @@ body #waterbear-room .wb-storm-toggle{font:9px monospace;color:#f9dcff;backgroun
 @media(prefers-reduced-motion:reduce){.wb-bolt-core{animation:none!important}}
 /* Keep the extra toggle in the existing compact mesh controls. */
 body #waterbear-room .wb-tether svg{grid-row:span 4}
+
+/* AV-347S: plasma corona, fixed structural nodes, same compact layout. */
+.wb-corona{pointer-events:none;opacity:.65;transition:opacity .4s ease}
+.wb-corona-ring{fill:none;stroke:currentColor;stroke-width:1;stroke-dasharray:5 12;animation:wbCoronaFlow 8s linear infinite}
+.wb-corona-dot{fill:currentColor;opacity:.48}
+.wb-corona-dot[data-hot=true]{fill:#fff;stroke:currentColor;stroke-width:2;opacity:1}
+.wb-card[data-energy=surge] .wb-corona{opacity:1}
+.wb-card[data-energy=surge] .wb-corona-ring{animation-duration:3s;stroke-width:1.6}
+.wb-card[data-actor=TOPH] .wb-corona-ring{animation-direction:reverse}
+@keyframes wbCoronaFlow{to{stroke-dashoffset:-102}}
+body #waterbear-room[data-storm=false] .wb-corona{display:none}
+body #waterbear-room[data-motion=false] .wb-corona{transition:none}
+@media(prefers-reduced-motion:reduce){.wb-corona-ring{animation:none!important}.wb-corona{transition:none}}
