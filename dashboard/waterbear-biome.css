@@ -295,3 +295,8 @@ body #waterbear-room[data-motion=false] .wb-clover-lobe path{animation:none}
 .wb-clover-lobe[data-route=true] path{stroke-width:1.5;opacity:1}
 .wb-clover-lobe[data-route=false] path{opacity:.55}
 .wb-clover[data-spinor-half="1"] .wb-clover-lobe[data-route=true] path{stroke-dasharray:2 4}
+
+/* AV-356S: structural route uses an outline; observed gameplay retains its pulse. */
+.wb-cubit[data-route=true]{outline:1px solid #b7faff;outline-offset:1px;box-shadow:0 0 5px #63eaff}
+.wb-corona-dot[data-route=true]{stroke:#63eaff;stroke-width:1.6;opacity:1}
+.wb-corona-dot[data-route=true][data-hot=true]{fill:white;stroke-width:2}
