@@ -300,3 +300,11 @@ body #waterbear-room[data-motion=false] .wb-clover-lobe path{animation:none}
 .wb-cubit[data-route=true]{outline:1px solid #b7faff;outline-offset:1px;box-shadow:0 0 5px #63eaff}
 .wb-corona-dot[data-route=true]{stroke:#63eaff;stroke-width:1.6;opacity:1}
 .wb-corona-dot[data-route=true][data-hot=true]{fill:white;stroke-width:2}
+
+/* AV-357S: temporal registers are outlines, not gameplay pulses. */
+.wb-cubit[data-temporal=past]{outline:1px dotted #a399bb;outline-offset:1px}
+.wb-cubit[data-temporal=present]{outline:1px solid #b7faff;outline-offset:1px;box-shadow:0 0 5px #63eaff}
+.wb-cubit[data-temporal=future]{outline:1px dashed #f4c970;outline-offset:1px}
+.wb-corona-dot[data-temporal=past]{stroke:#a399bb;stroke-width:1}
+.wb-corona-dot[data-temporal=future]{stroke:#f4c970;stroke-width:1.3}
+.wb-corona-dot[data-temporal=present]{stroke:#63eaff;stroke-width:1.8}
