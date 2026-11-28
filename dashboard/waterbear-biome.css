@@ -191,3 +191,28 @@ body #waterbear-room .wb-card>small{font-size:9px}
 body #waterbear-room .wb-journal pre{max-height:96px}
 body #waterbear-room .wb-geo-core,body #waterbear-room .wb-geo-orbit{pointer-events:none}
 @media(prefers-reduced-motion:reduce){body #waterbear-room .wb-geo-core,body #waterbear-room .wb-geo-orbit{animation:none!important}}
+
+/* AV-345S: compact three-card overview. Journal expansion never changes card height. */
+body #waterbear-room .wb-card{grid-template-columns:minmax(80px,.8fr) minmax(0,1.2fr);grid-template-areas:"art name" "art element" "art role" "art pose" "art trait" "art telemetry" "art energy" "band band" "info journal" "speech speech";padding:5px 7px;gap:0 6px;min-height:0}
+body #waterbear-room .wb-card h3{font-size:14px;line-height:1.15;margin:0}
+body #waterbear-room .wb-card :is(small,.wb-role,.wb-pose,.wb-telemetry,.wb-energy-label,.wb-info,.wb-journal){font-size:9px;line-height:1.15;margin:0;min-height:0}
+body #waterbear-room .wb-card .wb-art svg{max-height:84px}
+body #waterbear-room .wb-card .wb-band{display:flex;flex-wrap:wrap;gap:1px;margin:2px 0}
+body #waterbear-room .wb-card .wb-group{gap:1px;padding:0;border:0}
+body #waterbear-room .wb-card .wb-cubit{height:15px!important;min-width:13px;font-size:9px!important;padding:0 1px!important}
+body #waterbear-room .wb-card .wb-info{overflow-wrap:anywhere}
+body #waterbear-room .wb-card .wb-journal{border-top:0;padding:0}
+body #waterbear-room .wb-card .wb-journal summary{padding:0}
+body #waterbear-room .wb-card .wb-speech:not(:empty){position:absolute;top:24px;left:5px;max-width:38%;padding:3px 4px;z-index:3;pointer-events:none}
+body #waterbear-room .wb-tether{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px;padding:2px 4px}
+body #waterbear-room .wb-tether svg{height:43px;grid-row:span 3}
+body #waterbear-room .wb-tether .wb-mesh-label{font-size:8px}
+body #waterbear-room .wb-tether button{margin:0;padding:1px 4px}
+body #waterbear-room .wb-roster{gap:4px}
+body #waterbear-room .wb-live{font-size:9px;line-height:1.2}
+body #waterbear-room .wb-journal-export{margin-top:3px;padding:3px 6px}
+.wb-inspector{background:#130b20;color:#e8dcef;border:1px solid #dd6bff;border-radius:9px;max-width:min(90vw,650px);max-height:85vh;padding:16px;box-shadow:0 0 18px #dc4aff88}
+.wb-inspector::backdrop{background:#05030cc9}
+.wb-inspector pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:60vh;overflow:auto;font:11px monospace}
+.wb-inspector form{display:flex;justify-content:flex-end}
+@media(min-width:1101px) and (max-height:760px){body #waterbear-room{padding:5px}body #waterbear-room .wb-card .wb-art svg{max-height:68px}body #waterbear-room .wb-card .wb-info{font-size:8px}body #waterbear-room .wb-caption{font-size:8px}body #waterbear-room .wb-tether svg{height:36px}}
