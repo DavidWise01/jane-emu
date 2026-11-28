@@ -290,3 +290,8 @@ body #waterbear-room[data-motion=false] .wb-clover-lobe path{animation:none}
 .wb-spinor{pointer-events:none;opacity:.95}
 .wb-spinor-axis{fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round}
 .wb-spinor-tip{fill:#fff;stroke:currentColor;stroke-width:1}
+
+/* AV-355S: route emphasis within existing cloverleaf footprint. */
+.wb-clover-lobe[data-route=true] path{stroke-width:1.5;opacity:1}
+.wb-clover-lobe[data-route=false] path{opacity:.55}
+.wb-clover[data-spinor-half="1"] .wb-clover-lobe[data-route=true] path{stroke-dasharray:2 4}
